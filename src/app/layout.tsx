@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 import './globals.css';
 
@@ -42,9 +44,13 @@ export default function RootLayout({
       <head />
       <body className="h-full bg-background text-foreground antialiased">
         <ThemeProvider>
-          <main className="h-full">
-            {children}
-          </main>
+          <div className="flex h-full">
+            <DesktopSidebar />
+            <main className="flex-1 overflow-hidden pb-14 md:pb-0">
+              {children}
+            </main>
+          </div>
+          <BottomNav />
         </ThemeProvider>
       </body>
     </html>
