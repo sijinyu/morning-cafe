@@ -23,14 +23,41 @@ export interface Cafe {
 
 export type TimeFilter = 'all' | 'before6' | '6to7' | '7to8';
 
+// 체인점 키워드 (스타벅스 제외)
+const CHAIN_KEYWORDS = [
+  '무인카페', '무인 카페', '무인24',
+  '백다방', '빽다방',
+  '컴포즈', '컴포즈커피',
+  '메가커피', '메가MGC',
+  '바나프레소',
+  '이디야', '투썸플레이스', '투썸',
+  '할리스', '탐앤탐스', '탐탐',
+  '카페베네', '엔제리너스',
+  '더벤티', '매머드', '매머드커피', '매머드익스프레스',
+  '커피에반하다', '커피베이',
+  '달콤커피', '커피나무',
+  '요거프레소', '공차',
+  '쥬씨', '셀렉토커피',
+  '커피왕', '커피스미스',
+  '에그카페', '에그카페24',
+  '데이롱', '데이롱카페',
+] as const;
+
+export function isChainCafe(name: string): boolean {
+  const lower = name.toLowerCase();
+  return CHAIN_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+}
+
 interface CafeState {
   cafes: Cafe[];
   selectedCafe: Cafe | null;
   timeFilter: TimeFilter;
+  hideChains: boolean;
   loading: boolean;
   fetchCafes: () => Promise<void>;
   setSelectedCafe: (cafe: Cafe | null) => void;
   setTimeFilter: (filter: TimeFilter) => void;
+  setHideChains: (hide: boolean) => void;
   filteredCafes: () => Cafe[];
 }
 
@@ -47,6 +74,7 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   cafes: [],
   selectedCafe: null,
   timeFilter: 'all',
+  hideChains: true, // 기본값: 체인점 숨김
   loading: false,
 
   async fetchCafes() {
@@ -101,21 +129,29 @@ export const useCafeStore = create<CafeState>((set, get) => ({
     set({ timeFilter: filter });
   },
 
+  setHideChains(hide) {
+    set({ hideChains: hide });
+  },
+
   filteredCafes() {
-    const { cafes, timeFilter } = get();
-    if (timeFilter === 'all') return cafes;
+    const { cafes, timeFilter, hideChains } = get();
 
     return cafes.filter((cafe) => {
+      // 체인점 필터
+      if (hideChains && isChainCafe(cafe.name)) return false;
+
+      // 시간 필터
+      if (timeFilter === 'all') return true;
       const minutes = parseOpeningMinutes(cafe.opening_time);
       if (minutes === null) return false;
 
       switch (timeFilter) {
         case 'before6':
-          return minutes < 360; // before 06:00
+          return minutes < 360;
         case '6to7':
-          return minutes >= 360 && minutes < 420; // 06:00 – 06:59
+          return minutes >= 360 && minutes < 420;
         case '7to8':
-          return minutes >= 420 && minutes < 480; // 07:00 – 07:59
+          return minutes >= 420 && minutes < 480;
         default:
           return true;
       }

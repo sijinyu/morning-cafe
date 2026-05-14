@@ -276,6 +276,9 @@ async function main() {
 
     if (isNaN(lng) || isNaN(lat)) { skipped++; continue; }
 
+    // 서울특별시 한정 — 주소에 "서울"이 없으면 스킵
+    if (!place.address_name.includes('서울')) { skipped++; continue; }
+
     const ok = await upsertCafe({
       kakao_place_id: place.id,
       name: place.place_name,

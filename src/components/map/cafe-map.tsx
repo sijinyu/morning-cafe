@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
-import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, isChainCafe, type Cafe } from '@/lib/store/cafe-store';
 
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
@@ -69,11 +69,13 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
 
   const cafes = useCafeStore((state) => state.cafes);
   const timeFilter = useCafeStore((state) => state.timeFilter);
+  const hideChains = useCafeStore((state) => state.hideChains);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
   const filteredCafes = useMemo(() => {
-    if (timeFilter === 'all') return cafes;
     return cafes.filter((cafe) => {
+      if (hideChains && isChainCafe(cafe.name)) return false;
+      if (timeFilter === 'all') return true;
       if (!cafe.opening_time) return false;
       const parts = cafe.opening_time.split(':');
       const m = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
@@ -84,7 +86,7 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
         default: return true;
       }
     });
-  }, [cafes, timeFilter]);
+  }, [cafes, timeFilter, hideChains]);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
