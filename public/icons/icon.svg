@@ -1,5 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#d97706"/>
-  <text x="256" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="280" fill="white">&#x2615;</text>
-  <text x="256" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-size="60" font-weight="700" fill="rgba(255,255,255,0.9)">AM</text>
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#F59E0B"/>
+
+  <!-- Coffee cup body -->
+  <rect x="128" y="180" width="200" height="180" rx="24" fill="white"/>
+
+  <!-- Cup handle -->
+  <path d="M328 220 C370 220 390 260 390 280 C390 300 370 340 328 340"
+        fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- Coffee surface -->
+  <ellipse cx="228" cy="240" rx="76" ry="12" fill="#D97706" opacity="0.5"/>
+
+  <!-- Steam lines -->
+  <path d="M188 155 C188 135 208 135 208 115" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+  <path d="M228 145 C228 125 248 125 248 105" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+  <path d="M268 155 C268 135 288 135 288 115" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Saucer -->
+  <ellipse cx="228" cy="370" rx="120" ry="18" fill="white" opacity="0.9"/>
+
+  <!-- AM text -->
+  <text x="256" y="460" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="white" letter-spacing="4">AM</text>
 </svg>

@@ -5,7 +5,7 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/components/providers/auth-provider';
-import Script from 'next/script';
+
 import './globals.css';
 
 const geistSans = Geist({
@@ -43,12 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
-      <head>
-        <Script
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services,clusterer&autoload=false`}
-          strategy="beforeInteractive"
-        />
-      </head>
+      <head />
       <body className="h-full bg-background text-foreground antialiased">
         <ThemeProvider>
           <AuthProvider>

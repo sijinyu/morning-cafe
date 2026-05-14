@@ -67,7 +67,21 @@ export interface CafeMapProps {
 export function CafeMap({ onPanToReady }: CafeMapProps) {
   useKakaoLoader();
 
-  const filteredCafes = useCafeStore((state) => state.filteredCafes());
+  const filteredCafes = useCafeStore((state) => {
+    const { cafes, timeFilter } = state;
+    if (timeFilter === 'all') return cafes;
+    return cafes.filter((cafe) => {
+      if (!cafe.opening_time) return false;
+      const parts = cafe.opening_time.split(':');
+      const m = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
+      switch (timeFilter) {
+        case 'before6': return m < 360;
+        case '6to7': return m >= 360 && m < 420;
+        case '7to8': return m >= 420 && m < 480;
+        default: return true;
+      }
+    });
+  });
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
