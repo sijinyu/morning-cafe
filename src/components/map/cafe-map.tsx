@@ -65,7 +65,7 @@ export interface CafeMapProps {
 }
 
 export function CafeMap({ onPanToReady }: CafeMapProps) {
-  useKakaoLoader();
+  const { loading, error } = useKakaoLoader();
 
   const filteredCafes = useCafeStore((state) => {
     const { cafes, timeFilter } = state;
@@ -101,6 +101,23 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
   function handleCenterChange(map: kakao.maps.Map) {
     const latlng = map.getCenter();
     setCenter({ lat: latlng.getLat(), lng: latlng.getLng() });
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-muted/30">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted/30 px-4 text-center">
+        <p className="text-sm font-medium text-destructive">지도를 불러올 수 없습니다</p>
+        <p className="text-xs text-muted-foreground">{String(error)}</p>
+      </div>
+    );
   }
 
   return (
