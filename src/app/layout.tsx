@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import { ThemeProvider } from '@/components/layout/theme-provider';
-import { BottomNav } from '@/components/layout/bottom-nav';
-import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
-import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from '@/components/providers/auth-provider';
 
 import './globals.css';
 
@@ -46,16 +42,9 @@ export default function RootLayout({
       <head />
       <body className="h-full bg-background text-foreground antialiased">
         <ThemeProvider>
-          <AuthProvider>
-            <div className="flex h-full">
-              <DesktopSidebar />
-              <main className="flex-1 pb-16 md:pb-0">
-                {children}
-              </main>
-            </div>
-            <BottomNav />
-            <Toaster />
-          </AuthProvider>
+          <main className="h-full">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

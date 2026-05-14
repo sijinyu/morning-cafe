@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 
 interface MyLocationButtonProps {
   onLocation: (lat: number, lng: number) => void;
@@ -13,10 +12,7 @@ export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
   const [locating, setLocating] = useState(false);
 
   function handleClick() {
-    if (!navigator.geolocation) {
-      toast.error('이 브라우저에서는 위치 기능을 사용할 수 없습니다.');
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     setLocating(true);
 
@@ -25,21 +21,8 @@ export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
         setLocating(false);
         onLocation(position.coords.latitude, position.coords.longitude);
       },
-      (err) => {
+      () => {
         setLocating(false);
-        switch (err.code) {
-          case err.PERMISSION_DENIED:
-            toast.error('위치 권한이 거부되었습니다. 브라우저 설정에서 허용해 주세요.');
-            break;
-          case err.POSITION_UNAVAILABLE:
-            toast.error('현재 위치를 확인할 수 없습니다.');
-            break;
-          case err.TIMEOUT:
-            toast.error('위치 확인 시간이 초과되었습니다.');
-            break;
-          default:
-            toast.error('위치를 가져오는 중 오류가 발생했습니다.');
-        }
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
     );
