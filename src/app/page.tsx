@@ -26,6 +26,14 @@ export default function MapPage() {
       <SearchBar onSelectCafe={(lat, lng) => panToRef.current?.(lat, lng)} />
       <MyLocationButton onLocation={(lat, lng) => panToRef.current?.(lat, lng)} />
       <CafeBottomSheetWrapper />
+      <div className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2">
+        <a
+          href="mailto:sijinyudev@gmail.com"
+          className="rounded-full bg-background/60 px-3 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm hover:text-muted-foreground transition-colors"
+        >
+          &copy; 2025 sijinyu
+        </a>
+      </div>
     </div>
   );
 }
