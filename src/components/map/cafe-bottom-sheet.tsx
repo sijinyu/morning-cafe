@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   X,
@@ -12,8 +12,10 @@ import {
   ChevronUp,
   Clock,
   Check,
+  Heart,
 } from 'lucide-react';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useFavorites } from '@/lib/hooks/use-favorites';
 import { cn } from '@/lib/utils';
 
 // ---- helpers ----------------------------------------------------------------
@@ -114,6 +116,8 @@ interface CafeBottomSheetProps {
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorited = isFavorite(cafe.id);
 
   useEffect(() => {
     setSheetState('half');
@@ -141,14 +145,16 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     navigator.clipboard.writeText(addr).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    }).catch(() => {
-      // Silently fail — clipboard API may not be available
-    });
+    }).catch(() => {});
   }
 
   const displayAddress = cafe.road_address ?? cafe.address;
   const openingFormatted = formatOpeningTime(cafe.opening_time);
   const badgeStyle = getOpeningBadgeStyle(cafe.opening_time);
+
+  const instagramHref = cafe.instagram_url
+    ? (cafe.instagram_url.startsWith('http') ? cafe.instagram_url : `https://instagram.com/${cafe.instagram_url}`)
+    : `https://www.instagram.com/explore/tags/${encodeURIComponent(cafe.name)}/`;
 
   return (
     <motion.div
@@ -195,13 +201,30 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           )}
         </div>
 
-        <button
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors flex-shrink-0"
-          aria-label="닫기"
-        >
-          <X className="h-4 w-4 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <motion.button
+            onClick={() => toggleFavorite(cafe.id)}
+            whileTap={{ scale: 0.85 }}
+            animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
+            transition={{ duration: 0.25 }}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            aria-label={favorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
+          >
+            <Heart
+              className={cn(
+                'h-5 w-5 transition-colors',
+                favorited ? 'fill-red-500 stroke-red-500' : 'stroke-muted-foreground'
+              )}
+            />
+          </motion.button>
+          <button
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            aria-label="닫기"
+          >
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
       {/* Scrollable detail content */}
@@ -241,30 +264,29 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             )}
 
             {/* Instagram */}
-            {cafe.instagram_url && (
-              <div className="flex items-center gap-3">
-                <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <a
-                  href={
-                    cafe.instagram_url.startsWith('http')
-                      ? cafe.instagram_url
-                      : `https://instagram.com/${cafe.instagram_url}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-foreground hover:text-primary transition-colors truncate"
-                >
-                  인스타그램
-                </a>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <a
+                href={instagramHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  'text-sm transition-colors truncate',
+                  cafe.instagram_url
+                    ? 'text-foreground hover:text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {cafe.instagram_url ? '인스타그램' : '인스타그램에서 검색'}
+              </a>
+            </div>
 
             {/* Hours by day */}
             <HoursSection hoursByDay={cafe.hours_by_day} />
 
             <div className="h-px bg-border" />
 
-            {/* Kakao Map link — the only action button needed */}
+            {/* Action button */}
             {cafe.place_url && (
               <a
                 href={cafe.place_url}
