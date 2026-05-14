@@ -7,11 +7,12 @@
 // ---------------------------------------------------------------------------
 
 /** Approximate WGS84 bounding box covering the Seoul metropolitan area. */
+/** 서울특별시 행정경계 (경기도 제외) */
 export const SEOUL_BOUNDS = {
-  minLat: 37.413,
-  maxLat: 37.715,
-  minLng: 126.734,
-  maxLng: 127.269,
+  minLat: 37.428,
+  maxLat: 37.701,
+  minLng: 126.764,
+  maxLng: 127.183,
 } as const;
 
 // ---------------------------------------------------------------------------

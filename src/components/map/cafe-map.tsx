@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
@@ -67,8 +67,11 @@ export interface CafeMapProps {
 export function CafeMap({ onPanToReady }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
 
-  const filteredCafes = useCafeStore((state) => {
-    const { cafes, timeFilter } = state;
+  const cafes = useCafeStore((state) => state.cafes);
+  const timeFilter = useCafeStore((state) => state.timeFilter);
+  const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
+
+  const filteredCafes = useMemo(() => {
     if (timeFilter === 'all') return cafes;
     return cafes.filter((cafe) => {
       if (!cafe.opening_time) return false;
@@ -81,8 +84,7 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
         default: return true;
       }
     });
-  });
-  const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
+  }, [cafes, timeFilter]);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
