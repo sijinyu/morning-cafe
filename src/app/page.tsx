@@ -25,6 +25,7 @@ export default function MapPage() {
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [listSearchQuery, setListSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCafes();
@@ -75,6 +76,7 @@ export default function MapPage() {
         <div className="h-full pt-28">
           <CafeListView
             userLocation={userLocation}
+            searchQuery={listSearchQuery}
             onSelectCafe={(cafe) => {
               setSelectedCafe(cafe);
               setViewMode('map');
@@ -84,10 +86,14 @@ export default function MapPage() {
         </div>
       )}
 
-      <SearchBar onSelectCafe={(lat, lng) => {
-        if (viewMode === 'list') setViewMode('map');
-        setTimeout(() => panToRef.current?.(lat, lng), viewMode === 'list' ? 150 : 0);
-      }} />
+      <SearchBar
+        mode={viewMode}
+        onSelectCafe={(lat, lng) => {
+          if (viewMode === 'list') setViewMode('map');
+          setTimeout(() => panToRef.current?.(lat, lng), viewMode === 'list' ? 150 : 0);
+        }}
+        onQueryChange={setListSearchQuery}
+      />
       <TimeFilter />
 
       {/* 뷰 모드 토글 */}

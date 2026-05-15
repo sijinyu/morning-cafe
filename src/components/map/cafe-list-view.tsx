@@ -23,19 +23,32 @@ function formatDistance(km: number): string {
 interface CafeListViewProps {
   userLocation: { lat: number; lng: number } | null;
   onSelectCafe: (cafe: Cafe) => void;
+  searchQuery?: string;
 }
 
-export function CafeListView({ userLocation, onSelectCafe }: CafeListViewProps) {
+export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
   const filteredCafes = useCafeStore((state) => state.filteredCafes);
 
   const sortedCafes = useMemo(() => {
-    if (!userLocation) return filteredCafes;
-    return [...filteredCafes].sort((a, b) => {
+    let cafes = filteredCafes;
+
+    // 리스트 내 검색 필터
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      cafes = cafes.filter((c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.address.toLowerCase().includes(q) ||
+        (c.road_address?.toLowerCase().includes(q) ?? false)
+      );
+    }
+
+    if (!userLocation) return cafes;
+    return [...cafes].sort((a, b) => {
       const dA = haversineKm(userLocation.lat, userLocation.lng, a.latitude, a.longitude);
       const dB = haversineKm(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
       return dA - dB;
     });
-  }, [filteredCafes, userLocation]);
+  }, [filteredCafes, userLocation, searchQuery]);
 
   if (sortedCafes.length === 0) {
     return (

@@ -7,10 +7,15 @@ import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 
 interface SearchBarProps {
+  /** 지도 모드: 카페 선택 시 panTo */
   onSelectCafe: (lat: number, lng: number) => void;
+  /** 리스트 모드일 때 실시간 검색 쿼리 전달 */
+  onQueryChange?: (query: string) => void;
+  /** 현재 뷰모드 */
+  mode?: 'map' | 'list';
 }
 
-export function SearchBar({ onSelectCafe }: SearchBarProps) {
+export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchBarProps) {
   const cafes = useCafeStore((state) => state.cafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
@@ -19,7 +24,10 @@ export function SearchBar({ onSelectCafe }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const results: Cafe[] = query.trim().length >= 1
+  const isListMode = mode === 'list';
+
+  // 지도 모드: 드롭다운 결과
+  const results: Cafe[] = (!isListMode && query.trim().length >= 1)
     ? cafes
         .filter((cafe) =>
           cafe.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -29,7 +37,19 @@ export function SearchBar({ onSelectCafe }: SearchBarProps) {
         .slice(0, 5)
     : [];
 
-  const showDropdown = focused && results.length > 0;
+  const showDropdown = !isListMode && focused && results.length > 0;
+
+  // 리스트 모드: 쿼리 변경 시 부모에 알림
+  useEffect(() => {
+    if (isListMode) {
+      onQueryChange?.(query);
+    }
+  }, [query, isListMode, onQueryChange]);
+
+  // 모드 전환 시 쿼리 초기화
+  useEffect(() => {
+    setQuery('');
+  }, [mode]);
 
   const handleSelect = useCallback(
     (cafe: Cafe) => {
@@ -86,7 +106,7 @@ export function SearchBar({ onSelectCafe }: SearchBarProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
-          placeholder="카페명, 지역명 검색"
+          placeholder={isListMode ? '리스트에서 검색' : '카페명, 지역명 검색'}
           className={cn(
             'flex-1 bg-transparent text-sm text-foreground',
             'placeholder:text-muted-foreground/50',
@@ -111,7 +131,7 @@ export function SearchBar({ onSelectCafe }: SearchBarProps) {
         </AnimatePresence>
       </motion.div>
 
-      {/* Dropdown results */}
+      {/* Dropdown results — 지도 모드에서만 */}
       <AnimatePresence>
         {showDropdown && (
           <motion.div
@@ -129,7 +149,6 @@ export function SearchBar({ onSelectCafe }: SearchBarProps) {
               <button
                 key={cafe.id}
                 onMouseDown={(e) => {
-                  // Prevent blur from closing dropdown before click registers
                   e.preventDefault();
                 }}
                 onClick={() => handleSelect(cafe)}

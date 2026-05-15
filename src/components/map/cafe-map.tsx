@@ -49,24 +49,31 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Clean pin-drop marker — colored pin with white inner dot
+// Pin-drop marker with clean coffee mug silhouette (no steam)
 function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): string {
-  const { fill, stroke, cream } = colors;
+  const { fill, stroke, cream, coffee } = colors;
 
   if (selected) {
     const w = 44;
     const h = 54;
     const cx = w / 2;
+    const cy = 19; // inner circle center
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
       <defs>
         <filter id="ds" x="-30%" y="-10%" width="160%" height="140%">
           <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.25"/>
         </filter>
       </defs>
-      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 17} 30 ${cx - 17} 19 C${cx - 17} 9.5 ${cx - 9.5} 2 ${cx} 2 C${cx + 9.5} 2 ${cx + 17} 9.5 ${cx + 17} 19 C${cx + 17} 30 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 17} 30 ${cx - 17} ${cy} C${cx - 17} 9.5 ${cx - 9.5} 2 ${cx} 2 C${cx + 9.5} 2 ${cx + 17} 9.5 ${cx + 17} ${cy} C${cx + 17} 30 ${cx} ${h - 2} ${cx} ${h - 2}Z"
         fill="${fill}" stroke="${stroke}" stroke-width="2" filter="url(#ds)"/>
       <ellipse cx="${cx - 4}" cy="11" rx="3.5" ry="5" fill="white" opacity="0.25"/>
-      <circle cx="${cx}" cy="19" r="8" fill="${cream}"/>
+      <circle cx="${cx}" cy="${cy}" r="9" fill="${cream}" stroke="${stroke}" stroke-width="1"/>
+      <!-- mug body -->
+      <rect x="${cx - 5}" y="${cy - 2}" width="10" height="8" rx="1.5" fill="none" stroke="${stroke}" stroke-width="1.2"/>
+      <!-- handle -->
+      <path d="M${cx + 5} ${cy} Q${cx + 8} ${cy} ${cx + 8} ${cy + 2} Q${cx + 8} ${cy + 4} ${cx + 5} ${cy + 4}" fill="none" stroke="${stroke}" stroke-width="1"/>
+      <!-- coffee fill -->
+      <rect x="${cx - 4}" y="${cy + 1}" width="8" height="4" rx="1" fill="${coffee}" opacity="0.5"/>
       ${fav ? `<circle cx="${cx + 13}" cy="6" r="6.5" fill="white" stroke="${stroke}" stroke-width="1"/>
       <path d="M${cx + 13} 9.5 l-0.9-0.8c-2.3-2-3.8-3.4-3.8-5.1 0-1.3 1.1-2.3 2.4-2.3 0.7 0 1.5 0.3 2 0.9 0.4-0.6 1.2-0.9 2-0.9 1.3 0 2.4 1 2.4 2.3 0 1.7-1.5 3.1-3.8 5.1z" fill="#EF4444"/>` : ''}
     </svg>`;
@@ -75,6 +82,7 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
   const w = fav ? 34 : 28;
   const h = fav ? 42 : 36;
   const cx = w / 2;
+  const cy = Math.round(h * 0.39);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <defs>
@@ -82,10 +90,16 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
         <feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
       </filter>
     </defs>
-    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 11} ${h - 14} ${cx - 11} ${Math.round(h * 0.39)} C${cx - 11} ${Math.round(h * 0.19)} ${cx - 6} 2 ${cx} 2 C${cx + 6} 2 ${cx + 11} ${Math.round(h * 0.19)} ${cx + 11} ${Math.round(h * 0.39)} C${cx + 11} ${h - 14} ${cx} ${h - 2} ${cx} ${h - 2}Z"
+    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 11} ${h - 14} ${cx - 11} ${cy} C${cx - 11} ${Math.round(h * 0.19)} ${cx - 6} 2 ${cx} 2 C${cx + 6} 2 ${cx + 11} ${Math.round(h * 0.19)} ${cx + 11} ${cy} C${cx + 11} ${h - 14} ${cx} ${h - 2} ${cx} ${h - 2}Z"
       fill="${fill}" stroke="${stroke}" stroke-width="1.5" filter="url(#ds)"/>
     <ellipse cx="${cx - 2}" cy="${Math.round(h * 0.22)}" rx="2.5" ry="3.5" fill="white" opacity="0.2"/>
-    <circle cx="${cx}" cy="${Math.round(h * 0.39)}" r="6" fill="${cream}"/>
+    <circle cx="${cx}" cy="${cy}" r="6.5" fill="${cream}" stroke="${stroke}" stroke-width="0.8"/>
+    <!-- mug body -->
+    <rect x="${cx - 3.5}" y="${cy - 1.5}" width="7" height="5.5" rx="1" fill="none" stroke="${stroke}" stroke-width="0.8"/>
+    <!-- handle -->
+    <path d="M${cx + 3.5} ${cy - 0.5} Q${cx + 5.5} ${cy - 0.5} ${cx + 5.5} ${cy + 1} Q${cx + 5.5} ${cy + 2.5} ${cx + 3.5} ${cy + 2.5}" fill="none" stroke="${stroke}" stroke-width="0.7"/>
+    <!-- coffee fill -->
+    <rect x="${cx - 2.5}" y="${cy + 0.5}" width="5" height="2.5" rx="0.5" fill="${coffee}" opacity="0.45"/>
     ${fav ? `<circle cx="${cx + 9}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
     <path d="M${cx + 9} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
   </svg>`;
