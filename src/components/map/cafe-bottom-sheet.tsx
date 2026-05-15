@@ -236,70 +236,60 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               placeUrl={cafe.place_url}
             />
 
-            {/* Rating & review strengths */}
-            {(rating || strengths.length > 0) && (
-              <div className="space-y-2">
-                {rating && (
+            {/* All detail rows — uniform py-2.5 spacing */}
+            <div className="space-y-0">
+              {/* Rating */}
+              {rating && (
+                <div className="flex items-center gap-3 py-2.5">
+                  <Star className="h-4 w-4 fill-amber-400 stroke-amber-400 flex-shrink-0" />
                   <div className="flex items-center gap-1.5">
-                    <Star className="h-4 w-4 fill-amber-400 stroke-amber-400 flex-shrink-0" />
                     <span className="text-sm font-semibold text-foreground">{rating.score.toFixed(1)}</span>
                     {rating.count > 0 && (
                       <span className="text-xs text-muted-foreground">({rating.count.toLocaleString()}개 리뷰)</span>
                     )}
                   </div>
-                )}
-                {strengths.length > 0 && (
+                </div>
+              )}
+
+              {/* Strengths */}
+              {strengths.length > 0 && (
+                <div className="py-2.5">
                   <div className="flex flex-wrap gap-1.5">
                     {strengths.map((s) => (
-                      <span
-                        key={s}
-                        className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
-                      >
-                        {s}
-                      </span>
+                      <span key={s} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{s}</span>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
 
-            {/* Parking & facilities */}
-            {(parking || facilities.length > 0) && (
-              <div className="space-y-2">
-                {parking && (
-                  <div className="flex items-start gap-2">
-                    <Car className={cn('h-4 w-4 flex-shrink-0 mt-0.5', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
-                    <div className="min-w-0">
-                      <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
-                        {parking.available ? '주차 가능' : '주차 불가'}
-                      </span>
-                      {parking.summary && (
-                        <p className="text-xs text-muted-foreground leading-snug mt-0.5">{parking.summary}</p>
-                      )}
-                    </div>
+              {/* Parking */}
+              {parking && (
+                <div className="flex items-center gap-3 py-2.5">
+                  <Car className={cn('h-4 w-4 flex-shrink-0', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
+                  <div className="flex-1 min-w-0">
+                    <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
+                      {parking.available ? '주차 가능' : '주차 불가'}
+                    </span>
+                    {parking.summary && (
+                      <p className="text-xs text-muted-foreground leading-snug mt-0.5">{parking.summary}</p>
+                    )}
                   </div>
-                )}
-                {facilities.length > 0 && (
+                </div>
+              )}
+
+              {/* Facilities */}
+              {facilities.length > 0 && (
+                <div className="py-2.5">
                   <div className="flex flex-wrap gap-1.5">
                     {facilities.map((f) => (
-                      <span
-                        key={f}
-                        className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground"
-                      >
-                        {f}
-                      </span>
+                      <span key={f} className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">{f}</span>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
 
-            <MenuSection menu={menu} />
-
-            {/* Info rows — consistent vertical spacing */}
-            <div className="space-y-1">
               {/* Address */}
-              <div className="flex items-center gap-3 py-2">
+              <div className="flex items-center gap-3 py-2.5">
                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
                 <button
@@ -317,7 +307,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
               {/* Phone */}
               {cafe.phone && (
-                <div className="flex items-center gap-3 py-2">
+                <div className="flex items-center gap-3 py-2.5">
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <a
                     href={`tel:${cafe.phone}`}
@@ -340,7 +330,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               )}
 
               {/* Instagram */}
-              <div className="flex items-center gap-3 py-2">
+              <div className="flex items-center gap-3 py-2.5">
                 <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <a
                   href={instagramHref}
@@ -357,6 +347,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 </a>
               </div>
             </div>
+
+            <MenuSection menu={menu} />
 
             <HoursSection hoursByDay={cafe.hours_by_day} />
 

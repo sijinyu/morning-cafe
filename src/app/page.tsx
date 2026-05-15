@@ -10,6 +10,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { cn } from '@/lib/utils';
+import { SplashScreen } from '@/components/splash-screen';
 import dynamic from 'next/dynamic';
 
 const CafeBottomSheetWrapper = dynamic(
@@ -21,6 +22,7 @@ type ViewMode = 'map' | 'list';
 
 export default function MapPage() {
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
+  const cafes = useCafeStore((state) => state.cafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
@@ -63,6 +65,7 @@ export default function MapPage() {
 
   return (
     <div className="relative h-full w-full">
+      <SplashScreen ready={cafes.length > 0} />
       {viewMode === 'map' ? (
         <>
           <CafeMap
