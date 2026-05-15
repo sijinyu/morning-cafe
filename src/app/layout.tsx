@@ -15,6 +15,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://morningcoffee.kr'),
   title: '모닝커피 — 서울 아침 카페 지도',
   description: '서울에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.',
   keywords: ['아침 카페', '새벽 카페', '서울 카페', '얼리버드 카페', '카페 오픈 시간', '모닝커피'],
