@@ -16,11 +16,11 @@ export function DesktopSidebar() {
 
   return (
     <aside className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border md:bg-background">
-      {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-5">
+      {/* Logo — 클릭 시 홈으로 */}
+      <Link href="/" className="flex items-center gap-2 px-5 py-5 hover:opacity-80 transition-opacity">
         <Sun className="h-5 w-5 text-amber-500" />
         <span className="text-lg font-bold tracking-tight">모닝카페</span>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 px-3">

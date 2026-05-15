@@ -15,7 +15,7 @@ import {
   Heart,
   Share2,
 } from 'lucide-react';
-import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { cn } from '@/lib/utils';
 
@@ -150,9 +150,10 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   }
 
   const displayAddress = cafe.road_address ?? cafe.address;
-  const openingFormatted = formatOpeningTime(cafe.opening_time);
-  const badgeStyle = getOpeningBadgeStyle(cafe.opening_time);
-  const openStatus = getOpenStatus(cafe);
+  const is24h = is24Hours(cafe);
+  const openingFormatted = is24h ? '24시간' : formatOpeningTime(cafe.opening_time);
+  const badgeStyle = is24h ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : getOpeningBadgeStyle(cafe.opening_time);
+  const openStatus = is24h ? 'open' as const : getOpenStatus(cafe);
 
   const instagramHref = cafe.instagram_url
     ? (cafe.instagram_url.startsWith('http') ? cafe.instagram_url : `https://instagram.com/${cafe.instagram_url}`)
@@ -206,14 +207,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 {openStatus === 'open' ? '영업중' : '영업 전'}
               </span>
             )}
-            {cafe.opening_time && (
+            {(cafe.opening_time || is24h) && (
               <span
                 className={cn(
                   'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
                   badgeStyle
                 )}
               >
-                아침 {openingFormatted} 오픈
+                {is24h ? '24시간 영업' : `아침 ${openingFormatted} 오픈`}
               </span>
             )}
           </div>

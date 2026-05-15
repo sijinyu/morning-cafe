@@ -111,15 +111,37 @@ const DETAIL_HEADERS = {
   'pf': 'PC',
 };
 
-async function fetchDetail(placeId: string): Promise<any> {
-  try {
-    const res = await fetch(`https://place-api.map.kakao.com/places/panel3/${placeId}`, {
-      headers: DETAIL_HEADERS,
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch { return null; }
+async function fetchDetail(placeId: string, retries = 3): Promise<any> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`https://place-api.map.kakao.com/places/panel3/${placeId}`, {
+        headers: DETAIL_HEADERS,
+        signal: AbortSignal.timeout(10000),
+      });
+      if (res.status === 429) {
+        // rate limited — back off exponentially
+        const backoff = attempt * 2000;
+        console.warn(`  Rate limited on ${placeId}, backing off ${backoff}ms...`);
+        await sleep(backoff);
+        continue;
+      }
+      if (!res.ok) {
+        if (attempt < retries) { await sleep(1000); continue; }
+        return null;
+      }
+      const data = await res.json();
+      // 빈 응답 체크 (카카오가 가끔 빈 객체 반환)
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+        if (attempt < retries) { await sleep(1000); continue; }
+        return null;
+      }
+      return data;
+    } catch {
+      if (attempt < retries) { await sleep(1000); continue; }
+      return null;
+    }
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,18 +280,26 @@ async function main() {
   let upserted = 0;
   let earlybirds = 0;
   let skipped = 0;
+  let detailFailed = 0;
+  let noHours = 0;
 
   for (let i = 0; i < places.length; i++) {
     const place = places[i];
-    if ((i + 1) % 50 === 0 || i === places.length - 1) console.log(`[${i + 1}/${places.length}] Processing... (${earlybirds} earlybirds, ${upserted} total)`);
+    if ((i + 1) % 50 === 0 || i === places.length - 1) console.log(`[${i + 1}/${places.length}] earlybirds:${earlybirds} upserted:${upserted} detailFail:${detailFailed} noHours:${noHours} skipped:${skipped}`);
 
-    // 상세 조회
+    // 상세 조회 — 랜덤 jitter로 rate limit 회피
     const detail = await fetchDetail(place.id);
-    await sleep(200); // 예의 바르게
+    await sleep(400 + Math.random() * 200); // 400~600ms 랜덤 딜레이
 
     const { openingTime, closingTime, hoursByDay } = detail ? parseHours(detail) : { openingTime: null, closingTime: null, hoursByDay: null };
     const instagram = detail ? parseInstagram(detail) : null;
     const isEarlybird = openingTime !== null && openingTime < EARLYBIRD_THRESHOLD;
+
+    if (!detail) {
+      detailFailed++;
+    } else if (!openingTime) {
+      noHours++;
+    }
 
     const lng = parseFloat(place.x);
     const lat = parseFloat(place.y);
@@ -305,7 +335,9 @@ async function main() {
   console.log(`Total cafes: ${places.length}`);
   console.log(`Upserted: ${upserted}`);
   console.log(`Earlybirds: ${earlybirds}`);
-  console.log(`Skipped: ${skipped}`);
+  console.log(`Detail fetch failed: ${detailFailed}`);
+  console.log(`No hours data: ${noHours}`);
+  console.log(`Skipped (non-Seoul/bad coords): ${skipped}`);
 }
 
 main().catch(console.error);

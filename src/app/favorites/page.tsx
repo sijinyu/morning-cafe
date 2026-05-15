@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Heart, MapPin, Clock, ExternalLink } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
-import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 
 function formatOpeningTime(openingTime: string | null): string {
@@ -69,14 +69,20 @@ export default function FavoritesPage() {
 
 function CafeItem({ cafe, onRemove }: { cafe: Cafe; onRemove: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
-  const openStatus = getOpenStatus(cafe);
+  const cafe24h = is24Hours(cafe);
+  const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
 
   return (
     <li className="flex items-start gap-3 px-5 py-4">
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
-          {openStatus !== 'unknown' && (
+          {cafe24h && (
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              24시간
+            </span>
+          )}
+          {openStatus !== 'unknown' && !cafe24h && (
             <span
               className={cn(
                 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',

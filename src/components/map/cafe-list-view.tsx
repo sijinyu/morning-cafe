@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 
 function getOpeningBadgeStyle(openingTime: string | null): string {
@@ -69,7 +69,8 @@ export function CafeListView({ userLocation, onSelectCafe }: CafeListViewProps) 
     <div className="h-full overflow-y-auto">
       <ul className="divide-y divide-border">
         {sortedCafes.map((cafe, idx) => {
-          const openStatus = getOpenStatus(cafe);
+          const cafe24h = is24Hours(cafe);
+          const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
           const dist = userLocation
             ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
             : null;
@@ -88,7 +89,12 @@ export function CafeListView({ userLocation, onSelectCafe }: CafeListViewProps) 
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm truncate">{cafe.name}</span>
-                    {openStatus !== 'unknown' && (
+                    {cafe24h && (
+                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        24시간
+                      </span>
+                    )}
+                    {openStatus !== 'unknown' && !cafe24h && (
                       <span
                         className={cn(
                           'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
@@ -104,7 +110,7 @@ export function CafeListView({ userLocation, onSelectCafe }: CafeListViewProps) 
                         {openStatus === 'open' ? '영업중' : '영업 전'}
                       </span>
                     )}
-                    {cafe.opening_time && (
+                    {cafe.opening_time && !cafe24h && (
                       <span
                         className={cn(
                           'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold',

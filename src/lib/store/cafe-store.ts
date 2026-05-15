@@ -63,6 +63,7 @@ const CHAIN_KEYWORDS = [
   '감성커피',
   '커피명가',
   '전광수커피',
+  '텐퍼센트', '10PERCENT', '10%커피',
   // 무인카페
   '무인카페', '무인 카페', '무인24',
 ] as const;
@@ -70,6 +71,16 @@ const CHAIN_KEYWORDS = [
 export function isChainCafe(name: string): boolean {
   const lower = name.toLowerCase();
   return CHAIN_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+}
+
+// 24시간 영업 판단
+export function is24Hours(cafe: Cafe): boolean {
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '24:00:00') return true;
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00') return true;
+  // hours_by_day에 "00:00~24:00" 패턴
+  const sample = Object.values(cafe.hours_by_day ?? {})[0];
+  if (sample && /^00:00~24:00$/.test(sample)) return true;
+  return false;
 }
 
 // 요일 매핑 (Date.getDay() → Korean day key in hours_by_day)
