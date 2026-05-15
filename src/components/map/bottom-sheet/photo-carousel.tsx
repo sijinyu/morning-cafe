@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PhotoCarouselProps {
@@ -10,6 +10,29 @@ interface PhotoCarouselProps {
   loading: boolean;
   cafeName: string;
   placeUrl: string | null;
+}
+
+function SlideImage({ url, alt }: { url: string; alt: string }) {
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-muted/80">
+        <ImageOff className="h-6 w-6 text-muted-foreground/40" />
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={url}
+      alt={alt}
+      className="h-full w-full object-cover"
+      draggable={false}
+      onError={() => setError(true)}
+    />
+  );
 }
 
 export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCarouselProps) {
@@ -42,7 +65,7 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
   }, [emblaApi, photos]);
 
   return (
-    <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
+    <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-muted/50">
       {loading ? (
         <div className="flex h-full items-center justify-center">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
@@ -52,14 +75,8 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
           <div ref={emblaRef} className="h-full overflow-hidden">
             <div className="flex h-full">
               {photos.map((url, i) => (
-                <div key={url} className="min-w-0 flex-[0_0_100%]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt={`${cafeName} 사진 ${i + 1}`}
-                    className="h-full w-full object-cover pointer-events-none"
-                    draggable={false}
-                  />
+                <div key={url} className="min-w-0 flex-[0_0_100%] h-full">
+                  <SlideImage url={url} alt={`${cafeName} 사진 ${i + 1}`} />
                 </div>
               ))}
             </div>

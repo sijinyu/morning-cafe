@@ -88,7 +88,7 @@ export default function MapPage() {
       <TimeFilter />
 
       {/* 뷰 모드 토글 */}
-      <div className="absolute bottom-6 left-4 z-10">
+      <div className="absolute bottom-20 md:bottom-6 left-4 z-10">
         <motion.button
           onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
           whileTap={{ scale: 0.92 }}
@@ -113,7 +113,7 @@ export default function MapPage() {
         </motion.button>
       </div>
 
-      <div className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2">
+      <div className="absolute bottom-16 md:bottom-2 left-1/2 z-10 -translate-x-1/2">
         <a
           href="mailto:sijinyudev@gmail.com"
           className="rounded-full bg-background/60 px-3 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm hover:text-muted-foreground transition-colors"
