@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
-import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 
 // Seoul City Hall coordinates — default map center
@@ -18,22 +18,28 @@ interface MarkerColors {
   coffee: string;     // coffee liquid
 }
 
-function getMarkerColors(openingTime: string | null): MarkerColors {
-  if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#F3F0E8', steam: '#9CA3AF', coffee: '#6B7280' };
+function getMarkerColors(cafe: Cafe): MarkerColors {
+  // 24시간 카페: 빨간 계열 (배지 색상과 동일)
+  if (is24Hours(cafe)) {
+    return { fill: '#DC2626', stroke: '#2D3748', cream: '#FFF0F0', steam: '#EF4444', coffee: '#A16207' };
+  }
+
+  const openingTime = cafe.opening_time;
+  if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#FFF8F0', steam: '#D4A574', coffee: '#A16207' };
 
   const parts = openingTime.split(':');
   const totalMinutes = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
 
   if (totalMinutes < 360) {
-    // ~6시: warm coral red
-    return { fill: '#E8614D', stroke: '#2D3748', cream: '#FFF5F0', steam: '#E8614D', coffee: '#8B4513' };
+    // ~6시: deep warm orange
+    return { fill: '#EA580C', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#92400E' };
   }
   if (totalMinutes < 420) {
     // 6~7시: warm orange (like the reference image)
-    return { fill: '#F28B4E', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F28B4E', coffee: '#8B5E3C' };
+    return { fill: '#F28B4E', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#A16207' };
   }
-  // 7~8시: warm sage green
-  return { fill: '#6BAF7A', stroke: '#2D3748', cream: '#F5FFF5', steam: '#6BAF7A', coffee: '#5D4037' };
+  // 7~8시: light warm orange
+  return { fill: '#FBBF24', stroke: '#2D3748', cream: '#FFFDF0', steam: '#F59E0B', coffee: '#A16207' };
 }
 
 interface CafeMarkerProps {
@@ -127,7 +133,7 @@ function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean)
 }
 
 function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
-  const colors = getMarkerColors(cafe.opening_time);
+  const colors = getMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
   const w = isSelected ? 48 : (fav ? 36 : 32);

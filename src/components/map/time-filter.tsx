@@ -42,22 +42,38 @@ interface DropdownProps {
 
 function Dropdown({ trigger, open, onToggle, children, align = 'left' }: DropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onToggle();
+    function handleClick(e: Event) {
+      const target = e.target as Node;
+      // Ignore clicks inside the dropdown or on the trigger
+      if (ref.current && ref.current.contains(target)) return;
+      if (triggerRef.current && triggerRef.current.contains(target)) return;
+      onToggle();
     }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    // Use setTimeout so the current click event doesn't immediately close
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClick);
+      document.addEventListener('touchstart', handleClick);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('touchstart', handleClick);
+    };
   }, [open, onToggle]);
 
   return (
-    <div ref={ref} className="relative">
-      <button onClick={onToggle} className="contents">{trigger}</button>
+    <div className="relative">
+      <div ref={triggerRef} onClick={onToggle} role="button" tabIndex={0} className="cursor-pointer">
+        {trigger}
+      </div>
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={ref}
             initial={{ opacity: 0, y: -4, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.95 }}

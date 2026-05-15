@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,76 +12,34 @@ interface PhotoCarouselProps {
   placeUrl: string | null;
 }
 
-/**
- * Touch-based swipeable photo carousel.
- * Uses native touch events instead of framer-motion drag for reliable
- * single-slide navigation (no double-skip, no momentum glitch).
- */
 export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCarouselProps) {
-  const [photoIdx, setPhotoIdx] = useState(0);
-  const touchRef = useRef<{ startX: number; startY: number; swiping: boolean } | null>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    dragFree: false,
+    containScroll: 'trimSnaps',
+  });
 
-  function handleTouchStart(e: React.TouchEvent) {
-    const touch = e.touches[0]!;
-    touchRef.current = { startX: touch.clientX, startY: touch.clientY, swiping: false };
-  }
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
 
-  function handleTouchMove(e: React.TouchEvent) {
-    if (!touchRef.current) return;
-    const touch = e.touches[0]!;
-    const dx = touch.clientX - touchRef.current.startX;
-    const dy = touch.clientY - touchRef.current.startY;
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    onSelect();
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
-    // If horizontal movement is dominant, mark as swiping to prevent vertical scroll
-    if (!touchRef.current.swiping && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-      touchRef.current.swiping = true;
-    }
-
-    // Live preview: shift the track during drag
-    if (touchRef.current.swiping && trackRef.current) {
-      const baseOffset = -photoIdx * 100;
-      const containerWidth = trackRef.current.parentElement?.clientWidth ?? 1;
-      const pctDelta = (dx / containerWidth) * 100;
-      trackRef.current.style.transition = 'none';
-      trackRef.current.style.transform = `translateX(${baseOffset + pctDelta}%)`;
-    }
-  }
-
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (!touchRef.current) return;
-    const touch = e.changedTouches[0]!;
-    const dx = touch.clientX - touchRef.current.startX;
-    const threshold = 40;
-
-    // Snap to the correct slide with transition
-    if (trackRef.current) {
-      trackRef.current.style.transition = 'transform 0.3s ease-out';
-    }
-
-    if (touchRef.current.swiping) {
-      if (dx < -threshold && photoIdx < photos.length - 1) {
-        setPhotoIdx(photoIdx + 1);
-      } else if (dx > threshold && photoIdx > 0) {
-        setPhotoIdx(photoIdx - 1);
-      } else {
-        // Snap back
-        if (trackRef.current) {
-          trackRef.current.style.transform = `translateX(${-photoIdx * 100}%)`;
-        }
-      }
-    }
-    touchRef.current = null;
-  }
-
-  // Sync transform when photoIdx changes (from state update)
-  const trackStyle: React.CSSProperties = {
-    display: 'flex',
-    width: `${photos.length * 100}%`,
-    height: '100%',
-    transform: `translateX(${-photoIdx * 100}%)`,
-    transition: 'transform 0.3s ease-out',
-  };
+  // Reset to first slide when photos change (new cafe selected)
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollTo(0, true);
+    setSelectedIndex(0);
+  }, [emblaApi, photos]);
 
   return (
     <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
@@ -90,24 +49,20 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
         </div>
       ) : photos.length > 0 ? (
         <>
-          <div
-            ref={trackRef}
-            style={trackStyle}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {photos.map((url, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={url}
-                src={url}
-                alt={`${cafeName} 사진 ${i + 1}`}
-                className="h-full object-cover pointer-events-none"
-                style={{ width: `${100 / photos.length}%`, flexShrink: 0 }}
-                draggable={false}
-              />
-            ))}
+          <div ref={emblaRef} className="h-full overflow-hidden">
+            <div className="flex h-full">
+              {photos.map((url, i) => (
+                <div key={url} className="min-w-0 flex-[0_0_100%]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`${cafeName} 사진 ${i + 1}`}
+                    className="h-full w-full object-cover pointer-events-none"
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
           {/* Dots indicator */}
           {photos.length > 1 && (
@@ -117,7 +72,7 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
                   key={i}
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-200',
-                    i === photoIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50',
+                    i === selectedIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/50',
                   )}
                 />
               ))}
