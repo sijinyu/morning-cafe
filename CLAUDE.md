@@ -38,6 +38,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=   # Supabase anon key (클라이언트)
 SUPABASE_SERVICE_ROLE_KEY=       # Supabase service role key (서버 API)
 KAKAO_REST_API_KEY=              # 카카오 REST API 키 (place-detail API)
 RESEND_API_KEY=                  # Resend 이메일 API 키 (제보 알림)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=   # Google Analytics 4 측정 ID (G-XXXXXXX)
 ```
 
 카카오 Maps JS SDK 키는 `src/lib/hooks/use-kakao-loader.ts`에서 로드.
@@ -53,18 +54,28 @@ src/
 │   ├── layout.tsx                  # 루트 레이아웃 (ThemeProvider, DesktopSidebar, BottomNav)
 │   ├── globals.css                 # Tailwind + 글로벌 스타일
 │   ├── manifest.ts                 # PWA manifest
-│   ├── favorites/page.tsx          # 즐겨찾기 페이지
-│   ├── recent/page.tsx             # 최근 본 카페
-│   ├── report/page.tsx             # 카페 제보 폼
+│   ├── favorites/
+│   │   ├── page.tsx                # 즐겨찾기 페이지 (카드 클릭 → 지도 이동)
+│   │   └── layout.tsx              # SEO metadata
+│   ├── recent/
+│   │   ├── page.tsx                # 최근 본 카페
+│   │   └── layout.tsx              # SEO metadata
+│   ├── report/
+│   │   ├── page.tsx                # 카페 제보 폼
+│   │   └── layout.tsx              # SEO metadata
+│   ├── robots.ts                   # robots.txt 자동 생성
+│   ├── sitemap.ts                  # sitemap.xml 자동 생성
 │   └── api/
-│       ├── place-detail/route.ts   # 카카오 Place API 프록시 (사진+메뉴)
-│       └── reports/route.ts        # 제보 POST → Supabase insert
+│       ├── place-detail/route.ts   # 카카오 Place API 프록시 (사진+메뉴+별점+주차+편의시설)
+│       └── reports/route.ts        # 제보 POST → Supabase insert + Resend 이메일
 │
 ├── components/
 │   ├── layout/
 │   │   ├── bottom-nav.tsx          # 모바일 하단 네비 (h-14, z-50)
 │   │   ├── desktop-sidebar.tsx     # 데스크탑 좌측 사이드바
 │   │   └── theme-provider.tsx      # next-themes 다크모드
+│   │
+│   ├── splash-screen.tsx             # 스플래시 스크린 (커피잔 + 김 애니메이션)
 │   │
 │   └── map/
 │       ├── cafe-map.tsx            # 카카오 맵 + 마커 (뷰포트 필터링, SVG 핀마커)
@@ -81,6 +92,7 @@ src/
 │
 ├── lib/
 │   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle)
+│   ├── analytics.ts                # GA4 이벤트 트래킹 유틸 (trackEvent)
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
 │   │   └── cafe-store.ts           # Zustand 메인 스토어 (아래 상세)
@@ -135,8 +147,9 @@ src/
 | Dropdown | z-30 | absolute (필터 내부) |
 | SearchBar | z-20 | absolute top-3 |
 | TimeFilter | z-10 | absolute top-16 |
-| ViewToggle | z-10 | absolute bottom-20 right-[4.5rem] (모바일) / bottom-6 (md) |
-| MyLocation | z-10 | absolute bottom-20 right-4 (모바일) / bottom-6 (md) |
+| SplashScreen | z-[100] | fixed inset-0 (로딩 완료 후 페이드아웃) |
+| ViewToggle | z-10 | absolute bottom-18 left-4 (모바일) / bottom-6 (md) |
+| MyLocation | z-10 | absolute bottom-18 right-4 (모바일) / bottom-6 (md) |
 
 ### 모바일 레이아웃 규칙
 
@@ -151,8 +164,18 @@ src/
 ## API 엔드포인트
 
 ### GET `/api/place-detail?placeId={kakao_place_id}`
-카카오 Place API에서 사진 + 메뉴를 가져오는 프록시.
-- 응답: `{ photos: string[], menu: { name, price, photo? }[] }`
+카카오 Place API (panel3)에서 사진 + 메뉴 + 별점 + 주차 + 편의시설을 가져오는 프록시.
+- 응답:
+  ```typescript
+  {
+    photos: string[],
+    menu: { name: string, price: string, photo?: string }[],
+    rating: { score: number, count: number } | null,
+    parking: { available: boolean, info: string } | null,
+    facilities: string[],      // e.g. ["바테이블", "놀이방"]
+    strengths: string[]         // e.g. ["커피가 맛있어요", "뷰가 좋아요"]
+  }
+  ```
 - 서버 키 사용: `KAKAO_REST_API_KEY`
 
 ### POST `/api/reports`
@@ -201,8 +224,12 @@ npm run lint         # ESLint
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
-8. **상세보기 수직 간격**: 주소/전화/인스타 행은 `space-y-1` 그룹 내 각 `py-2`로 통일.
-9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "© 2026 유시진".
+8. **상세보기 수직 간격**: 모든 상세 행(별점, 장점칩, 주차, 편의시설, 주소, 전화, 인스타)은 `space-y-0` 그룹 내 각 `py-2.5`로 통일.
+9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 유시진 All rights reserved."
+10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-8 w-8`, 아이콘 `h-[18px] w-[18px]`, gap 없음.
+11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝커피" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
+12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
+13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
 
 ### 커밋 메시지
 
@@ -212,11 +239,15 @@ npm run lint         # ESLint
 
 ## 알려진 제약 / TODO
 
-- [ ] 사장님 카페 직접 등록 기능 (등록 폼 → Supabase insert → 즉시 마커 표시)
+- [x] GA4 이벤트 트래킹 (주요 사용자 액션)
+- [x] SEO 최적화 (OG/Twitter meta, robots.txt, sitemap.xml)
+- [x] 스플래시 스크린 (커피잔 애니메이션)
+- [x] 카카오 API 데이터 확장 (별점, 주차, 편의시설, 장점)
+- [ ] OG 이미지 디자인 (커피잔 일러스트)
+- [ ] 오프라인 캐싱 개선 (Serwist 설정)
+- [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
 - [ ] 카페 데이터 자동 갱신 (크롤링 주기)
-- [ ] 오프라인 캐싱 개선 (Serwist 설정)
-- [ ] 성능: MarkerClusterer 대량 마커 렌더 시 추가 최적화 여지
 
 ---
 
