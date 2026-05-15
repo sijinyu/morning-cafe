@@ -188,20 +188,30 @@ export const useCafeStore = create<CafeState>((set, get) => ({
     try {
       const supabase = createClient();
 
-      // cafes_with_coords is the VIEW defined in migration 002 that adds
-      // latitude and longitude columns derived from the PostGIS geography column.
-      const { data, error } = await supabase
-        .from('cafes_with_coords')
-        .select('*')
-        .eq('is_earlybird', true);
+      // Supabase JS client returns max 1,000 rows per request.
+      // Paginate to fetch all earlybird cafes.
+      const allRows: any[] = [];
+      const PAGE_SIZE = 1000;
+      let from = 0;
 
-      if (error) {
-        // Supabase env vars may not be set yet — silently degrade.
-        set({ cafes: [], loading: false });
-        return;
+      while (true) {
+        const { data, error } = await supabase
+          .from('cafes_with_coords')
+          .select('*')
+          .eq('is_earlybird', true)
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (error) {
+          set({ cafes: [], loading: false });
+          return;
+        }
+
+        allRows.push(...(data ?? []));
+        if (!data || data.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
       }
 
-      const cafes: Cafe[] = (data ?? []).map((row) => ({
+      const cafes: Cafe[] = allRows.map((row) => ({
         id: row.id as string,
         kakao_place_id: row.kakao_place_id as string,
         name: row.name as string,
@@ -222,7 +232,6 @@ export const useCafeStore = create<CafeState>((set, get) => ({
 
       set({ cafes, loading: false });
     } catch {
-      // Silently degrade when Supabase is not configured.
       set({ cafes: [], loading: false });
     }
   },
