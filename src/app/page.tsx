@@ -1,31 +1,96 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Map as MapIcon, List } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { CafeMap } from '@/components/map/cafe-map';
 import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
 import { CafeBottomSheetWrapper } from '@/components/map/cafe-bottom-sheet';
 import { SearchBar } from '@/components/map/search-bar';
+import { CafeListView } from '@/components/map/cafe-list-view';
+import { cn } from '@/lib/utils';
+
+type ViewMode = 'map' | 'list';
 
 export default function MapPage() {
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
-  // panToRef holds the panTo helper exposed by CafeMap so MyLocationButton
-  // and SearchBar can move the map without needing a direct kakao.maps.Map
-  // reference here.
+  const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('map');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     fetchCafes();
   }, [fetchCafes]);
 
+  // 리스트뷰에서 GPS 위치 자동 가져오기
+  useEffect(() => {
+    if (viewMode === 'list' && !userLocation && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+      );
+    }
+  }, [viewMode, userLocation]);
+
+  function handleLocationUpdate(lat: number, lng: number) {
+    setUserLocation({ lat, lng });
+    panToRef.current?.(lat, lng);
+  }
+
   return (
     <div className="relative h-full w-full">
-      <CafeMap onPanToReady={(fn) => { panToRef.current = fn; }} />
+      {viewMode === 'map' ? (
+        <>
+          <CafeMap onPanToReady={(fn) => { panToRef.current = fn; }} />
+          <SearchBar onSelectCafe={(lat, lng) => panToRef.current?.(lat, lng)} />
+          <MyLocationButton onLocation={handleLocationUpdate} />
+          <CafeBottomSheetWrapper />
+        </>
+      ) : (
+        <div className="h-full pt-28">
+          <CafeListView
+            userLocation={userLocation}
+            onSelectCafe={(cafe) => {
+              setSelectedCafe(cafe);
+              setViewMode('map');
+              setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
+            }}
+          />
+        </div>
+      )}
+
       <TimeFilter />
-      <SearchBar onSelectCafe={(lat, lng) => panToRef.current?.(lat, lng)} />
-      <MyLocationButton onLocation={(lat, lng) => panToRef.current?.(lat, lng)} />
-      <CafeBottomSheetWrapper />
+
+      {/* 뷰 모드 토글 */}
+      <div className="absolute bottom-6 left-4 z-10">
+        <motion.button
+          onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
+          whileTap={{ scale: 0.92 }}
+          className={cn(
+            'flex h-12 items-center gap-2 rounded-full px-4',
+            'bg-background shadow-lg border border-border',
+            'text-sm font-medium text-foreground',
+            'transition-colors hover:bg-muted',
+          )}
+        >
+          {viewMode === 'map' ? (
+            <>
+              <List className="h-4 w-4" />
+              리스트
+            </>
+          ) : (
+            <>
+              <MapIcon className="h-4 w-4" />
+              지도
+            </>
+          )}
+        </motion.button>
+      </div>
+
       <div className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2">
         <a
           href="mailto:sijinyudev@gmail.com"

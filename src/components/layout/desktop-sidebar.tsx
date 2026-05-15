@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Heart, Sun } from 'lucide-react';
+import { Map, Heart, Sun, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { href: '/', label: '지도', icon: Map },
   { href: '/favorites', label: '즐겨찾기', icon: Heart },
+  { href: '/report', label: '제보하기', icon: Send },
 ] as const;
 
 export function DesktopSidebar() {

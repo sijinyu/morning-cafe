@@ -13,8 +13,9 @@ import {
   Clock,
   Check,
   Heart,
+  Share2,
 } from 'lucide-react';
-import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { cn } from '@/lib/utils';
 
@@ -151,6 +152,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const displayAddress = cafe.road_address ?? cafe.address;
   const openingFormatted = formatOpeningTime(cafe.opening_time);
   const badgeStyle = getOpeningBadgeStyle(cafe.opening_time);
+  const openStatus = getOpenStatus(cafe);
 
   const instagramHref = cafe.instagram_url
     ? (cafe.instagram_url.startsWith('http') ? cafe.instagram_url : `https://instagram.com/${cafe.instagram_url}`)
@@ -187,8 +189,24 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </span>
             )}
           </div>
-          {cafe.opening_time && (
-            <div className="mt-1.5">
+          <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+            {openStatus !== 'unknown' && (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                  openStatus === 'open'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                )}
+              >
+                <span className={cn(
+                  'inline-block h-1.5 w-1.5 rounded-full',
+                  openStatus === 'open' ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
+                )} />
+                {openStatus === 'open' ? '영업중' : '영업 전'}
+              </span>
+            )}
+            {cafe.opening_time && (
               <span
                 className={cn(
                   'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
@@ -197,8 +215,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               >
                 아침 {openingFormatted} 오픈
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
@@ -286,23 +304,44 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <div className="h-px bg-border" />
 
-            {/* Action button */}
-            {cafe.place_url && (
-              <a
-                href={cafe.place_url}
-                target="_blank"
-                rel="noopener noreferrer"
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {cafe.place_url && (
+                <a
+                  href={cafe.place_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
+                    'bg-foreground text-background py-3.5',
+                    'text-sm font-medium',
+                    'hover:opacity-90 transition-opacity'
+                  )}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  카카오맵에서 보기
+                </a>
+              )}
+              <button
+                onClick={() => {
+                  const text = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}${cafe.place_url ? `\n${cafe.place_url}` : ''}`;
+                  if (navigator.share) {
+                    navigator.share({ title: cafe.name, text }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(text).catch(() => {});
+                  }
+                }}
                 className={cn(
-                  'flex w-full items-center justify-center gap-1.5 rounded-2xl',
-                  'bg-foreground text-background py-3.5',
-                  'text-sm font-medium',
-                  'hover:opacity-90 transition-opacity'
+                  'flex items-center justify-center rounded-2xl',
+                  'border border-border py-3.5 px-4',
+                  'text-sm font-medium text-foreground',
+                  'hover:bg-muted transition-colors'
                 )}
+                aria-label="공유하기"
               >
-                <ExternalLink className="h-3.5 w-3.5" />
-                카카오맵에서 보기
-              </a>
-            )}
+                <Share2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Heart, MapPin, Clock, ExternalLink } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
-import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 
 function formatOpeningTime(openingTime: string | null): string {
@@ -69,12 +69,29 @@ export default function FavoritesPage() {
 
 function CafeItem({ cafe, onRemove }: { cafe: Cafe; onRemove: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
+  const openStatus = getOpenStatus(cafe);
 
   return (
     <li className="flex items-start gap-3 px-5 py-4">
       <div className="flex-1 min-w-0 space-y-1.5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
+          {openStatus !== 'unknown' && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',
+                openStatus === 'open'
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+              )}
+            >
+              <span className={cn(
+                'inline-block h-1.5 w-1.5 rounded-full',
+                openStatus === 'open' ? 'bg-emerald-500' : 'bg-gray-400'
+              )} />
+              {openStatus === 'open' ? '영업중' : '영업 전'}
+            </span>
+          )}
           {cafe.opening_time && (
             <span
               className={cn(
