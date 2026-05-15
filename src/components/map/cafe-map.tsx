@@ -101,12 +101,18 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
 
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const selectedCafe = useCafeStore((state) => state.selectedCafe);
+  // Subscribe to cafes directly so the component re-renders when fetchCafes()
+  // resolves and populates the store. Without this subscription, filteredCafes()
+  // is only invoked once at mount (when cafes is still []) because Zustand sees
+  // the stable filteredCafes function reference and skips re-renders.
+  useCafeStore((state) => state.cafes);
   const filteredCafes = useCafeStore((state) => state.filteredCafes)();
   // Re-render when filters change
   useCafeStore((state) => state.timeFilter);
   useCafeStore((state) => state.hideChains);
   useCafeStore((state) => state.dayFilter);
   useCafeStore((state) => state.guFilter);
+  useCafeStore((state) => state.hide24h);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);

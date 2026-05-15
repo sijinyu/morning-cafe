@@ -60,3 +60,20 @@ docs/decisions/ 폴더에 ADR(Architecture Decision Record) 작성:
 - RICE 우선순위 — Reach × Impact × Confidence ÷ Effort
 - Hooked 모델 — 트리거→행동→가변보상→투자 (리텐션 설계)
 - North Star Metric — 이 제품의 단 하나의 핵심 지표는?
+
+## 디자인 시스템 레퍼런스
+
+디자인 작업 시 `design-md/` 폴더의 DESIGN.md 파일을 참조하라.
+각 브랜드별 색상, 타이포그래피, 컴포넌트, 레이아웃, 반응형 규칙이 정리되어 있다.
+
+**참고할 브랜드 (카페/소비자 앱 관련):**
+- `design-md/airbnb/DESIGN.md` — 따뜻한 소비자 마켓플레이스, 사진 중심, 부드러운 곡선
+- `design-md/starbucks/DESIGN.md` — 카페 브랜드, 따뜻한 크림 캔버스, 4단계 그린
+- `design-md/spotify/DESIGN.md` — 다크 앱, 콘텐츠 중심, pill 버튼
+- `design-md/uber/DESIGN.md` — 지도 기반 앱
+- `design-md/airbnb/` — 카드 UI, 바텀시트, 필터칩 패턴
+
+**사용 방법:**
+1. UI 컴포넌트 만들 때 → 관련 브랜드 DESIGN.md 읽고 패턴 참고
+2. 색상/타이포 결정 시 → 토큰 체계와 원칙 참고
+3. 반응형 설계 시 → breakpoint와 collapsing strategy 참고

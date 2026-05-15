@@ -137,6 +137,7 @@ interface CafeState {
   dayFilter: DayFilter;
   guFilter: string | null; // null = 전체
   hideChains: boolean;
+  hide24h: boolean;
   loading: boolean;
   fetchCafes: () => Promise<void>;
   setSelectedCafe: (cafe: Cafe | null) => void;
@@ -144,6 +145,7 @@ interface CafeState {
   setDayFilter: (filter: DayFilter) => void;
   setGuFilter: (gu: string | null) => void;
   setHideChains: (hide: boolean) => void;
+  setHide24h: (hide: boolean) => void;
   filteredCafes: () => Cafe[];
   availableGus: () => string[];
 }
@@ -181,6 +183,7 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   dayFilter: 'today',
   guFilter: null,
   hideChains: true, // 기본값: 체인점 숨김
+  hide24h: false,
   loading: false,
 
   async fetchCafes() {
@@ -256,13 +259,20 @@ export const useCafeStore = create<CafeState>((set, get) => ({
     set({ hideChains: hide });
   },
 
+  setHide24h(hide) {
+    set({ hide24h: hide });
+  },
+
   filteredCafes() {
-    const { cafes, timeFilter, dayFilter, guFilter, hideChains } = get();
+    const { cafes, timeFilter, dayFilter, guFilter, hideChains, hide24h } = get();
     const dayKey = resolveDayKey(dayFilter);
 
     return cafes.filter((cafe) => {
       // 체인점 필터
       if (hideChains && isChainCafe(cafe.name)) return false;
+
+      // 24시간 영업 필터
+      if (hide24h && is24Hours(cafe)) return false;
 
       // 구 필터
       if (guFilter) {

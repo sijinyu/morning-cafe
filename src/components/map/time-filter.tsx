@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Store, Calendar, MapPin, ChevronDown } from 'lucide-react';
+import { Store, Calendar, MapPin, ChevronDown, Clock } from 'lucide-react';
 import { useState } from 'react';
 import {
   useCafeStore,
@@ -42,6 +42,8 @@ export function TimeFilter() {
   const setGuFilter = useCafeStore((state) => state.setGuFilter);
   const hideChains = useCafeStore((state) => state.hideChains);
   const setHideChains = useCafeStore((state) => state.setHideChains);
+  const hide24h = useCafeStore((state) => state.hide24h);
+  const setHide24h = useCafeStore((state) => state.setHide24h);
   // cafes를 직접 구독해야 fetch 완료 후 re-render 됨
   useCafeStore((state) => state.cafes);
   const availableGus = useCafeStore((state) => state.availableGus)();
@@ -178,6 +180,21 @@ export function TimeFilter() {
         >
           <Store className="h-3 w-3" />
           {hideChains ? '개인카페만' : '체인점 포함'}
+        </motion.button>
+
+        {/* 24시간 필터 토글 */}
+        <motion.button
+          onClick={() => setHide24h(!hide24h)}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+            hide24h
+              ? 'bg-blue-500 text-white shadow-md'
+              : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
+          )}
+        >
+          <Clock className="h-3 w-3" />
+          {hide24h ? '24시간 제외' : '24시간 포함'}
         </motion.button>
 
         {/* 결과 카운트 */}

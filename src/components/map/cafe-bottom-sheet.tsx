@@ -17,11 +17,18 @@ import {
   Navigation,
   Bell,
   BellOff,
+  StickyNote,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ImageIcon,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
+import { usePlacePhotos } from '@/lib/hooks/use-place-photos';
+import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
 import { cn } from '@/lib/utils';
 
 // ---- helpers ----------------------------------------------------------------
@@ -125,6 +132,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
+  const { photos, loading: photosLoading } = usePlacePhotos(cafe.kakao_place_id);
+  const { getMemo, setMemo } = useCafeMemos();
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const [memoOpen, setMemoOpen] = useState(false);
+  const [memoText, setMemoText] = useState('');
   const favorited = isFavorite(cafe.id);
   const reminded = hasReminder(cafe.id);
   const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
@@ -141,8 +153,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
   useEffect(() => {
     setSheetState('half');
+    setPhotoIdx(0);
+    setMemoOpen(false);
+    setMemoText(getMemo(cafe.id));
     addRecent(cafe.id);
-  }, [cafe.id, addRecent]);
+  }, [cafe.id, addRecent, getMemo]);
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const velocity = info.velocity.y;
@@ -290,33 +305,62 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           <div className="px-5 pb-6 space-y-4">
             <div className="h-px bg-border" />
 
-            {/* Photo header */}
-            <div className="relative h-32 rounded-2xl overflow-hidden">
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(135deg,
-                    hsl(var(--primary) / 0.18) 0%,
-                    hsl(var(--primary) / 0.08) 50%,
-                    hsl(var(--muted)) 100%)`,
-                }}
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                <span className="text-lg font-bold text-foreground/80 px-4 text-center leading-tight line-clamp-2">
-                  {cafe.name}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  카카오맵 사진 보기
-                </span>
-              </div>
-              {cafe.place_url && (
+            {/* Photo carousel */}
+            <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
+              {photosLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
+                </div>
+              ) : photos.length > 0 ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photos[photoIdx % photos.length]}
+                    alt={`${cafe.name} 사진 ${photoIdx + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                  {/* Nav arrows */}
+                  {photos.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setPhotoIdx((i) => (i - 1 + photos.length) % photos.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setPhotoIdx((i) => (i + 1) % photos.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-2 py-0.5 text-[10px] text-white backdrop-blur-sm">
+                        {photoIdx + 1} / {photos.length}
+                      </div>
+                    </>
+                  )}
+                  {cafe.place_url && (
+                    <a
+                      href={`${cafe.place_url}#photo`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] text-white backdrop-blur-sm"
+                    >
+                      <ImageIcon className="h-3 w-3" />
+                      더보기
+                    </a>
+                  )}
+                </>
+              ) : (
                 <a
-                  href={`${cafe.place_url}#photo`}
+                  href={cafe.place_url ? `${cafe.place_url}#photo` : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0"
-                  aria-label={`${cafe.name} 사진 보기`}
-                />
+                  className="flex h-full flex-col items-center justify-center gap-1"
+                >
+                  <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
+                  <span className="text-xs text-muted-foreground">카카오맵 사진 보기</span>
+                </a>
               )}
             </div>
 
@@ -370,6 +414,71 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             {/* Hours by day */}
             <HoursSection hoursByDay={cafe.hours_by_day} />
+
+            {/* 내 메모 */}
+            <div>
+              <button
+                onClick={() => setMemoOpen((v) => !v)}
+                className="flex w-full items-center justify-between py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <StickyNote className="h-4 w-4" />
+                  <span>내 메모</span>
+                  {getMemo(cafe.id) && !memoOpen && (
+                    <span className="text-xs text-foreground/60 truncate max-w-[160px]">{getMemo(cafe.id)}</span>
+                  )}
+                </div>
+                {memoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+
+              <AnimatePresence>
+                {memoOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-1 rounded-2xl bg-muted/50 p-3">
+                      <textarea
+                        value={memoText}
+                        onChange={(e) => setMemoText(e.target.value)}
+                        onBlur={() => setMemo(cafe.id, memoText)}
+                        placeholder="이 카페에 대한 메모를 남겨보세요..."
+                        className="w-full resize-none rounded-xl bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
+                        rows={3}
+                      />
+                      <div className="mt-1.5 flex justify-end">
+                        <button
+                          onClick={() => {
+                            setMemo(cafe.id, memoText);
+                            setMemoOpen(false);
+                          }}
+                          className="rounded-lg bg-foreground px-3 py-1 text-xs font-medium text-background"
+                        >
+                          저장
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* 리뷰 링크 */}
+            {cafe.place_url && (
+              <a
+                href={`${cafe.place_url}#comment`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Star className="h-4 w-4" />
+                <span>카카오맵 리뷰 보기</span>
+                <ExternalLink className="h-3 w-3 ml-auto" />
+              </a>
+            )}
 
             <div className="h-px bg-border" />
 
