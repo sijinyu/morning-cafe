@@ -12,14 +12,14 @@ import {
   Heart,
   Share2,
   Navigation,
-  Bell,
-  BellOff,
+  // Bell,
+  // BellOff,
   Star,
   Car,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
-import { useNotifications } from '@/lib/hooks/use-notifications';
+// import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
@@ -52,23 +52,23 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const [copied, setCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
+  // const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
   const { photos, menu, rating, parking, facilities, strengths, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
-  const reminded = hasReminder(cafe.id);
-  const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
+  // const reminded = hasReminder(cafe.id);
+  // const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
 
-  async function handleBellClick() {
-    if (reminded) {
-      removeReminder(cafe.id);
-      return;
-    }
-    const permission = await requestPermission();
-    if (permission !== 'granted') return;
-    scheduleReminder(cafe.id, cafe.name, cafe.opening_time!);
-  }
+  // async function handleBellClick() {
+  //   if (reminded) {
+  //     removeReminder(cafe.id);
+  //     return;
+  //   }
+  //   const permission = await requestPermission();
+  //   if (permission !== 'granted') return;
+  //   scheduleReminder(cafe.id, cafe.name, cafe.opening_time!);
+  // }
 
   useEffect(() => {
     setSheetState('half');
@@ -182,6 +182,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         </div>
 
         <div className="flex items-center -mr-2 flex-shrink-0">
+          {/* TODO: 알림 기능 추후 활성화
           {canRemind && (
             <motion.button
               onClick={handleBellClick}
@@ -198,6 +199,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               )}
             </motion.button>
           )}
+          */}
           <motion.button
             onClick={() => toggleFavorite(cafe.id)}
             whileTap={{ scale: 0.85 }}
