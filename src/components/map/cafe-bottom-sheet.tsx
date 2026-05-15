@@ -181,20 +181,20 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center -mr-1 flex-shrink-0">
           {canRemind && (
             <motion.button
               onClick={handleBellClick}
               whileTap={{ scale: 0.85 }}
               animate={{ scale: reminded ? [1, 1.25, 1] : 1 }}
               transition={{ duration: 0.25 }}
-              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
               aria-label={reminded ? '알림 제거' : '오픈 알림 설정'}
             >
               {reminded ? (
-                <BellOff className="h-5 w-5 fill-amber-400 stroke-amber-500" />
+                <BellOff className="h-[18px] w-[18px] fill-amber-400 stroke-amber-500" />
               ) : (
-                <Bell className="h-5 w-5 stroke-muted-foreground" />
+                <Bell className="h-[18px] w-[18px] stroke-muted-foreground" />
               )}
             </motion.button>
           )}
@@ -203,22 +203,22 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             whileTap={{ scale: 0.85 }}
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label={favorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
           >
             <Heart
               className={cn(
-                'h-5 w-5 transition-colors',
+                'h-[18px] w-[18px] transition-colors',
                 favorited ? 'fill-red-500 stroke-red-500' : 'stroke-muted-foreground'
               )}
             />
           </motion.button>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label="닫기"
           >
-            <X className="h-4 w-4 text-muted-foreground" />
+            <X className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         </div>
       </div>
