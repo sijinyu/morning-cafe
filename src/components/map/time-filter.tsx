@@ -123,7 +123,7 @@ export function TimeFilter() {
   }
 
   return (
-    <div className="absolute top-16 left-3 right-3 z-10 flex items-center gap-1.5">
+    <div className="absolute top-16 left-3 right-3 z-10 flex items-center justify-center gap-1.5">
       {/* 시간 & 요일 드롭다운 */}
       <Dropdown
         open={openDropdown === 'time'}
@@ -237,15 +237,15 @@ export function TimeFilter() {
         </button>
       )}
 
-      {/* 카운트 — 필터 바로 옆 */}
+      {/* 카운트 */}
       <motion.span
         key={filteredCount}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="rounded-full bg-foreground/90 px-2.5 py-1 text-[10px] font-semibold text-background shadow-md backdrop-blur-sm whitespace-nowrap"
+        className="rounded-full bg-foreground/90 px-2.5 py-1.5 text-[10px] font-semibold text-background shadow-md backdrop-blur-sm whitespace-nowrap"
       >
-        {filteredCount.toLocaleString()}개
+        총 {filteredCount.toLocaleString()}개
       </motion.span>
     </div>
   );
