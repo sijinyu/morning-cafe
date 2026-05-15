@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useState } from 'react';
 import { ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,8 +11,76 @@ interface PhotoCarouselProps {
   placeUrl: string | null;
 }
 
+/**
+ * Touch-based swipeable photo carousel.
+ * Uses native touch events instead of framer-motion drag for reliable
+ * single-slide navigation (no double-skip, no momentum glitch).
+ */
 export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCarouselProps) {
   const [photoIdx, setPhotoIdx] = useState(0);
+  const touchRef = useRef<{ startX: number; startY: number; swiping: boolean } | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0]!;
+    touchRef.current = { startX: touch.clientX, startY: touch.clientY, swiping: false };
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touchRef.current) return;
+    const touch = e.touches[0]!;
+    const dx = touch.clientX - touchRef.current.startX;
+    const dy = touch.clientY - touchRef.current.startY;
+
+    // If horizontal movement is dominant, mark as swiping to prevent vertical scroll
+    if (!touchRef.current.swiping && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      touchRef.current.swiping = true;
+    }
+
+    // Live preview: shift the track during drag
+    if (touchRef.current.swiping && trackRef.current) {
+      const baseOffset = -photoIdx * 100;
+      const containerWidth = trackRef.current.parentElement?.clientWidth ?? 1;
+      const pctDelta = (dx / containerWidth) * 100;
+      trackRef.current.style.transition = 'none';
+      trackRef.current.style.transform = `translateX(${baseOffset + pctDelta}%)`;
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (!touchRef.current) return;
+    const touch = e.changedTouches[0]!;
+    const dx = touch.clientX - touchRef.current.startX;
+    const threshold = 40;
+
+    // Snap to the correct slide with transition
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'transform 0.3s ease-out';
+    }
+
+    if (touchRef.current.swiping) {
+      if (dx < -threshold && photoIdx < photos.length - 1) {
+        setPhotoIdx(photoIdx + 1);
+      } else if (dx > threshold && photoIdx > 0) {
+        setPhotoIdx(photoIdx - 1);
+      } else {
+        // Snap back
+        if (trackRef.current) {
+          trackRef.current.style.transform = `translateX(${-photoIdx * 100}%)`;
+        }
+      }
+    }
+    touchRef.current = null;
+  }
+
+  // Sync transform when photoIdx changes (from state update)
+  const trackStyle: React.CSSProperties = {
+    display: 'flex',
+    width: `${photos.length * 100}%`,
+    height: '100%',
+    transform: `translateX(${-photoIdx * 100}%)`,
+    transition: 'transform 0.3s ease-out',
+  };
 
   return (
     <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
@@ -23,22 +90,12 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
         </div>
       ) : photos.length > 0 ? (
         <>
-          <motion.div
-            className="flex h-full"
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.15}
-            onDragEnd={(_, info) => {
-              const threshold = 50;
-              if (info.offset.x < -threshold) {
-                setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
-              } else if (info.offset.x > threshold) {
-                setPhotoIdx((i) => Math.max(i - 1, 0));
-              }
-            }}
-            animate={{ x: `-${photoIdx * (100 / photos.length)}%` }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            style={{ width: `${photos.length * 100}%`, touchAction: 'pan-y' }}
+          <div
+            ref={trackRef}
+            style={trackStyle}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {photos.map((url, i) => (
               // eslint-disable-next-line @next/next/no-img-element
@@ -47,11 +104,12 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
                 src={url}
                 alt={`${cafeName} 사진 ${i + 1}`}
                 className="h-full object-cover pointer-events-none"
-                style={{ width: `${100 / photos.length}%` }}
+                style={{ width: `${100 / photos.length}%`, flexShrink: 0 }}
                 draggable={false}
               />
             ))}
-          </motion.div>
+          </div>
+          {/* Dots indicator */}
           {photos.length > 1 && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
               {photos.map((_, i) => (
