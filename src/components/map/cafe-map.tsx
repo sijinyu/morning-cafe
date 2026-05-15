@@ -248,6 +248,10 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     if (onPanToReady) {
       onPanToReady((lat, lng) => {
         const latlng = new kakao.maps.LatLng(lat, lng);
+        // 검색으로 카페 선택 시 줌인 (레벨 3 = 거리 수준)
+        if (map.getLevel() > 3) {
+          map.setLevel(3);
+        }
         map.panTo(latlng);
       });
     }
