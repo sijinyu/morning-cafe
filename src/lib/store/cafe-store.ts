@@ -35,7 +35,7 @@ const CHAIN_KEYWORDS = [
   '카페베네', '엔제리너스',
   '폴바셋', 'PAUL BASSETT',
   // 저가 프랜차이즈
-  '메가커피', '메가MGC', 'MEGA',
+  '메가커피', '메가MGC', '메가엠지씨', 'MEGA',
   '컴포즈', '컴포즈커피', 'COMPOSE',
   '빽다방', '백다방', 'PAIK',
   '더벤티', 'THE VENTI',
