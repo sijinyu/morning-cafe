@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { useFavorites } from '@/lib/hooks/use-favorites';
 
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
@@ -24,76 +25,82 @@ function getMarkerColor(openingTime: string | null): string {
 interface CafeMarkerProps {
   cafe: Cafe;
   isSelected: boolean;
+  isFavorite: boolean;
   onSelect: (cafe: Cafe) => void;
 }
 
-function buildPinSvg(color: string, selected: boolean): string {
+// Minimal dot marker — clean, modern, map-native feel
+// Normal: small pill dot · Selected: larger with ring · Favorite: heart badge
+function buildMarkerSvg(color: string, selected: boolean, fav: boolean): string {
   if (selected) {
-    // Larger pin with bounce shadow + yellow glow
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="58" viewBox="0 0 48 58">
+    // Selected: large frosted-glass pill with subtle ring
+    const s = 52;
+    const cx = s / 2;
+    const cy = 20;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s + 6}" viewBox="0 0 ${s} ${s + 6}">
       <defs>
-        <filter id="s" x="-30%" y="-10%" width="160%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.25"/>
+        <filter id="ds" x="-40%" y="-20%" width="180%" height="160%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="${color}" flood-opacity="0.35"/>
         </filter>
-        <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
-          <stop offset="100%" stop-color="${color}" stop-opacity="0.75"/>
-        </linearGradient>
       </defs>
-      <ellipse cx="24" cy="54" rx="8" ry="3" fill="#000" opacity="0.15"/>
-      <path d="M24 2C14.06 2 6 10.06 6 20c0 12 18 34 18 34s18-22 18-34C42 10.06 33.94 2 24 2z" fill="url(#g)" stroke="#FACC15" stroke-width="2.5" filter="url(#s)"/>
-      <circle cx="24" cy="19" r="9" fill="white" opacity="0.95"/>
-      <text x="24" y="23.5" text-anchor="middle" font-size="14">☕</text>
+      <circle cx="${cx}" cy="${cy}" r="18" fill="${color}" filter="url(#ds)"/>
+      <circle cx="${cx}" cy="${cy}" r="15" fill="white" opacity="0.2"/>
+      <circle cx="${cx}" cy="${cy}" r="8" fill="white" opacity="0.95"/>
+      <circle cx="${cx}" cy="${cy}" r="4.5" fill="${color}"/>
+      ${fav ? `<circle cx="${cx + 13}" cy="${cy - 10}" r="8" fill="white"/>
+      <path d="M${cx + 13} ${cy - 5} l-1.2-1.1c-3.2-2.9-5.3-4.8-5.3-7.1 0-1.9 1.5-3.3 3.3-3.3 1 0 2.1.5 2.7 1.3.6-.8 1.7-1.3 2.7-1.3 1.8 0 3.3 1.4 3.3 3.3 0 2.3-2.1 4.2-5.3 7.1z" fill="#EF4444"/>` : ''}
+      <polygon points="${cx},${cy + 18} ${cx - 6},${cy + 8} ${cx + 6},${cy + 8}" fill="${color}" opacity="0.9"/>
     </svg>`;
   }
-  // Default pin
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
+
+  // Normal: compact dot
+  const s = fav ? 34 : 28;
+  const cx = s / 2;
+  const cy = s / 2;
+  const r = fav ? 11 : 9;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
     <defs>
-      <filter id="s" x="-20%" y="-10%" width="140%" height="130%">
-        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
+      <filter id="ds" x="-30%" y="-20%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
       </filter>
-      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
-        <stop offset="100%" stop-color="${color}" stop-opacity="0.8"/>
-      </linearGradient>
     </defs>
-    <ellipse cx="16" cy="39" rx="5" ry="2" fill="#000" opacity="0.1"/>
-    <path d="M16 2C9.37 2 4 7.37 4 14c0 8.5 12 24 12 24s12-15.5 12-24C28 7.37 22.63 2 16 2z" fill="url(#g)" stroke="white" stroke-width="1.5" filter="url(#s)"/>
-    <circle cx="16" cy="13" r="6.5" fill="white" opacity="0.9"/>
-    <text x="16" y="17" text-anchor="middle" font-size="10">☕</text>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" filter="url(#ds)" stroke="white" stroke-width="2"/>
+    ${fav ? `<circle cx="${cx + 8}" cy="${cy - 8}" r="6" fill="white"/>
+    <path d="M${cx + 8} ${cy - 4.5} l-.9-.8c-2.3-2.1-3.8-3.5-3.8-5.1 0-1.3 1-2.4 2.4-2.4.7 0 1.5.4 2 .9.4-.6 1.2-.9 2-.9 1.3 0 2.4 1.1 2.4 2.4 0 1.6-1.5 3-3.8 5.1z" fill="#EF4444"/>` : ''}
   </svg>`;
 }
 
 // Cache SVG data URIs to avoid re-encoding on every render
-const pinCache: Record<string, string> = {};
+const markerCache: Record<string, string> = {};
 
-function getPinDataUri(color: string, selected: boolean): string {
-  const key = `${color}-${selected}`;
-  let uri = pinCache[key];
+function getMarkerDataUri(color: string, selected: boolean, fav: boolean): string {
+  const key = `${color}-${selected}-${fav}`;
+  let uri = markerCache[key];
   if (!uri) {
-    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildPinSvg(color, selected))}`;
-    pinCache[key] = uri;
+    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildMarkerSvg(color, selected, fav))}`;
+    markerCache[key] = uri;
   }
   return uri;
 }
 
-function CafeMarker({ cafe, isSelected, onSelect }: CafeMarkerProps) {
+function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
   const color = getMarkerColor(cafe.opening_time);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
-  const w = isSelected ? 48 : 32;
-  const h = isSelected ? 58 : 42;
+  const w = isSelected ? 52 : (fav ? 34 : 28);
+  const h = isSelected ? 58 : (fav ? 34 : 28);
+  const offsetY = isSelected ? h - 6 : h / 2;
 
   return (
     <MapMarker
       position={position}
       title={cafe.name}
       onClick={() => onSelect(cafe)}
-      zIndex={isSelected ? 100 : 0}
+      zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{
-        src: getPinDataUri(color, isSelected),
+        src: getMarkerDataUri(color, isSelected, fav),
         size: { width: w, height: h },
-        options: { offset: { x: w / 2, y: h } },
+        options: { offset: { x: w / 2, y: offsetY } },
       }}
     />
   );
@@ -146,6 +153,7 @@ export interface CafeMapProps {
 
 export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
+  const { favorites } = useFavorites();
 
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const selectedCafe = useCafeStore((state) => state.selectedCafe);
@@ -272,6 +280,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             key={cafe.id}
             cafe={cafe}
             isSelected={selectedCafe?.id === cafe.id}
+            isFavorite={favorites.has(cafe.id)}
             onSelect={setSelectedCafe}
           />
         ))}
