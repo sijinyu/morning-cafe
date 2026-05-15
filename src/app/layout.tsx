@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { PersistentMapPage } from '@/components/persistent-map-page';
 
 import './globals.css';
 
@@ -77,7 +78,8 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex h-full">
             <DesktopSidebar />
-            <main className="flex-1 overflow-hidden pb-14 md:pb-0">
+            <main className="relative flex-1 overflow-hidden pb-14 md:pb-0">
+              <PersistentMapPage />
               {children}
             </main>
           </div>
