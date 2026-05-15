@@ -94,7 +94,7 @@ function Dropdown({ trigger, open, onToggle, children, align = 'left' }: Dropdow
 // ---- chip styles ------------------------------------------------------------
 
 const CHIP_BASE = 'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all duration-150';
-const CHIP_ACTIVE = `${CHIP_BASE} bg-foreground text-background shadow-sm`;
+const CHIP_ACTIVE = `${CHIP_BASE} bg-primary text-primary-foreground shadow-sm`;
 const CHIP_INACTIVE = `${CHIP_BASE} bg-background/80 text-muted-foreground backdrop-blur-md border border-border hover:bg-background`;
 
 // ---- main component ---------------------------------------------------------
@@ -150,7 +150,7 @@ export function TimeFilter() {
                 onClick={() => { setTimeFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
-                  timeFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+                  timeFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
                 {label}
@@ -167,7 +167,7 @@ export function TimeFilter() {
                 onClick={() => { setDayFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
-                  dayFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+                  dayFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
                 {label}
@@ -198,7 +198,7 @@ export function TimeFilter() {
             onClick={() => { setGuFilter(null); setOpenDropdown(null); }}
             className={cn(
               'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-              !guFilter ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+              !guFilter ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
             )}
           >
             서울 전체
@@ -209,7 +209,7 @@ export function TimeFilter() {
               onClick={() => { setGuFilter(gu); setOpenDropdown(null); }}
               className={cn(
                 'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-                guFilter === gu ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+                guFilter === gu ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
               )}
             >
               {gu}
@@ -243,7 +243,7 @@ export function TimeFilter() {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="rounded-full bg-foreground/90 px-2.5 py-1.5 text-[10px] font-semibold text-background shadow-md backdrop-blur-sm whitespace-nowrap"
+        className="rounded-full bg-primary px-2.5 py-1.5 text-[10px] font-semibold text-primary-foreground shadow-md backdrop-blur-sm whitespace-nowrap"
       >
         총 {filteredCount.toLocaleString()}개
       </motion.span>

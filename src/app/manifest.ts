@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: '서울에서 아침 6~8시에 오픈하는 카페를 지도에서 한눈에 찾아보세요.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#d97706',
+    background_color: '#FFF8F0',
+    theme_color: '#E8501F',
     icons: [
       {
         src: '/icons/icon-96.png',

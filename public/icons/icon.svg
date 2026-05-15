@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <!-- Background -->
-  <rect width="512" height="512" rx="112" fill="#F59E0B"/>
+  <rect width="512" height="512" rx="112" fill="#E8501F"/>
 
   <!-- Coffee cup body -->
   <rect x="128" y="180" width="200" height="180" rx="24" fill="white"/>
@@ -10,7 +10,7 @@
         fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
 
   <!-- Coffee surface -->
-  <ellipse cx="228" cy="240" rx="76" ry="12" fill="#D97706" opacity="0.5"/>
+  <ellipse cx="228" cy="240" rx="76" ry="12" fill="#5C3A1E" opacity="0.4"/>
 
   <!-- Steam lines -->
   <path d="M188 155 C188 135 208 135 208 115" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>

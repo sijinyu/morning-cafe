@@ -380,7 +380,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name })}
                   className={cn(
                     'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
-                    'bg-foreground text-background py-3.5',
+                    'bg-primary text-primary-foreground py-3.5',
                     'text-sm font-medium',
                     'hover:opacity-90 transition-opacity'
                   )}

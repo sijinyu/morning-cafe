@@ -37,7 +37,7 @@ function getMarkerColors(cafe: Cafe): MarkerColors {
   }
   if (totalMinutes < 420) {
     // 6~7시: warm orange (like the reference image)
-    return { fill: '#F28B4E', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#A16207' };
+    return { fill: '#E8501F', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#A16207' };
   }
   // 7~8시: light warm orange
   return { fill: '#FBBF24', stroke: '#2D3748', cream: '#FFFDF0', steam: '#F59E0B', coffee: '#A16207' };
