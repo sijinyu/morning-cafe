@@ -236,7 +236,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               placeUrl={cafe.place_url}
             />
 
-            {/* All detail rows — compact spacing */}
+            {/* All detail rows — compact spacing, items-start for multiline */}
             <div className="space-y-0">
               {/* Rating */}
               {rating && (
@@ -262,10 +262,10 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 </div>
               )}
 
-              {/* Parking */}
+              {/* Parking — items-start: 두 줄일 때 아이콘 상단 정렬 */}
               {parking && (
-                <div className="flex items-center gap-2 py-1.5">
-                  <Car className={cn('h-4 w-4 flex-shrink-0', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
+                <div className="flex items-start gap-2 py-1.5">
+                  <Car className={cn('h-4 w-4 flex-shrink-0 mt-0.5', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
                   <div className="flex-1 min-w-0">
                     <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
                       {parking.available ? '주차 가능' : '주차 불가'}
@@ -288,9 +288,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 </div>
               )}
 
-              {/* Address */}
-              <div className="flex items-center gap-2 py-1.5">
-                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              {/* Address — items-start: 긴 주소 줄바꿈 시 아이콘 상단 정렬 */}
+              <div className="flex items-start gap-2 py-1.5">
+                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
                 <button
                   onClick={handleCopyAddress}
@@ -298,9 +298,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   aria-label="주소 복사"
                 >
                   {copied ? (
-                    <Check className="h-3.5 w-3.5 text-green-500" />
+                    <Check className="h-4 w-4 text-green-500" />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Copy className="h-4 w-4 text-muted-foreground" />
                   )}
                 </button>
               </div>
@@ -321,9 +321,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                     aria-label="전화번호 복사"
                   >
                     {phoneCopied ? (
-                      <Check className="h-3.5 w-3.5 text-green-500" />
+                      <Check className="h-4 w-4 text-green-500" />
                     ) : (
-                      <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Copy className="h-4 w-4 text-muted-foreground" />
                     )}
                   </button>
                 </div>
