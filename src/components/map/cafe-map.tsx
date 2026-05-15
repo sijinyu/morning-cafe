@@ -32,15 +32,15 @@ function getMarkerColors(cafe: Cafe): MarkerColors {
   const totalMinutes = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
 
   if (totalMinutes < 360) {
-    // ~6시: deep warm orange
-    return { fill: '#EA580C', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#92400E' };
+    // ~6시: deep amber
+    return { fill: '#D97706', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#92400E' };
   }
   if (totalMinutes < 420) {
-    // 6~7시: warm orange (like the reference image)
-    return { fill: '#E8501F', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#A16207' };
+    // 6~7시: amber (brand primary)
+    return { fill: '#F59E0B', stroke: '#2D3748', cream: '#FFF8F0', steam: '#FBBF24', coffee: '#A16207' };
   }
-  // 7~8시: light warm orange
-  return { fill: '#FBBF24', stroke: '#2D3748', cream: '#FFFDF0', steam: '#F59E0B', coffee: '#A16207' };
+  // 7~8시: light amber
+  return { fill: '#FBBF24', stroke: '#2D3748', cream: '#FFFDF0', steam: '#FCD34D', coffee: '#A16207' };
 }
 
 interface CafeMarkerProps {
