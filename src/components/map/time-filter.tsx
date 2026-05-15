@@ -237,8 +237,7 @@ export function TimeFilter() {
         </button>
       )}
 
-      {/* spacer + 카운트 */}
-      <div className="flex-1" />
+      {/* 카운트 — 필터 바로 옆 */}
       <motion.span
         key={filteredCount}
         initial={{ scale: 0.8, opacity: 0 }}

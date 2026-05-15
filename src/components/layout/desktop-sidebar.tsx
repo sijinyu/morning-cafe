@@ -20,8 +20,8 @@ export function DesktopSidebar() {
     <aside className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border md:bg-background">
       {/* Logo — 클릭 시 홈으로 */}
       <Link href="/" className="flex items-center gap-2.5 px-5 py-5 hover:opacity-80 transition-opacity">
-        <Image src="/icons/icon-96.png" alt="모닝카페" width={28} height={28} className="rounded-lg" />
-        <span className="text-lg font-bold tracking-tight">모닝카페</span>
+        <Image src="/icons/icon-96.png" alt="모닝커피" width={28} height={28} className="rounded-lg" />
+        <span className="text-lg font-bold tracking-tight">모닝커피</span>
       </Link>
 
       {/* Nav */}

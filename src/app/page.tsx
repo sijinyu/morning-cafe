@@ -68,7 +68,6 @@ export default function MapPage() {
             onPanToReady={(fn) => { panToRef.current = fn; }}
             userLocation={userLocation}
           />
-          <SearchBar onSelectCafe={(lat, lng) => panToRef.current?.(lat, lng)} />
           <MyLocationButton onLocation={handleLocationUpdate} />
           <CafeBottomSheetWrapper />
         </>
@@ -85,6 +84,10 @@ export default function MapPage() {
         </div>
       )}
 
+      <SearchBar onSelectCafe={(lat, lng) => {
+        if (viewMode === 'list') setViewMode('map');
+        setTimeout(() => panToRef.current?.(lat, lng), viewMode === 'list' ? 150 : 0);
+      }} />
       <TimeFilter />
 
       {/* 뷰 모드 토글 */}

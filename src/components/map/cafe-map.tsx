@@ -49,73 +49,45 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Pin-drop marker with coffee cup icon — warm, illustrated style
-// Inspired by: thick outline pin, cream inner circle, coffee cup with steam
+// Clean pin-drop marker — colored pin with white inner dot
 function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): string {
-  const { fill, stroke, cream, steam, coffee } = colors;
+  const { fill, stroke, cream } = colors;
 
   if (selected) {
-    // Selected: large pin (48x56)
-    const w = 48;
-    const h = 58;
+    const w = 44;
+    const h = 54;
     const cx = w / 2;
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
       <defs>
         <filter id="ds" x="-30%" y="-10%" width="160%" height="140%">
-          <feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.2"/>
+          <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.25"/>
         </filter>
       </defs>
-      <!-- pin body -->
-      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 18} 32 ${cx - 18} 20 C${cx - 18} 10 ${cx - 10} 2 ${cx} 2 C${cx + 10} 2 ${cx + 18} 10 ${cx + 18} 20 C${cx + 18} 32 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 17} 30 ${cx - 17} 19 C${cx - 17} 9.5 ${cx - 9.5} 2 ${cx} 2 C${cx + 9.5} 2 ${cx + 17} 9.5 ${cx + 17} 19 C${cx + 17} 30 ${cx} ${h - 2} ${cx} ${h - 2}Z"
         fill="${fill}" stroke="${stroke}" stroke-width="2" filter="url(#ds)"/>
-      <!-- highlight gloss -->
-      <ellipse cx="${cx - 5}" cy="12" rx="4" ry="6" fill="white" opacity="0.3"/>
-      <!-- cream inner circle -->
-      <circle cx="${cx}" cy="20" r="12" fill="${cream}" stroke="${stroke}" stroke-width="1.5"/>
-      <!-- coffee cup body -->
-      <rect x="${cx - 6}" y="18" width="12" height="9" rx="1.5" fill="none" stroke="${stroke}" stroke-width="1.2"/>
-      <!-- handle -->
-      <path d="M${cx + 6} 20 Q${cx + 9} 20 ${cx + 9} 23 Q${cx + 9} 26 ${cx + 6} 26" fill="none" stroke="${stroke}" stroke-width="1"/>
-      <!-- coffee liquid -->
-      <rect x="${cx - 5}" y="21" width="10" height="5" rx="1" fill="${coffee}" opacity="0.6"/>
-      <!-- steam wisps -->
-      <path d="M${cx - 3} 17 Q${cx - 4} 14 ${cx - 2} 12" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-      <path d="M${cx} 16 Q${cx + 1} 13 ${cx - 1} 11" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-      <path d="M${cx + 3} 17 Q${cx + 4} 14 ${cx + 2} 12" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
-      ${fav ? `<circle cx="${cx + 14}" cy="6" r="7" fill="white" stroke="${stroke}" stroke-width="1"/>
-      <path d="M${cx + 14} 10 l-1-0.9c-2.6-2.3-4.2-3.9-4.2-5.7 0-1.5 1.2-2.6 2.6-2.6 0.8 0 1.7 0.4 2.2 1 0.5-0.6 1.4-1 2.2-1 1.4 0 2.6 1.1 2.6 2.6 0 1.8-1.6 3.4-4.2 5.7z" fill="#EF4444"/>` : ''}
+      <ellipse cx="${cx - 4}" cy="11" rx="3.5" ry="5" fill="white" opacity="0.25"/>
+      <circle cx="${cx}" cy="19" r="8" fill="${cream}"/>
+      ${fav ? `<circle cx="${cx + 13}" cy="6" r="6.5" fill="white" stroke="${stroke}" stroke-width="1"/>
+      <path d="M${cx + 13} 9.5 l-0.9-0.8c-2.3-2-3.8-3.4-3.8-5.1 0-1.3 1.1-2.3 2.4-2.3 0.7 0 1.5 0.3 2 0.9 0.4-0.6 1.2-0.9 2-0.9 1.3 0 2.4 1 2.4 2.3 0 1.7-1.5 3.1-3.8 5.1z" fill="#EF4444"/>` : ''}
     </svg>`;
   }
 
-  // Normal: small pin (32x40) or (36x44) for favorites
-  const w = fav ? 36 : 32;
-  const h = fav ? 44 : 40;
+  const w = fav ? 34 : 28;
+  const h = fav ? 42 : 36;
   const cx = w / 2;
-  const pinTop = 2;
-  const circleY = 15;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <defs>
       <filter id="ds" x="-25%" y="-10%" width="150%" height="140%">
-        <feDropShadow dx="1.5" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
+        <feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
       </filter>
     </defs>
-    <!-- pin body -->
-    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 13} 25 ${cx - 13} ${circleY} C${cx - 13} ${pinTop + 5} ${cx - 7} ${pinTop} ${cx} ${pinTop} C${cx + 7} ${pinTop} ${cx + 13} ${pinTop + 5} ${cx + 13} ${circleY} C${cx + 13} 25 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 11} ${h - 14} ${cx - 11} ${Math.round(h * 0.39)} C${cx - 11} ${Math.round(h * 0.19)} ${cx - 6} 2 ${cx} 2 C${cx + 6} 2 ${cx + 11} ${Math.round(h * 0.19)} ${cx + 11} ${Math.round(h * 0.39)} C${cx + 11} ${h - 14} ${cx} ${h - 2} ${cx} ${h - 2}Z"
       fill="${fill}" stroke="${stroke}" stroke-width="1.5" filter="url(#ds)"/>
-    <!-- highlight gloss -->
-    <ellipse cx="${cx - 3}" cy="${pinTop + 5}" rx="3" ry="4" fill="white" opacity="0.25"/>
-    <!-- cream inner circle -->
-    <circle cx="${cx}" cy="${circleY}" r="8.5" fill="${cream}" stroke="${stroke}" stroke-width="1"/>
-    <!-- coffee cup (simplified) -->
-    <rect x="${cx - 4}" y="${circleY - 1}" width="8" height="6" rx="1" fill="none" stroke="${stroke}" stroke-width="0.9"/>
-    <path d="M${cx + 4} ${circleY} Q${cx + 6} ${circleY} ${cx + 6} ${circleY + 2} Q${cx + 6} ${circleY + 4} ${cx + 4} ${circleY + 4}" fill="none" stroke="${stroke}" stroke-width="0.7"/>
-    <!-- coffee -->
-    <rect x="${cx - 3}" y="${circleY + 1}" width="6" height="3" rx="0.5" fill="${coffee}" opacity="0.5"/>
-    <!-- steam (single wisp) -->
-    <path d="M${cx} ${circleY - 3} Q${cx + 1} ${circleY - 5} ${cx - 1} ${circleY - 7}" fill="none" stroke="${steam}" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
-    ${fav ? `<circle cx="${cx + 10}" cy="5" r="6" fill="white" stroke="${stroke}" stroke-width="0.8"/>
-    <path d="M${cx + 10} 8.5 l-0.8-0.7c-2.1-1.9-3.5-3.2-3.5-4.7 0-1.2 1-2.2 2.2-2.2 0.6 0 1.3 0.3 1.7 0.8 0.4-0.5 1.1-0.8 1.7-0.8 1.2 0 2.2 0.9 2.2 2.2 0 1.5-1.4 2.8-3.5 4.7z" fill="#EF4444"/>` : ''}
+    <ellipse cx="${cx - 2}" cy="${Math.round(h * 0.22)}" rx="2.5" ry="3.5" fill="white" opacity="0.2"/>
+    <circle cx="${cx}" cy="${Math.round(h * 0.39)}" r="6" fill="${cream}"/>
+    ${fav ? `<circle cx="${cx + 9}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
+    <path d="M${cx + 9} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
   </svg>`;
 }
 
@@ -136,8 +108,8 @@ function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerP
   const colors = getMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
-  const w = isSelected ? 48 : (fav ? 36 : 32);
-  const h = isSelected ? 58 : (fav ? 44 : 40);
+  const w = isSelected ? 44 : (fav ? 34 : 28);
+  const h = isSelected ? 54 : (fav ? 42 : 36);
   const offsetY = h - 2; // pin tip is at bottom
 
   return (

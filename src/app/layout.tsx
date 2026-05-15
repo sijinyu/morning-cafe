@@ -12,17 +12,17 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: '모닝카페 — 서울 얼리버드 카페 찾기',
+  title: '모닝커피 — 서울 얼리버드 카페 찾기',
   description: '서울에서 아침 6~8시에 오픈하는 카페를 지도에서 한눈에 찾아보세요.',
   openGraph: {
-    title: '모닝카페 — 서울 얼리버드 카페 찾기',
+    title: '모닝커피 — 서울 얼리버드 카페 찾기',
     description: '서울에서 아침 6~8시에 오픈하는 카페를 지도에서 한눈에 찾아보세요.',
     type: 'website',
     locale: 'ko_KR',
   },
   twitter: {
     card: 'summary',
-    title: '모닝카페 — 서울 얼리버드 카페 찾기',
+    title: '모닝커피 — 서울 얼리버드 카페 찾기',
     description: '서울에서 아침 6~8시에 오픈하는 카페를 지도에서 한눈에 찾아보세요.',
   },
 };
