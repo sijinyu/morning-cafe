@@ -49,7 +49,7 @@ export function TimeFilter() {
   const [showGu, setShowGu] = useState(false);
 
   return (
-    <div className="absolute top-4 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 max-w-[95vw]">
+    <div className="absolute top-16 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 max-w-[95vw]">
       {/* 시간 필터 */}
       <div className="flex gap-1.5">
         {FILTER_CHIPS.map(({ value, label }) => {

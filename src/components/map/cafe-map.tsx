@@ -114,7 +114,7 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
   return (
     <Map
       center={center}
-      level={8}
+      level={5}
       className="h-full w-full"
       onCreate={handleCreate}
       onCenterChanged={handleCenterChange}
