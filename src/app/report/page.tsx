@@ -242,9 +242,9 @@ export default function ReportPage() {
         {/* 만든 사람 */}
         <div className="mt-8 border-t border-border pt-6 pb-8 text-center space-y-1.5">
           <p className="text-xs text-muted-foreground">
-            모닝커피를 만든 사람
+            커피를 좋아하는 사람
           </p>
-          <p className="text-sm font-medium">sijinyu</p>
+          <p className="text-sm font-medium">유시진</p>
           <a
             href="mailto:sijinyudev@gmail.com"
             className="inline-block text-xs text-muted-foreground hover:text-foreground transition-colors"
