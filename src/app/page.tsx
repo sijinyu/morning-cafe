@@ -7,10 +7,15 @@ import { useCafeStore } from '@/lib/store/cafe-store';
 import { CafeMap } from '@/components/map/cafe-map';
 import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
-import { CafeBottomSheetWrapper } from '@/components/map/cafe-bottom-sheet';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+
+const CafeBottomSheetWrapper = dynamic(
+  () => import('@/components/map/cafe-bottom-sheet').then((mod) => mod.CafeBottomSheetWrapper),
+  { ssr: false },
+);
 
 type ViewMode = 'map' | 'list';
 

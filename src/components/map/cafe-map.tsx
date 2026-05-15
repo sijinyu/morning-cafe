@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
@@ -104,6 +104,13 @@ interface MapCenter {
   lng: number;
 }
 
+interface ViewportBounds {
+  swLat: number;
+  swLng: number;
+  neLat: number;
+  neLng: number;
+}
+
 // SVG source for the blue "you are here" dot.
 // The pulsing ring is rendered as a second circle and animated via CSS
 // injected into a <style> tag inside the SVG itself so it works even
@@ -156,9 +163,38 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   useCafeStore((state) => state.hide24h);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
+  const [viewportBounds, setViewportBounds] = useState<ViewportBounds | null>(null);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
   // Guard: only auto-zoom to user location on the very first GPS fix.
   const hasAutoZoomedRef = useRef(false);
+  const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const updateBounds = useCallback((map: kakao.maps.Map) => {
+    if (boundsTimerRef.current) clearTimeout(boundsTimerRef.current);
+    boundsTimerRef.current = setTimeout(() => {
+      const bounds = map.getBounds();
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
+      setViewportBounds({
+        swLat: sw.getLat(),
+        swLng: sw.getLng(),
+        neLat: ne.getLat(),
+        neLng: ne.getLng(),
+      });
+    }, 250);
+  }, []);
+
+  // Filter cafes to only those within the current viewport
+  const visibleCafes = useMemo(() => {
+    if (!viewportBounds) return filteredCafes;
+    const { swLat, swLng, neLat, neLng } = viewportBounds;
+    return filteredCafes.filter((cafe) =>
+      cafe.latitude >= swLat &&
+      cafe.latitude <= neLat &&
+      cafe.longitude >= swLng &&
+      cafe.longitude <= neLng
+    );
+  }, [filteredCafes, viewportBounds]);
 
   // Auto-zoom to user location the first time a valid position arrives.
   useEffect(() => {
@@ -187,11 +223,18 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     kakao.maps.event.addListener(map, 'click', () => {
       setSelectedCafe(null);
     });
+    // 줌 변경 시 bounds 갱신
+    kakao.maps.event.addListener(map, 'zoom_changed', () => {
+      updateBounds(map);
+    });
+    // 초기 bounds 설정
+    updateBounds(map);
   }
 
   function handleCenterChange(map: kakao.maps.Map) {
     const latlng = map.getCenter();
     setCenter({ lat: latlng.getLat(), lng: latlng.getLng() });
+    updateBounds(map);
   }
 
   if (loading) {
@@ -224,7 +267,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         minLevel={6}
         gridSize={80}
       >
-        {filteredCafes.map((cafe) => (
+        {visibleCafes.map((cafe) => (
           <CafeMarker
             key={cafe.id}
             cafe={cafe}

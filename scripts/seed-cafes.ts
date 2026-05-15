@@ -356,7 +356,7 @@ async function main() {
       opening_time: openingTime,
       closing_time: closingTime,
       hours_by_day: hoursByDay,
-      is_earlybird: openingTime !== null && openingTime < EARLYBIRD_THRESHOLD,
+      is_earlybird: openingTime !== null && openingTime <= EARLYBIRD_THRESHOLD,
       last_crawled_at: now,
     };
   }
@@ -378,7 +378,7 @@ async function main() {
 
     if (!detail) detailFailed++;
     else if (!openingTime) noHours++;
-    if (openingTime !== null && openingTime < EARLYBIRD_THRESHOLD) earlybirds++;
+    if (openingTime !== null && openingTime <= EARLYBIRD_THRESHOLD) earlybirds++;
 
     const lng = parseFloat(place.x);
     const lat = parseFloat(place.y);

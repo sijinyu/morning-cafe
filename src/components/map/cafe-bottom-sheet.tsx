@@ -20,12 +20,13 @@ import {
   StickyNote,
   Star,
   ImageIcon,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
-import { usePlacePhotos } from '@/lib/hooks/use-place-photos';
+import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
 import { cn } from '@/lib/utils';
 
@@ -130,7 +131,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photos, loading: photosLoading } = usePlacePhotos(cafe.kakao_place_id);
+  const { photos, menu, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const [photoIdx, setPhotoIdx] = useState(0);
   const [memoOpen, setMemoOpen] = useState(false);
@@ -324,7 +325,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                         setPhotoIdx((i) => Math.max(i - 1, 0));
                       }
                     }}
-                    animate={{ x: `-${photoIdx * 100}%` }}
+                    animate={{ x: `-${photoIdx * (100 / photos.length)}%` }}
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     style={{ width: `${photos.length * 100}%`, touchAction: 'pan-y' }}
                   >
@@ -378,6 +379,34 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 </a>
               )}
             </div>
+
+            {/* Menu */}
+            {menu.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
+                  <UtensilsCrossed className="h-4 w-4" />
+                  <span>메뉴</span>
+                </div>
+                <div className="rounded-2xl bg-muted/50 px-4 py-3 space-y-2">
+                  {menu.map((item) => (
+                    <div key={item.name} className="flex items-center gap-3">
+                      {item.photo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.photo}
+                          alt={item.name}
+                          className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
+                        />
+                      )}
+                      <span className="flex-1 text-sm text-foreground truncate">{item.name}</span>
+                      {item.price && (
+                        <span className="text-sm font-medium text-foreground/70 flex-shrink-0">{item.price}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Address */}
             <div className="flex items-start gap-3">

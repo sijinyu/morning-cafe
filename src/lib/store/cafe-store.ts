@@ -65,6 +65,26 @@ const CHAIN_KEYWORDS = [
   '전광수커피',
   '텐퍼센트', '10PERCENT', '10%커피',
   '우지커피', 'WOOJI',
+  // 소규모 프랜차이즈
+  '커피인류',
+  '로칼커피',
+  '백억커피',
+  '더리터',
+  '빈스빈스',
+  '라떼킹',
+  '커피마마',
+  '하삼동',
+  '청자다방',
+  '카페인중독',
+  '하이오커피',
+  '토프레소',
+  '아마스빈',
+  '디저트39',
+  '커피니',
+  '더카페 ',
+  '가배도',
+  '빈브라더스',
+  '벌크커피',
   // 무인카페
   '무인카페', '무인 카페', '무인24',
 ] as const;
@@ -132,6 +152,7 @@ export function extractGu(address: string): string | null {
 
 interface CafeState {
   cafes: Cafe[];
+  chainCafeIds: Set<string>;
   selectedCafe: Cafe | null;
   timeFilter: TimeFilter;
   dayFilter: DayFilter;
@@ -178,8 +199,9 @@ function getOpeningMinutesForDay(cafe: Cafe, dayKey: string): number | null {
 
 export const useCafeStore = create<CafeState>((set, get) => ({
   cafes: [],
+  chainCafeIds: new Set<string>(),
   selectedCafe: null,
-  timeFilter: 'all',
+  timeFilter: '7to8',
   dayFilter: 'today',
   guFilter: null,
   hideChains: true, // 기본값: 체인점 숨김
@@ -233,7 +255,12 @@ export const useCafeStore = create<CafeState>((set, get) => ({
         last_crawled_at: row.last_crawled_at as string | null,
       }));
 
-      set({ cafes, loading: false });
+      const chainCafeIds = new Set<string>();
+      for (const cafe of cafes) {
+        if (isChainCafe(cafe.name)) chainCafeIds.add(cafe.id);
+      }
+
+      set({ cafes, chainCafeIds, loading: false });
     } catch {
       set({ cafes: [], loading: false });
     }
@@ -264,12 +291,12 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   },
 
   filteredCafes() {
-    const { cafes, timeFilter, dayFilter, guFilter, hideChains, hide24h } = get();
+    const { cafes, chainCafeIds, timeFilter, dayFilter, guFilter, hideChains, hide24h } = get();
     const dayKey = resolveDayKey(dayFilter);
 
     return cafes.filter((cafe) => {
-      // 체인점 필터
-      if (hideChains && isChainCafe(cafe.name)) return false;
+      // 체인점 필터 (O(1) Set lookup)
+      if (hideChains && chainCafeIds.has(cafe.id)) return false;
 
       // 24시간 영업 필터
       if (hide24h && is24Hours(cafe)) return false;
@@ -292,13 +319,14 @@ export const useCafeStore = create<CafeState>((set, get) => ({
       const minutes = getOpeningMinutesForDay(cafe, dayKey);
       if (minutes === null) return false;
 
+      // 각 구간은 시작(포함) ~ 끝(포함): 라벨 "~6시"는 6:00 포함, "6~7시"는 7:00 포함
       switch (timeFilter) {
         case 'before6':
-          return minutes < 360;
+          return minutes <= 360;
         case '6to7':
-          return minutes >= 360 && minutes < 420;
+          return minutes > 360 && minutes <= 420;
         case '7to8':
-          return minutes >= 420 && minutes < 480;
+          return minutes > 420 && minutes <= 480;
         default:
           return true;
       }

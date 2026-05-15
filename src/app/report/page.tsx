@@ -14,24 +14,21 @@ const REPORT_TYPES: { value: ReportType; label: string; icon: typeof Clock; desc
   { value: 'closed', label: '폐업 신고', icon: XCircle, desc: '영업을 종료한 카페인 경우' },
 ];
 
-const REPORTS_STORAGE_KEY = 'morning-cafe-reports';
-
-interface StoredReport {
-  id: string;
-  type: ReportType;
-  cafeName: string | null;
-  content: string;
-  createdAt: string;
-}
-
-function saveReport(report: Omit<StoredReport, 'id' | 'createdAt'>) {
-  const existing: StoredReport[] = JSON.parse(localStorage.getItem(REPORTS_STORAGE_KEY) ?? '[]');
-  existing.push({
-    ...report,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  });
-  localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(existing));
+async function saveReport(report: { type: ReportType; cafeName: string | null; content: string }): Promise<boolean> {
+  try {
+    const res = await fetch('/api/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: report.type,
+        cafe_name: report.cafeName,
+        content: report.content,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export default function ReportPage() {
@@ -57,13 +54,18 @@ export default function ReportPage() {
         .slice(0, 5)
     : [];
 
-  function handleSubmit() {
-    if (!reportType || !content.trim()) return;
-    saveReport({
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    if (!reportType || !content.trim() || submitting) return;
+    setSubmitting(true);
+    const ok = await saveReport({
       type: reportType,
       cafeName: selectedCafe?.name ?? (reportType === 'new_cafe' ? cafeSearch : null),
       content: content.trim(),
     });
+    setSubmitting(false);
+    if (!ok) return;
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -216,18 +218,22 @@ export default function ReportPage() {
               {/* 제출 버튼 */}
               <motion.button
                 onClick={handleSubmit}
-                disabled={!content.trim() || (needsCafe && !selectedCafe)}
+                disabled={!content.trim() || (needsCafe && !selectedCafe) || submitting}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
                   'flex w-full items-center justify-center gap-2 rounded-2xl py-3.5',
                   'text-sm font-medium transition-all',
-                  content.trim() && (!needsCafe || selectedCafe)
+                  content.trim() && (!needsCafe || selectedCafe) && !submitting
                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : 'bg-muted text-muted-foreground cursor-not-allowed',
                 )}
               >
-                <Send className="h-4 w-4" />
-                제보 보내기
+                {submitting ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                {submitting ? '보내는 중...' : '제보 보내기'}
               </motion.button>
             </motion.div>
           )}
