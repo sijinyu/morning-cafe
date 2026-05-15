@@ -19,8 +19,6 @@ import {
   BellOff,
   StickyNote,
   Star,
-  ChevronLeft,
-  ChevronRight,
   ImageIcon,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
@@ -305,7 +303,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           <div className="px-5 pb-6 space-y-4">
             <div className="h-px bg-border" />
 
-            {/* Photo carousel */}
+            {/* Photo swipeable carousel */}
             <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
               {photosLoading ? (
                 <div className="flex h-full items-center justify-center">
@@ -313,31 +311,48 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 </div>
               ) : photos.length > 0 ? (
                 <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photos[photoIdx % photos.length]}
-                    alt={`${cafe.name} 사진 ${photoIdx + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  {/* Nav arrows */}
+                  <motion.div
+                    className="flex h-full"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.15}
+                    onDragEnd={(_, info) => {
+                      const threshold = 50;
+                      if (info.offset.x < -threshold) {
+                        setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
+                      } else if (info.offset.x > threshold) {
+                        setPhotoIdx((i) => Math.max(i - 1, 0));
+                      }
+                    }}
+                    animate={{ x: `-${photoIdx * 100}%` }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                    style={{ width: `${photos.length * 100}%`, touchAction: 'pan-y' }}
+                  >
+                    {photos.map((url, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={url}
+                        src={url}
+                        alt={`${cafe.name} 사진 ${i + 1}`}
+                        className="h-full object-cover pointer-events-none"
+                        style={{ width: `${100 / photos.length}%` }}
+                        draggable={false}
+                      />
+                    ))}
+                  </motion.div>
+                  {/* Dots indicator */}
                   {photos.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setPhotoIdx((i) => (i - 1 + photos.length) % photos.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setPhotoIdx((i) => (i + 1) % photos.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-2 py-0.5 text-[10px] text-white backdrop-blur-sm">
-                        {photoIdx + 1} / {photos.length}
-                      </div>
-                    </>
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                      {photos.map((_, i) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            'h-1.5 rounded-full transition-all duration-200',
+                            i === photoIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50',
+                          )}
+                        />
+                      ))}
+                    </div>
                   )}
                   {cafe.place_url && (
                     <a
