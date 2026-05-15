@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore, useCallback } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 const STORAGE_KEY = 'morning-cafe-favorites';
 
@@ -68,6 +69,7 @@ export function useFavorites() {
   const favorites = useSyncExternalStore(subscribe, getStableSnapshot, getServerSnapshot);
 
   const toggleFavorite = useCallback((cafeId: string) => {
+    trackEvent('toggle_favorite', { cafe_id: cafeId });
     return toggle(cafeId);
   }, []);
 

@@ -13,15 +13,32 @@ export interface MenuItem {
   photo: string | null;
 }
 
+export interface RatingInfo {
+  score: number;
+  count: number;
+}
+
+export interface ParkingInfo {
+  available: boolean;
+  summary: string | null;
+}
+
 export interface PlaceDetailResponse {
   photos: string[];
   menu: MenuItem[];
+  rating: RatingInfo | null;
+  parking: ParkingInfo | null;
+  facilities: string[];
+  strengths: string[];
 }
 
 export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('placeId');
   if (!placeId || !/^\d+$/.test(placeId)) {
-    return NextResponse.json({ photos: [], menu: [] } satisfies PlaceDetailResponse, { status: 400 });
+    return NextResponse.json(
+      { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+      { status: 400 },
+    );
   }
 
   try {
@@ -31,7 +48,9 @@ export async function GET(request: NextRequest) {
     );
 
     if (!res.ok) {
-      return NextResponse.json({ photos: [], menu: [] } satisfies PlaceDetailResponse);
+      return NextResponse.json(
+        { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+      );
     }
 
     const data = await res.json();
@@ -58,8 +77,41 @@ export async function GET(request: NextRequest) {
       }))
       .filter((m) => m.name);
 
+    // Rating
+    const scoreSet = data?.kakaomap_review?.score_set;
+    const rating: RatingInfo | null =
+      scoreSet?.average_score != null
+        ? { score: scoreSet.average_score as number, count: (scoreSet.review_count as number) ?? 0 }
+        : null;
+
+    // Parking
+    const addInfo = data?.place_add_info;
+    const isParkingAvailable: boolean = addInfo?.facilities?.is_parking === true;
+    const parkingSummary: string | null =
+      (addInfo?.simple_parking_infos?.summary as string | undefined) ?? null;
+    const parkingTexts: string[] = (addInfo?.simple_parking_infos?.texts as string[] | undefined) ?? [];
+    const parking: ParkingInfo | null =
+      addInfo?.facilities != null
+        ? {
+            available: isParkingAvailable,
+            summary: parkingSummary ?? (parkingTexts.length > 0 ? parkingTexts[0] : null),
+          }
+        : null;
+
+    // Facilities
+    const rawDetails: { text?: string }[] = addInfo?.simple_detail_infos ?? [];
+    const facilities: string[] = rawDetails
+      .map((d) => d.text)
+      .filter((t): t is string => Boolean(t));
+
+    // Strengths
+    const rawStrengths: { name?: string }[] = data?.kakaomap_review?.strength_description ?? [];
+    const strengths: string[] = rawStrengths
+      .map((s) => s.name)
+      .filter((n): n is string => Boolean(n));
+
     return NextResponse.json(
-      { photos, menu } satisfies PlaceDetailResponse,
+      { photos, menu, rating, parking, facilities, strengths } satisfies PlaceDetailResponse,
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
@@ -67,6 +119,8 @@ export async function GET(request: NextRequest) {
       },
     );
   } catch {
-    return NextResponse.json({ photos: [], menu: [] } satisfies PlaceDetailResponse);
+    return NextResponse.json(
+      { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+    );
   }
 }

@@ -15,6 +15,7 @@ import {
   Bell,
   BellOff,
   Star,
+  Car,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
@@ -24,6 +25,7 @@ import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 import { PhotoCarousel } from './bottom-sheet/photo-carousel';
 import { MenuSection } from './bottom-sheet/menu-section';
 import { HoursSection } from './bottom-sheet/hours-section';
@@ -48,10 +50,11 @@ interface CafeBottomSheetProps {
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
+  const [phoneCopied, setPhoneCopied] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photos, menu, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
+  const { photos, menu, rating, parking, facilities, strengths, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
   const reminded = hasReminder(cafe.id);
@@ -94,6 +97,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     navigator.clipboard.writeText(addr).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  }
+
+  function handleCopyPhone() {
+    if (!cafe.phone) return;
+    navigator.clipboard.writeText(cafe.phone).then(() => {
+      setPhoneCopied(true);
+      setTimeout(() => setPhoneCopied(false), 1500);
     }).catch(() => {});
   }
 
@@ -225,6 +236,64 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               placeUrl={cafe.place_url}
             />
 
+            {/* Rating & review strengths */}
+            {(rating || strengths.length > 0) && (
+              <div className="space-y-2">
+                {rating && (
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-4 w-4 fill-amber-400 stroke-amber-400 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-foreground">{rating.score.toFixed(1)}</span>
+                    {rating.count > 0 && (
+                      <span className="text-xs text-muted-foreground">({rating.count.toLocaleString()}개 리뷰)</span>
+                    )}
+                  </div>
+                )}
+                {strengths.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {strengths.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Parking & facilities */}
+            {(parking || facilities.length > 0) && (
+              <div className="space-y-2">
+                {parking && (
+                  <div className="flex items-start gap-2">
+                    <Car className={cn('h-4 w-4 flex-shrink-0 mt-0.5', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
+                    <div className="min-w-0">
+                      <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
+                        {parking.available ? '주차 가능' : '주차 불가'}
+                      </span>
+                      {parking.summary && (
+                        <p className="text-xs text-muted-foreground leading-snug mt-0.5">{parking.summary}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {facilities.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {facilities.map((f) => (
+                      <span
+                        key={f}
+                        className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <MenuSection menu={menu} />
 
             {/* Info rows — consistent vertical spacing */}
@@ -252,10 +321,21 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <a
                     href={`tel:${cafe.phone}`}
-                    className="text-sm text-foreground hover:text-primary transition-colors"
+                    className="flex-1 min-w-0 text-sm text-foreground hover:text-primary transition-colors"
                   >
                     {cafe.phone}
                   </a>
+                  <button
+                    onClick={handleCopyPhone}
+                    className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                    aria-label="전화번호 복사"
+                  >
+                    {phoneCopied ? (
+                      <Check className="h-3.5 w-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </button>
                 </div>
               )}
 
@@ -305,6 +385,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   href={cafe.place_url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name })}
                   className={cn(
                     'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
                     'bg-foreground text-background py-3.5',
@@ -320,6 +401,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 href={`https://map.kakao.com/link/to/${encodeURIComponent(cafe.name)},${cafe.latitude},${cafe.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent('navigate', { cafe_name: cafe.name })}
                 className={cn(
                   'flex items-center justify-center gap-1.5 rounded-2xl',
                   'border border-border py-3.5 px-4',
@@ -333,6 +415,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </a>
               <button
                 onClick={() => {
+                  trackEvent('share', { cafe_name: cafe.name });
                   const text = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}${cafe.place_url ? `\n${cafe.place_url}` : ''}`;
                   if (navigator.share) {
                     navigator.share({ title: cafe.name, text }).catch(() => {});

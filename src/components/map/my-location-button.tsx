@@ -34,7 +34,7 @@ export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
       disabled={locating}
       whileTap={{ scale: 0.92 }}
       className={[
-        'absolute bottom-20 md:bottom-6 right-4 z-10 flex h-12 w-12 items-center justify-center',
+        'absolute bottom-18 md:bottom-6 right-4 z-10 flex h-12 w-12 items-center justify-center',
         'rounded-full bg-background shadow-lg border border-border',
         'transition-opacity disabled:opacity-60',
       ].join(' ')}

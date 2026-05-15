@@ -96,8 +96,8 @@ export default function MapPage() {
       />
       <TimeFilter />
 
-      {/* 뷰 모드 토글 — 현위치 버튼과 같은 수평선, 우측 */}
-      <div className="absolute bottom-20 md:bottom-6 right-[4.5rem] z-10">
+      {/* 뷰 모드 토글 — 현위치 버튼과 같은 수평선, 양끝 */}
+      <div className="absolute bottom-18 md:bottom-6 left-4 z-10">
         <motion.button
           onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
           whileTap={{ scale: 0.92 }}
@@ -127,7 +127,7 @@ export default function MapPage() {
           href="mailto:sijinyudev@gmail.com"
           className="rounded-full bg-background/60 px-3 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm hover:text-muted-foreground transition-colors"
         >
-          &copy; 2026 유시진
+          ⓒ 2026. 유시진 All rights reserved.
         </a>
       </div>
     </div>

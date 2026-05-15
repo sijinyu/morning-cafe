@@ -5,6 +5,7 @@ import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
+import { trackEvent } from '@/lib/analytics';
 
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
@@ -49,59 +50,58 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Pin-drop marker with clean coffee mug silhouette (no steam)
+// New marker design with sparkle + coffee mug + squiggle tail
 function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): string {
   const { fill, stroke, cream, coffee } = colors;
 
   if (selected) {
+    // Selected: larger version (44x54)
     const w = 44;
     const h = 54;
-    const cx = w / 2;
-    const cy = 19; // inner circle center
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
       <defs>
-        <filter id="ds" x="-30%" y="-10%" width="160%" height="140%">
-          <feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.25"/>
+        <filter id="ds" x="-30%" y="-20%" width="160%" height="180%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.2"/>
         </filter>
       </defs>
-      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 17} 30 ${cx - 17} ${cy} C${cx - 17} 9.5 ${cx - 9.5} 2 ${cx} 2 C${cx + 9.5} 2 ${cx + 17} 9.5 ${cx + 17} ${cy} C${cx + 17} 30 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+      <path d="M22 52C22 52 4.7 35.4 4.7 22C4.7 11.6 12.4 3.1 22 3.1C31.6 3.1 39.3 11.6 39.3 22C39.3 35.4 22 52 22 52Z"
         fill="${fill}" stroke="${stroke}" stroke-width="2" filter="url(#ds)"/>
-      <ellipse cx="${cx - 4}" cy="11" rx="3.5" ry="5" fill="white" opacity="0.25"/>
-      <circle cx="${cx}" cy="${cy}" r="9" fill="${cream}" stroke="${stroke}" stroke-width="1"/>
-      <!-- mug body -->
-      <rect x="${cx - 5}" y="${cy - 2}" width="10" height="8" rx="1.5" fill="none" stroke="${stroke}" stroke-width="1.2"/>
-      <!-- handle -->
-      <path d="M${cx + 5} ${cy} Q${cx + 8} ${cy} ${cx + 8} ${cy + 2} Q${cx + 8} ${cy + 4} ${cx + 5} ${cy + 4}" fill="none" stroke="${stroke}" stroke-width="1"/>
-      <!-- coffee fill -->
-      <rect x="${cx - 4}" y="${cy + 1}" width="8" height="4" rx="1" fill="${coffee}" opacity="0.5"/>
-      ${fav ? `<circle cx="${cx + 13}" cy="6" r="6.5" fill="white" stroke="${stroke}" stroke-width="1"/>
-      <path d="M${cx + 13} 9.5 l-0.9-0.8c-2.3-2-3.8-3.4-3.8-5.1 0-1.3 1.1-2.3 2.4-2.3 0.7 0 1.5 0.3 2 0.9 0.4-0.6 1.2-0.9 2-0.9 1.3 0 2.4 1 2.4 2.3 0 1.7-1.5 3.1-3.8 5.1z" fill="#EF4444"/>` : ''}
+      <ellipse cx="16.3" cy="12" rx="4.4" ry="3" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 16.3 12)"/>
+      <path d="M34.7 9.1L35.8 11.5L38.3 12.6L35.8 13.7L34.7 16.1L33.6 13.7L31.1 12.6L33.6 11.5L34.7 9.1Z"
+        fill="${cream}" stroke="${stroke}" stroke-width="1.1" stroke-linejoin="round"/>
+      <circle cx="22" cy="22" r="10.7" fill="${cream}" stroke="${stroke}" stroke-width="1.4"/>
+      <rect x="16.5" y="18.2" width="9.9" height="8.5" rx="1.7" fill="none" stroke="${stroke}" stroke-width="1.3"/>
+      <path d="M26.4 20.3C28.3 20.3 29.4 21.2 29.4 22.5C29.4 23.8 28.3 24.7 26.4 24.7" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round"/>
+      <rect x="17.8" y="22.1" width="7.1" height="2.8" rx="0.6" fill="${coffee}" opacity="0.9"/>
+      <path d="M17.6 39.5C18.9 38.5 19.9 38.5 21 39.5C22 40.4 23 40.4 24.1 39.4" stroke="${stroke}" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+      ${fav ? `<circle cx="35" cy="6" r="7" fill="white" stroke="${stroke}" stroke-width="1"/>
+      <path d="M35 10 l-1-0.9c-2.5-2.2-4.1-3.7-4.1-5.5 0-1.4 1.2-2.5 2.6-2.5 0.8 0 1.6 0.3 2.2 1 0.5-0.7 1.3-1 2.2-1 1.4 0 2.6 1.1 2.6 2.5 0 1.8-1.6 3.3-4.1 5.5z" fill="#EF4444"/>` : ''}
     </svg>`;
   }
 
+  // Normal marker (28x36) or favorite (34x42)
   const w = fav ? 34 : 28;
   const h = fav ? 42 : 36;
-  const cx = w / 2;
-  const cy = Math.round(h * 0.39);
+  const s = w / 28; // scale factor
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
     <defs>
-      <filter id="ds" x="-25%" y="-10%" width="150%" height="140%">
-        <feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
+      <filter id="ds" x="-30%" y="-20%" width="160%" height="180%">
+        <feDropShadow dx="0" dy="2" stdDeviation="1.8" flood-color="#000" flood-opacity="0.16"/>
       </filter>
     </defs>
-    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 11} ${h - 14} ${cx - 11} ${cy} C${cx - 11} ${Math.round(h * 0.19)} ${cx - 6} 2 ${cx} 2 C${cx + 6} 2 ${cx + 11} ${Math.round(h * 0.19)} ${cx + 11} ${cy} C${cx + 11} ${h - 14} ${cx} ${h - 2} ${cx} ${h - 2}Z"
-      fill="${fill}" stroke="${stroke}" stroke-width="1.5" filter="url(#ds)"/>
-    <ellipse cx="${cx - 2}" cy="${Math.round(h * 0.22)}" rx="2.5" ry="3.5" fill="white" opacity="0.2"/>
-    <circle cx="${cx}" cy="${cy}" r="6.5" fill="${cream}" stroke="${stroke}" stroke-width="0.8"/>
-    <!-- mug body -->
-    <rect x="${cx - 3.5}" y="${cy - 1.5}" width="7" height="5.5" rx="1" fill="none" stroke="${stroke}" stroke-width="0.8"/>
-    <!-- handle -->
-    <path d="M${cx + 3.5} ${cy - 0.5} Q${cx + 5.5} ${cy - 0.5} ${cx + 5.5} ${cy + 1} Q${cx + 5.5} ${cy + 2.5} ${cx + 3.5} ${cy + 2.5}" fill="none" stroke="${stroke}" stroke-width="0.7"/>
-    <!-- coffee fill -->
-    <rect x="${cx - 2.5}" y="${cy + 0.5}" width="5" height="2.5" rx="0.5" fill="${coffee}" opacity="0.45"/>
-    ${fav ? `<circle cx="${cx + 9}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
-    <path d="M${cx + 9} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
+    <path d="M${w / 2} ${h - 2}C${w / 2} ${h - 2} ${3 * s} ${(h - 13.5 * s)}  ${3 * s} ${14 * s}C${3 * s} ${7.4 * s} ${7.9 * s} ${2 * s} ${14 * s} ${2 * s}C${20.1 * s} ${2 * s} ${25 * s} ${7.4 * s} ${25 * s} ${14 * s}C${25 * s} ${(h - 13.5 * s)} ${w / 2} ${h - 2} ${w / 2} ${h - 2}Z"
+      fill="${fill}" stroke="${stroke}" stroke-width="1.8" filter="url(#ds)"/>
+    <ellipse cx="${10.4 * s}" cy="${7.6 * s}" rx="${2.8 * s}" ry="${1.9 * s}" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 ${10.4 * s} ${7.6 * s})"/>
+    <path d="M${22.1 * s} ${5.8 * s}L${22.8 * s} ${7.3 * s}L${24.4 * s} ${8 * s}L${22.8 * s} ${8.7 * s}L${22.1 * s} ${10.2 * s}L${21.4 * s} ${8.7 * s}L${19.8 * s} ${8 * s}L${21.4 * s} ${7.3 * s}L${22.1 * s} ${5.8 * s}Z"
+      fill="${cream}" stroke="${stroke}" stroke-width="0.9" stroke-linejoin="round"/>
+    <circle cx="${14 * s}" cy="${14 * s}" r="${6.8 * s}" fill="${cream}" stroke="${stroke}" stroke-width="1.2"/>
+    <rect x="${10.5 * s}" y="${11.6 * s}" width="${6.3 * s}" height="${5.4 * s}" rx="${1.1 * s}" fill="none" stroke="${stroke}" stroke-width="1"/>
+    <path d="M${16.8 * s} ${12.9 * s}C${18 * s} ${12.9 * s} ${18.7 * s} ${13.5 * s} ${18.7 * s} ${14.3 * s}C${18.7 * s} ${15.1 * s} ${18 * s} ${15.7 * s} ${16.8 * s} ${15.7 * s}" stroke="${stroke}" stroke-width="0.9" stroke-linecap="round"/>
+    <rect x="${11.3 * s}" y="${14.1 * s}" width="${4.5 * s}" height="${1.8 * s}" rx="${0.4 * s}" fill="${coffee}" opacity="0.92"/>
+    <path d="M${11.2 * s} ${25.1 * s}C${12 * s} ${24.5 * s} ${12.7 * s} ${24.5 * s} ${13.4 * s} ${25.1 * s}C${14 * s} ${25.7 * s} ${14.7 * s} ${25.7 * s} ${15.4 * s} ${25 * s}" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>
+    ${fav ? `<circle cx="${w - 8}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
+    <path d="M${w - 8} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
   </svg>`;
 }
 
@@ -130,7 +130,7 @@ function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerP
     <MapMarker
       position={position}
       title={cafe.name}
-      onClick={() => onSelect(cafe)}
+      onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); onSelect(cafe); }}
       zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{
         src: getMarkerDataUri(colors, isSelected, fav),

@@ -5,6 +5,7 @@ import { Send, Clock, MapPin, XCircle, CheckCircle2, Search } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 type ReportType = 'hours_correction' | 'new_cafe' | 'closed';
 
@@ -66,6 +67,7 @@ export default function ReportPage() {
     });
     setSubmitting(false);
     if (!ok) return;
+    trackEvent('submit_report', { type: reportType });
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
