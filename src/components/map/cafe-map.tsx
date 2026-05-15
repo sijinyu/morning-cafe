@@ -27,15 +27,62 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
+function buildPinSvg(color: string, selected: boolean): string {
+  if (selected) {
+    // Larger pin with bounce shadow + yellow glow
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="58" viewBox="0 0 48 58">
+      <defs>
+        <filter id="s" x="-30%" y="-10%" width="160%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.25"/>
+        </filter>
+        <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0.75"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="24" cy="54" rx="8" ry="3" fill="#000" opacity="0.15"/>
+      <path d="M24 2C14.06 2 6 10.06 6 20c0 12 18 34 18 34s18-22 18-34C42 10.06 33.94 2 24 2z" fill="url(#g)" stroke="#FACC15" stroke-width="2.5" filter="url(#s)"/>
+      <circle cx="24" cy="19" r="9" fill="white" opacity="0.95"/>
+      <text x="24" y="23.5" text-anchor="middle" font-size="14">☕</text>
+    </svg>`;
+  }
+  // Default pin
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
+    <defs>
+      <filter id="s" x="-20%" y="-10%" width="140%" height="130%">
+        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
+      </filter>
+      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0.8"/>
+      </linearGradient>
+    </defs>
+    <ellipse cx="16" cy="39" rx="5" ry="2" fill="#000" opacity="0.1"/>
+    <path d="M16 2C9.37 2 4 7.37 4 14c0 8.5 12 24 12 24s12-15.5 12-24C28 7.37 22.63 2 16 2z" fill="url(#g)" stroke="white" stroke-width="1.5" filter="url(#s)"/>
+    <circle cx="16" cy="13" r="6.5" fill="white" opacity="0.9"/>
+    <text x="16" y="17" text-anchor="middle" font-size="10">☕</text>
+  </svg>`;
+}
+
+// Cache SVG data URIs to avoid re-encoding on every render
+const pinCache: Record<string, string> = {};
+
+function getPinDataUri(color: string, selected: boolean): string {
+  const key = `${color}-${selected}`;
+  let uri = pinCache[key];
+  if (!uri) {
+    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildPinSvg(color, selected))}`;
+    pinCache[key] = uri;
+  }
+  return uri;
+}
+
 function CafeMarker({ cafe, isSelected, onSelect }: CafeMarkerProps) {
   const color = getMarkerColor(cafe.opening_time);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
-  const size = isSelected ? 44 : 32;
-  const r = isSelected ? 18 : 12;
-  const cx = size / 2;
-  const strokeW = isSelected ? 3 : 2;
-  const strokeColor = isSelected ? '#FACC15' : 'white'; // yellow ring when selected
-  const fontSize = isSelected ? 17 : 13;
+
+  const w = isSelected ? 48 : 32;
+  const h = isSelected ? 58 : 42;
 
   return (
     <MapMarker
@@ -44,15 +91,9 @@ function CafeMarker({ cafe, isSelected, onSelect }: CafeMarkerProps) {
       onClick={() => onSelect(cafe)}
       zIndex={isSelected ? 100 : 0}
       image={{
-        src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-            ${isSelected ? `<circle cx="${cx}" cy="${cx}" r="${r + 3}" fill="${strokeColor}" opacity="0.3"/>` : ''}
-            <circle cx="${cx}" cy="${cx}" r="${r}" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeW}"/>
-            <text x="${cx}" y="${cx + 4}" text-anchor="middle" font-size="${fontSize}" fill="white">☕</text>
-          </svg>`
-        )}`,
-        size: { width: size, height: size },
-        options: { offset: { x: cx, y: cx } },
+        src: getPinDataUri(color, isSelected),
+        size: { width: w, height: h },
+        options: { offset: { x: w / 2, y: h } },
       }}
     />
   );

@@ -197,11 +197,18 @@ export function TimeFilter() {
           {hide24h ? '24시간 제외' : '24시간 포함'}
         </motion.button>
 
-        {/* 결과 카운트 */}
-        <span className="flex items-center rounded-full bg-background/80 backdrop-blur-md border border-border px-3 py-1.5 text-xs text-muted-foreground">
-          {filteredCafes.length}개
-        </span>
       </div>
+
+      {/* 결과 카운트 — 필터와 분리 */}
+      <motion.div
+        key={filteredCafes.length}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        className="mt-1 rounded-full bg-foreground/90 px-3 py-1 text-[11px] font-semibold text-background shadow-lg backdrop-blur-sm"
+      >
+        {filteredCafes.length.toLocaleString()}개 카페
+      </motion.div>
     </div>
   );
 }
