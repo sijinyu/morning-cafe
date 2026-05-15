@@ -40,9 +40,11 @@ export function TimeFilter() {
   const setDayFilter = useCafeStore((state) => state.setDayFilter);
   const guFilter = useCafeStore((state) => state.guFilter);
   const setGuFilter = useCafeStore((state) => state.setGuFilter);
-  const availableGus = useCafeStore((state) => state.availableGus)();
   const hideChains = useCafeStore((state) => state.hideChains);
   const setHideChains = useCafeStore((state) => state.setHideChains);
+  // cafes를 직접 구독해야 fetch 완료 후 re-render 됨
+  useCafeStore((state) => state.cafes);
+  const availableGus = useCafeStore((state) => state.availableGus)();
   const filteredCafes = useCafeStore((state) => state.filteredCafes)();
 
   const [showDays, setShowDays] = useState(false);

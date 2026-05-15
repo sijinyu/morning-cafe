@@ -165,7 +165,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
       onDragEnd={handleDragEnd}
-      animate={{ height: SHEET_HEIGHTS[sheetState] }}
+      initial={{ y: '100%' }}
+      animate={{ y: 0, height: SHEET_HEIGHTS[sheetState] }}
+      exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 32, stiffness: 320 }}
       className={cn(
         'fixed bottom-0 left-0 right-0 z-40',
@@ -355,12 +357,26 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 export function CafeBottomSheetWrapper() {
   const selectedCafe = useCafeStore((state) => state.selectedCafe);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
+  const [wasOpen, setWasOpen] = useState(false);
+
+  // Track whether sheet was already open (for skipping enter animation on cafe switch)
+  useEffect(() => {
+    if (selectedCafe) {
+      // If sheet was already showing, skip animation
+      if (wasOpen) {
+        // will render without AnimatePresence enter animation via key=stable
+      }
+      setWasOpen(true);
+    } else {
+      setWasOpen(false);
+    }
+  }, [selectedCafe]);
 
   return (
     <AnimatePresence>
       {selectedCafe && (
         <CafeBottomSheet
-          key={selectedCafe.id}
+          key={wasOpen ? 'sheet-stable' : selectedCafe.id}
           cafe={selectedCafe}
           onClose={() => setSelectedCafe(null)}
         />

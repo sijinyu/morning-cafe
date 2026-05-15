@@ -23,28 +23,36 @@ function getMarkerColor(openingTime: string | null): string {
 
 interface CafeMarkerProps {
   cafe: Cafe;
+  isSelected: boolean;
   onSelect: (cafe: Cafe) => void;
 }
 
-function CafeMarker({ cafe, onSelect }: CafeMarkerProps) {
+function CafeMarker({ cafe, isSelected, onSelect }: CafeMarkerProps) {
   const color = getMarkerColor(cafe.opening_time);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
+  const size = isSelected ? 44 : 32;
+  const r = isSelected ? 18 : 12;
+  const cx = size / 2;
+  const strokeW = isSelected ? 3 : 2;
+  const strokeColor = isSelected ? '#FACC15' : 'white'; // yellow ring when selected
+  const fontSize = isSelected ? 17 : 13;
 
   return (
     <MapMarker
       position={position}
       title={cafe.name}
       onClick={() => onSelect(cafe)}
+      zIndex={isSelected ? 100 : 0}
       image={{
-        // Inline SVG data URI — colored circle with coffee emoji
         src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-            <circle cx="16" cy="16" r="12" fill="${color}" stroke="white" stroke-width="2"/>
-            <text x="16" y="20" text-anchor="middle" font-size="13" fill="white">☕</text>
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+            ${isSelected ? `<circle cx="${cx}" cy="${cx}" r="${r + 3}" fill="${strokeColor}" opacity="0.3"/>` : ''}
+            <circle cx="${cx}" cy="${cx}" r="${r}" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeW}"/>
+            <text x="${cx}" y="${cx + 4}" text-anchor="middle" font-size="${fontSize}" fill="white">☕</text>
           </svg>`
         )}`,
-        size: { width: 32, height: 32 },
-        options: { offset: { x: 16, y: 16 } },
+        size: { width: size, height: size },
+        options: { offset: { x: cx, y: cx } },
       }}
     />
   );
@@ -68,6 +76,7 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
 
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
+  const selectedCafe = useCafeStore((state) => state.selectedCafe);
   const filteredCafes = useCafeStore((state) => state.filteredCafes)();
   // Re-render when filters change
   useCafeStore((state) => state.timeFilter);
@@ -82,11 +91,14 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
     mapInstanceRef.current = map;
     if (onPanToReady) {
       onPanToReady((lat, lng) => {
-        // LatLng constructor is available once the SDK is loaded.
         const latlng = new kakao.maps.LatLng(lat, lng);
         map.panTo(latlng);
       });
     }
+    // 지도 클릭 시 바텀시트 닫기
+    kakao.maps.event.addListener(map, 'click', () => {
+      setSelectedCafe(null);
+    });
   }
 
   function handleCenterChange(map: kakao.maps.Map) {
@@ -128,6 +140,7 @@ export function CafeMap({ onPanToReady }: CafeMapProps) {
           <CafeMarker
             key={cafe.id}
             cafe={cafe}
+            isSelected={selectedCafe?.id === cafe.id}
             onSelect={setSelectedCafe}
           />
         ))}
