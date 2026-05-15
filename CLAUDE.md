@@ -37,6 +37,7 @@ NEXT_PUBLIC_SUPABASE_URL=        # Supabase 프로젝트 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=   # Supabase anon key (클라이언트)
 SUPABASE_SERVICE_ROLE_KEY=       # Supabase service role key (서버 API)
 KAKAO_REST_API_KEY=              # 카카오 REST API 키 (place-detail API)
+RESEND_API_KEY=                  # Resend 이메일 API 키 (제보 알림)
 ```
 
 카카오 Maps JS SDK 키는 `src/lib/hooks/use-kakao-loader.ts`에서 로드.
@@ -134,7 +135,8 @@ src/
 | Dropdown | z-30 | absolute (필터 내부) |
 | SearchBar | z-20 | absolute top-3 |
 | TimeFilter | z-10 | absolute top-16 |
-| ViewToggle | z-10 | absolute bottom-20 (모바일) / bottom-6 (md) |
+| ViewToggle | z-10 | absolute bottom-20 right-[4.5rem] (모바일) / bottom-6 (md) |
+| MyLocation | z-10 | absolute bottom-20 right-4 (모바일) / bottom-6 (md) |
 
 ### 모바일 레이아웃 규칙
 
@@ -155,9 +157,11 @@ src/
 
 ### POST `/api/reports`
 사용자 카페 제보.
-- body: `{ cafeName, address, openingTime?, memo? }`
+- body: `{ type, cafe_name, content }`
+- type: `hours_correction` | `new_cafe` | `closed`
 - Supabase `reports` 테이블에 insert
-- 서버 키 사용: `SUPABASE_SERVICE_ROLE_KEY`
+- Resend로 관리자 이메일 알림 (sijinyudev@gmail.com)
+- 서버 키 사용: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 
 ---
 
@@ -171,6 +175,7 @@ src/
 - `lucide-react` — 아이콘
 - `next-themes` — 다크모드
 - `serwist` — PWA 서비스 워커
+- `resend` — 이메일 발송 (제보 알림)
 
 ---
 
@@ -192,8 +197,12 @@ npm run lint         # ESLint
 1. **Zustand 파생 상태**: `filteredCafes`, `availableGus`는 함수가 아닌 배열. 필터/데이터 변경 시 `recompute()` 호출 필수.
 2. **바텀시트 bottom**: 모바일 `bottom-14`, 데스크탑 `bottom-0`. BottomNav 높이 고려.
 3. **마커 SVG**: `buildMarkerSvg()` 수정 시 `markerCache` 키가 올바른지 확인.
-4. **사진 로드 실패**: `SlideImage` 컴포넌트의 `onError` 핸들링 유지.
+4. **사진 로딩**: `SlideImage`에 스켈레톤(animate-pulse) + onLoad/onError 처리. 로딩 중 스켈레톤 → 로드 완료 시 opacity 트랜지션.
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
+6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
+7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
+8. **상세보기 수직 간격**: 주소/전화/인스타 행은 `space-y-1` 그룹 내 각 `py-2`로 통일.
+9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "© 2026 유시진".
 
 ### 커밋 메시지
 

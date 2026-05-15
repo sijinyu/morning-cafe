@@ -227,52 +227,55 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <MenuSection menu={menu} />
 
-            {/* Address */}
-            <div className="flex items-start gap-3">
-              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <p className="flex-1 min-w-0 text-sm text-foreground leading-relaxed">{displayAddress}</p>
-              <button
-                onClick={handleCopyAddress}
-                className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-                aria-label="주소 복사"
-              >
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-green-500" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-            </div>
-
-            {/* Phone */}
-            {cafe.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <a
-                  href={`tel:${cafe.phone}`}
-                  className="text-sm text-foreground hover:text-primary transition-colors"
+            {/* Info rows — consistent vertical spacing */}
+            <div className="space-y-1">
+              {/* Address */}
+              <div className="flex items-center gap-3 py-2">
+                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
+                <button
+                  onClick={handleCopyAddress}
+                  className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                  aria-label="주소 복사"
                 >
-                  {cafe.phone}
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+
+              {/* Phone */}
+              {cafe.phone && (
+                <div className="flex items-center gap-3 py-2">
+                  <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <a
+                    href={`tel:${cafe.phone}`}
+                    className="text-sm text-foreground hover:text-primary transition-colors"
+                  >
+                    {cafe.phone}
+                  </a>
+                </div>
+              )}
+
+              {/* Instagram */}
+              <div className="flex items-center gap-3 py-2">
+                <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <a
+                  href={instagramHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'text-sm transition-colors truncate',
+                    cafe.instagram_url
+                      ? 'text-foreground hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {cafe.instagram_url ? '인스타그램' : '인스타그램에서 검색'}
                 </a>
               </div>
-            )}
-
-            {/* Instagram */}
-            <div className="flex items-center gap-3">
-              <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <a
-                href={instagramHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  'text-sm transition-colors truncate',
-                  cafe.instagram_url
-                    ? 'text-foreground hover:text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {cafe.instagram_url ? '인스타그램' : '인스타그램에서 검색'}
-              </a>
             </div>
 
             <HoursSection hoursByDay={cafe.hours_by_day} />

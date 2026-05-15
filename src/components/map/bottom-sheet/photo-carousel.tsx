@@ -14,6 +14,7 @@ interface PhotoCarouselProps {
 
 function SlideImage({ url, alt }: { url: string; alt: string }) {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   if (error) {
     return (
@@ -24,14 +25,28 @@ function SlideImage({ url, alt }: { url: string; alt: string }) {
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={url}
-      alt={alt}
-      className="h-full w-full object-cover"
-      draggable={false}
-      onError={() => setError(true)}
-    />
+    <div className="relative h-full w-full">
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-muted">
+          <div className="flex h-full flex-col items-center justify-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-muted-foreground/10" />
+            <div className="h-2 w-20 rounded-full bg-muted-foreground/10" />
+          </div>
+        </div>
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={alt}
+        className={cn(
+          'h-full w-full object-cover transition-opacity duration-300',
+          loaded ? 'opacity-100' : 'opacity-0',
+        )}
+        draggable={false}
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
+    </div>
   );
 }
 
@@ -67,8 +82,11 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
   return (
     <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-muted/50">
       {loading ? (
-        <div className="flex h-full items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
+        <div className="h-full w-full animate-pulse bg-muted">
+          <div className="flex h-full flex-col items-center justify-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-muted-foreground/10" />
+            <div className="h-2 w-20 rounded-full bg-muted-foreground/10" />
+          </div>
         </div>
       ) : photos.length > 0 ? (
         <>
