@@ -14,9 +14,14 @@ import {
   Check,
   Heart,
   Share2,
+  Navigation,
+  Bell,
+  BellOff,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
+import { useNotifications } from '@/lib/hooks/use-notifications';
+import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { cn } from '@/lib/utils';
 
 // ---- helpers ----------------------------------------------------------------
@@ -118,11 +123,26 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
+  const { addRecent } = useRecentCafes();
   const favorited = isFavorite(cafe.id);
+  const reminded = hasReminder(cafe.id);
+  const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
+
+  async function handleBellClick() {
+    if (reminded) {
+      removeReminder(cafe.id);
+      return;
+    }
+    const permission = await requestPermission();
+    if (permission !== 'granted') return;
+    scheduleReminder(cafe.id, cafe.name, cafe.opening_time!);
+  }
 
   useEffect(() => {
     setSheetState('half');
-  }, [cafe.id]);
+    addRecent(cafe.id);
+  }, [cafe.id, addRecent]);
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const velocity = info.velocity.y;
@@ -223,6 +243,22 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
+          {canRemind && (
+            <motion.button
+              onClick={handleBellClick}
+              whileTap={{ scale: 0.85 }}
+              animate={{ scale: reminded ? [1, 1.25, 1] : 1 }}
+              transition={{ duration: 0.25 }}
+              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+              aria-label={reminded ? '알림 제거' : '오픈 알림 설정'}
+            >
+              {reminded ? (
+                <BellOff className="h-5 w-5 fill-amber-400 stroke-amber-500" />
+              ) : (
+                <Bell className="h-5 w-5 stroke-muted-foreground" />
+              )}
+            </motion.button>
+          )}
           <motion.button
             onClick={() => toggleFavorite(cafe.id)}
             whileTap={{ scale: 0.85 }}
@@ -253,6 +289,36 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         <div className="flex-1 overflow-y-auto overscroll-contain">
           <div className="px-5 pb-6 space-y-4">
             <div className="h-px bg-border" />
+
+            {/* Photo header */}
+            <div className="relative h-32 rounded-2xl overflow-hidden">
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(135deg,
+                    hsl(var(--primary) / 0.18) 0%,
+                    hsl(var(--primary) / 0.08) 50%,
+                    hsl(var(--muted)) 100%)`,
+                }}
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                <span className="text-lg font-bold text-foreground/80 px-4 text-center leading-tight line-clamp-2">
+                  {cafe.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  카카오맵 사진 보기
+                </span>
+              </div>
+              {cafe.place_url && (
+                <a
+                  href={`${cafe.place_url}#photo`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0"
+                  aria-label={`${cafe.name} 사진 보기`}
+                />
+              )}
+            </div>
 
             {/* Address */}
             <div className="flex items-start gap-3">
@@ -325,6 +391,21 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   카카오맵에서 보기
                 </a>
               )}
+              <a
+                href={`https://map.kakao.com/link/to/${encodeURIComponent(cafe.name)},${cafe.latitude},${cafe.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-2xl',
+                  'border border-border py-3.5 px-4',
+                  'text-sm font-medium text-foreground',
+                  'hover:bg-muted transition-colors'
+                )}
+                aria-label="길찾기"
+              >
+                <Navigation className="h-4 w-4" />
+                길찾기
+              </a>
               <button
                 onClick={() => {
                   const text = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}${cafe.place_url ? `\n${cafe.place_url}` : ''}`;

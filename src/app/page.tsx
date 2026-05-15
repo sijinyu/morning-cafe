@@ -25,7 +25,21 @@ export default function MapPage() {
     fetchCafes();
   }, [fetchCafes]);
 
-  // 리스트뷰에서 GPS 위치 자동 가져오기
+  // Auto-request GPS on first load so the map can zoom to the user's location.
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {
+        // Permission denied or unavailable — map stays at Seoul City Hall fallback.
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+    );
+  // Run once on mount only.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep GPS fresh when switching to list view if we don't have a fix yet.
   useEffect(() => {
     if (viewMode === 'list' && !userLocation && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -45,7 +59,10 @@ export default function MapPage() {
     <div className="relative h-full w-full">
       {viewMode === 'map' ? (
         <>
-          <CafeMap onPanToReady={(fn) => { panToRef.current = fn; }} />
+          <CafeMap
+            onPanToReady={(fn) => { panToRef.current = fn; }}
+            userLocation={userLocation}
+          />
           <SearchBar onSelectCafe={(lat, lng) => panToRef.current?.(lat, lng)} />
           <MyLocationButton onLocation={handleLocationUpdate} />
           <CafeBottomSheetWrapper />

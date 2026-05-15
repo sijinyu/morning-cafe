@@ -41,7 +41,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
-      <head />
+      <head>
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+      </head>
       <body className="h-full bg-background text-foreground antialiased">
         <ThemeProvider>
           <div className="flex h-full">
