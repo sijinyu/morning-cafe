@@ -3,16 +3,22 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// 모듈 레벨 — 한 번 dismiss되면 페이지 이동해도 다시 안 뜸
+let splashDismissed = false;
+
 interface SplashScreenProps {
   ready: boolean;
 }
 
 export function SplashScreen({ ready }: SplashScreenProps) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(!splashDismissed);
 
   useEffect(() => {
-    if (!ready) return;
-    const timer = setTimeout(() => setVisible(false), 500);
+    if (!ready || splashDismissed) return;
+    const timer = setTimeout(() => {
+      splashDismissed = true;
+      setVisible(false);
+    }, 500);
     return () => clearTimeout(timer);
   }, [ready]);
 
