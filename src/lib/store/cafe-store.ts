@@ -160,6 +160,10 @@ interface CafeState {
   hideChains: boolean;
   hide24h: boolean;
   loading: boolean;
+  /** Pre-computed filtered list — updated whenever cafes or filters change. */
+  filteredCafes: Cafe[];
+  /** Pre-computed sorted list of available 구 names. */
+  availableGus: string[];
   fetchCafes: () => Promise<void>;
   setSelectedCafe: (cafe: Cafe | null) => void;
   setTimeFilter: (filter: TimeFilter) => void;
@@ -167,8 +171,6 @@ interface CafeState {
   setGuFilter: (gu: string | null) => void;
   setHideChains: (hide: boolean) => void;
   setHide24h: (hide: boolean) => void;
-  filteredCafes: () => Cafe[];
-  availableGus: () => string[];
 }
 
 function parseOpeningMinutes(openingTime: string | null): number | null {
@@ -197,6 +199,62 @@ function getOpeningMinutesForDay(cafe: Cafe, dayKey: string): number | null {
   return parseOpeningMinutes(cafe.opening_time);
 }
 
+/** Pure filter logic — called internally to recompute derived state. */
+function computeFilteredCafes(
+  cafes: Cafe[],
+  chainCafeIds: Set<string>,
+  timeFilter: TimeFilter,
+  dayFilter: DayFilter,
+  guFilter: string | null,
+  hideChains: boolean,
+  hide24h: boolean,
+): Cafe[] {
+  const dayKey = resolveDayKey(dayFilter);
+
+  return cafes.filter((cafe) => {
+    if (hideChains && chainCafeIds.has(cafe.id)) return false;
+    if (hide24h && is24Hours(cafe)) return false;
+    if (guFilter) {
+      const gu = extractGu(cafe.address);
+      if (gu !== guFilter) return false;
+    }
+    if (dayFilter !== 'today' && cafe.hours_by_day) {
+      const dayHours = cafe.hours_by_day[dayKey];
+      if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
+    }
+    if (timeFilter === 'all') return true;
+    const minutes = getOpeningMinutesForDay(cafe, dayKey);
+    if (minutes === null) return false;
+    switch (timeFilter) {
+      case 'before6':
+        return minutes <= 360;
+      case '6to7':
+        return minutes > 360 && minutes <= 420;
+      case '7to8':
+        return minutes > 420 && minutes <= 480;
+      default:
+        return true;
+    }
+  });
+}
+
+function computeAvailableGus(cafes: Cafe[]): string[] {
+  const gus = new Set<string>();
+  for (const cafe of cafes) {
+    const gu = extractGu(cafe.address);
+    if (gu) gus.add(gu);
+  }
+  return [...gus].sort();
+}
+
+/** Recompute derived state and merge into store. */
+function recompute(get: () => CafeState, set: (partial: Partial<CafeState>) => void) {
+  const { cafes, chainCafeIds, timeFilter, dayFilter, guFilter, hideChains, hide24h } = get();
+  set({
+    filteredCafes: computeFilteredCafes(cafes, chainCafeIds, timeFilter, dayFilter, guFilter, hideChains, hide24h),
+  });
+}
+
 export const useCafeStore = create<CafeState>((set, get) => ({
   cafes: [],
   chainCafeIds: new Set<string>(),
@@ -204,17 +262,17 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   timeFilter: '7to8',
   dayFilter: 'today',
   guFilter: null,
-  hideChains: true, // 기본값: 체인점 숨김
+  hideChains: true,
   hide24h: false,
   loading: false,
+  filteredCafes: [],
+  availableGus: [],
 
   async fetchCafes() {
     set({ loading: true });
     try {
       const supabase = createClient();
 
-      // Supabase JS client returns max 1,000 rows per request.
-      // Paginate to fetch all earlybird cafes.
       const allRows: any[] = [];
       const PAGE_SIZE = 1000;
       let from = 0;
@@ -227,7 +285,7 @@ export const useCafeStore = create<CafeState>((set, get) => ({
           .range(from, from + PAGE_SIZE - 1);
 
         if (error) {
-          set({ cafes: [], loading: false });
+          set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
           return;
         }
 
@@ -260,9 +318,10 @@ export const useCafeStore = create<CafeState>((set, get) => ({
         if (isChainCafe(cafe.name)) chainCafeIds.add(cafe.id);
       }
 
-      set({ cafes, chainCafeIds, loading: false });
+      set({ cafes, chainCafeIds, availableGus: computeAvailableGus(cafes), loading: false });
+      recompute(get, set);
     } catch {
-      set({ cafes: [], loading: false });
+      set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
     }
   },
 
@@ -272,74 +331,26 @@ export const useCafeStore = create<CafeState>((set, get) => ({
 
   setTimeFilter(filter) {
     set({ timeFilter: filter });
+    recompute(get, set);
   },
 
   setDayFilter(filter) {
     set({ dayFilter: filter });
+    recompute(get, set);
   },
 
   setGuFilter(gu) {
     set({ guFilter: gu });
+    recompute(get, set);
   },
 
   setHideChains(hide) {
     set({ hideChains: hide });
+    recompute(get, set);
   },
 
   setHide24h(hide) {
     set({ hide24h: hide });
-  },
-
-  filteredCafes() {
-    const { cafes, chainCafeIds, timeFilter, dayFilter, guFilter, hideChains, hide24h } = get();
-    const dayKey = resolveDayKey(dayFilter);
-
-    return cafes.filter((cafe) => {
-      // 체인점 필터 (O(1) Set lookup)
-      if (hideChains && chainCafeIds.has(cafe.id)) return false;
-
-      // 24시간 영업 필터
-      if (hide24h && is24Hours(cafe)) return false;
-
-      // 구 필터
-      if (guFilter) {
-        const gu = extractGu(cafe.address);
-        if (gu !== guFilter) return false;
-      }
-
-      // 요일별 영업 여부 체크
-      if (dayFilter !== 'today' && cafe.hours_by_day) {
-        const dayHours = cafe.hours_by_day[dayKey];
-        // 해당 요일 데이터가 있는데 "정기휴무" 등이면 제외
-        if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
-      }
-
-      // 시간 필터
-      if (timeFilter === 'all') return true;
-      const minutes = getOpeningMinutesForDay(cafe, dayKey);
-      if (minutes === null) return false;
-
-      // 각 구간은 시작(포함) ~ 끝(포함): 라벨 "~6시"는 6:00 포함, "6~7시"는 7:00 포함
-      switch (timeFilter) {
-        case 'before6':
-          return minutes <= 360;
-        case '6to7':
-          return minutes > 360 && minutes <= 420;
-        case '7to8':
-          return minutes > 420 && minutes <= 480;
-        default:
-          return true;
-      }
-    });
-  },
-
-  availableGus() {
-    const { cafes } = get();
-    const gus = new Set<string>();
-    for (const cafe of cafes) {
-      const gu = extractGu(cafe.address);
-      if (gu) gus.add(gu);
-    }
-    return [...gus].sort();
+    recompute(get, set);
   },
 }));

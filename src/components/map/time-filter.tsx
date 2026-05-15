@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Store, Calendar, MapPin, ChevronDown, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Store, Calendar, MapPin, ChevronDown, Clock, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import {
   useCafeStore,
@@ -33,6 +33,10 @@ const DAY_CHIPS: { value: DayFilter; label: string }[] = [
   { value: '일', label: '일' },
 ];
 
+// Active chip style — unified single accent color
+const ACTIVE_CHIP = 'bg-foreground text-background shadow-md';
+const INACTIVE_CHIP = 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background';
+
 export function TimeFilter() {
   const timeFilter = useCafeStore((state) => state.timeFilter);
   const setTimeFilter = useCafeStore((state) => state.setTimeFilter);
@@ -44,18 +48,24 @@ export function TimeFilter() {
   const setHideChains = useCafeStore((state) => state.setHideChains);
   const hide24h = useCafeStore((state) => state.hide24h);
   const setHide24h = useCafeStore((state) => state.setHide24h);
-  // cafes를 직접 구독해야 fetch 완료 후 re-render 됨
-  useCafeStore((state) => state.cafes);
-  const availableGus = useCafeStore((state) => state.availableGus)();
-  const filteredCafes = useCafeStore((state) => state.filteredCafes)();
+  const availableGus = useCafeStore((state) => state.availableGus);
+  const filteredCafes = useCafeStore((state) => state.filteredCafes);
 
+  const [showMore, setShowMore] = useState(false);
   const [showDays, setShowDays] = useState(false);
   const [showGu, setShowGu] = useState(false);
 
+  // Count how many secondary filters are active
+  const activeSecondaryCount =
+    (dayFilter !== 'today' ? 1 : 0) +
+    (guFilter ? 1 : 0) +
+    (hideChains ? 1 : 0) +
+    (hide24h ? 1 : 0);
+
   return (
     <div className="absolute top-16 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 max-w-[95vw]">
-      {/* 시간 필터 */}
-      <div className="flex gap-1.5">
+      {/* 1행: 시간 필터 + 더보기 토글 */}
+      <div className="flex gap-1.5 items-center">
         {FILTER_CHIPS.map(({ value, label }) => {
           const isActive = timeFilter === value;
           return (
@@ -65,147 +75,168 @@ export function TimeFilter() {
               whileTap={{ scale: 0.95 }}
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 whitespace-nowrap',
-                isActive
-                  ? 'bg-foreground text-background shadow-md'
-                  : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
+                isActive ? ACTIVE_CHIP : INACTIVE_CHIP,
               )}
             >
               {label}
             </motion.button>
           );
         })}
+
+        {/* 더보기 토글 */}
+        <motion.button
+          onClick={() => { setShowMore(!showMore); setShowDays(false); setShowGu(false); }}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            'relative flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition-all duration-200',
+            showMore || activeSecondaryCount > 0 ? ACTIVE_CHIP : INACTIVE_CHIP,
+          )}
+        >
+          <SlidersHorizontal className="h-3 w-3" />
+          {activeSecondaryCount > 0 && (
+            <span className={cn(
+              'absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold',
+              showMore ? 'bg-background text-foreground' : 'bg-foreground text-background',
+            )}>
+              {activeSecondaryCount}
+            </span>
+          )}
+        </motion.button>
       </div>
 
-      {/* 2행: 요일 + 구 + 체인점 + 카운트 */}
-      <div className="flex gap-1.5 flex-wrap justify-center">
-        {/* 요일 필터 토글 */}
-        <div className="relative">
-          <motion.button
-            onClick={() => { setShowDays(!showDays); setShowGu(false); }}
-            whileTap={{ scale: 0.95 }}
-            className={cn(
-              'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-              dayFilter !== 'today'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
-            )}
+      {/* 2행: 세부 필터 (접이식) */}
+      <AnimatePresence>
+        {showMore && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
           >
-            <Calendar className="h-3 w-3" />
-            {dayFilter === 'today' ? '오늘' : `${dayFilter}요일`}
-            <ChevronDown className="h-3 w-3" />
-          </motion.button>
-
-          {showDays && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full mt-1 left-0 z-20 flex gap-1 rounded-2xl border border-border bg-background/95 backdrop-blur-md p-2 shadow-lg"
-            >
-              {DAY_CHIPS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => { setDayFilter(value); setShowDays(false); }}
+            <div className="flex gap-1.5 flex-wrap justify-center">
+              {/* 요일 필터 */}
+              <div className="relative">
+                <motion.button
+                  onClick={() => { setShowDays(!showDays); setShowGu(false); }}
+                  whileTap={{ scale: 0.95 }}
                   className={cn(
-                    'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
-                    dayFilter === value
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-muted text-muted-foreground',
+                    'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                    dayFilter !== 'today' ? ACTIVE_CHIP : INACTIVE_CHIP,
                   )}
                 >
-                  {label}
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </div>
+                  <Calendar className="h-3 w-3" />
+                  {dayFilter === 'today' ? '오늘' : `${dayFilter}요일`}
+                  <ChevronDown className="h-3 w-3" />
+                </motion.button>
 
-        {/* 구 필터 */}
-        <div className="relative">
-          <motion.button
-            onClick={() => { setShowGu(!showGu); setShowDays(false); }}
-            whileTap={{ scale: 0.95 }}
-            className={cn(
-              'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-              guFilter
-                ? 'bg-violet-500 text-white shadow-md'
-                : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
-            )}
-          >
-            <MapPin className="h-3 w-3" />
-            {guFilter ?? '서울 전체'}
-            <ChevronDown className="h-3 w-3" />
-          </motion.button>
+                {showDays && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute top-full mt-1 left-0 z-20 flex gap-1 rounded-2xl border border-border bg-background/95 backdrop-blur-md p-2 shadow-lg"
+                  >
+                    {DAY_CHIPS.map(({ value, label }) => (
+                      <button
+                        key={value}
+                        onClick={() => { setDayFilter(value); setShowDays(false); }}
+                        className={cn(
+                          'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                          dayFilter === value
+                            ? 'bg-foreground text-background'
+                            : 'hover:bg-muted text-muted-foreground',
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
 
-          {showGu && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full mt-1 right-0 z-20 max-h-60 w-36 overflow-y-auto rounded-2xl border border-border bg-background/95 backdrop-blur-md p-2 shadow-lg"
-            >
-              <button
-                onClick={() => { setGuFilter(null); setShowGu(false); }}
+              {/* 구 필터 */}
+              <div className="relative">
+                <motion.button
+                  onClick={() => { setShowGu(!showGu); setShowDays(false); }}
+                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                    guFilter ? ACTIVE_CHIP : INACTIVE_CHIP,
+                  )}
+                >
+                  <MapPin className="h-3 w-3" />
+                  {guFilter ?? '서울 전체'}
+                  <ChevronDown className="h-3 w-3" />
+                </motion.button>
+
+                {showGu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute top-full mt-1 right-0 z-20 max-h-60 w-36 overflow-y-auto rounded-2xl border border-border bg-background/95 backdrop-blur-md p-2 shadow-lg"
+                  >
+                    <button
+                      onClick={() => { setGuFilter(null); setShowGu(false); }}
+                      className={cn(
+                        'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
+                        !guFilter ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+                      )}
+                    >
+                      서울 전체
+                    </button>
+                    {availableGus.map((gu) => (
+                      <button
+                        key={gu}
+                        onClick={() => { setGuFilter(gu); setShowGu(false); }}
+                        className={cn(
+                          'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
+                          guFilter === gu ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
+                        )}
+                      >
+                        {gu}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* 체인점 필터 */}
+              <motion.button
+                onClick={() => setHideChains(!hideChains)}
+                whileTap={{ scale: 0.95 }}
                 className={cn(
-                  'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-                  !guFilter ? 'bg-violet-500 text-white' : 'hover:bg-muted text-muted-foreground',
+                  'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                  hideChains ? ACTIVE_CHIP : INACTIVE_CHIP,
                 )}
               >
-                서울 전체
-              </button>
-              {availableGus.map((gu) => (
-                <button
-                  key={gu}
-                  onClick={() => { setGuFilter(gu); setShowGu(false); }}
-                  className={cn(
-                    'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-                    guFilter === gu ? 'bg-violet-500 text-white' : 'hover:bg-muted text-muted-foreground',
-                  )}
-                >
-                  {gu}
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </div>
+                <Store className="h-3 w-3" />
+                {hideChains ? '개인카페만' : '체인점 포함'}
+              </motion.button>
 
-        {/* 체인점 필터 토글 */}
-        <motion.button
-          onClick={() => setHideChains(!hideChains)}
-          whileTap={{ scale: 0.95 }}
-          className={cn(
-            'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-            hideChains
-              ? 'bg-amber-500 text-white shadow-md'
-              : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
-          )}
-        >
-          <Store className="h-3 w-3" />
-          {hideChains ? '개인카페만' : '체인점 포함'}
-        </motion.button>
+              {/* 24시간 필터 */}
+              <motion.button
+                onClick={() => setHide24h(!hide24h)}
+                whileTap={{ scale: 0.95 }}
+                className={cn(
+                  'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                  hide24h ? ACTIVE_CHIP : INACTIVE_CHIP,
+                )}
+              >
+                <Clock className="h-3 w-3" />
+                {hide24h ? '24시간 제외' : '24시간 포함'}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* 24시간 필터 토글 */}
-        <motion.button
-          onClick={() => setHide24h(!hide24h)}
-          whileTap={{ scale: 0.95 }}
-          className={cn(
-            'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-            hide24h
-              ? 'bg-blue-500 text-white shadow-md'
-              : 'border border-border bg-background/80 text-muted-foreground backdrop-blur-md hover:bg-background',
-          )}
-        >
-          <Clock className="h-3 w-3" />
-          {hide24h ? '24시간 제외' : '24시간 포함'}
-        </motion.button>
-
-      </div>
-
-      {/* 결과 카운트 — 필터와 분리 */}
+      {/* 결과 카운트 */}
       <motion.div
         key={filteredCafes.length}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="mt-1 rounded-full bg-foreground/90 px-3 py-1 text-[11px] font-semibold text-background shadow-lg backdrop-blur-sm"
+        className="rounded-full bg-foreground/90 px-3 py-1 text-[11px] font-semibold text-background shadow-lg backdrop-blur-sm"
       >
         {filteredCafes.length.toLocaleString()}개 카페
       </motion.div>

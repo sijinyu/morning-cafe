@@ -9,17 +9,31 @@ import { useFavorites } from '@/lib/hooks/use-favorites';
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
 
-function getMarkerColor(openingTime: string | null): string {
-  if (!openingTime) return '#6B7280'; // gray — unknown
+// Color palette — warm cafe tones per opening hour bracket
+interface MarkerColors {
+  fill: string;       // pin body
+  stroke: string;     // dark outline
+  cream: string;      // inner circle (cream)
+  steam: string;      // steam wisps
+  coffee: string;     // coffee liquid
+}
+
+function getMarkerColors(openingTime: string | null): MarkerColors {
+  if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#F3F0E8', steam: '#9CA3AF', coffee: '#6B7280' };
 
   const parts = openingTime.split(':');
-  const hours = parseInt(parts[0] ?? '0', 10);
-  const minutes = parseInt(parts[1] ?? '0', 10);
-  const totalMinutes = hours * 60 + minutes;
+  const totalMinutes = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
 
-  if (totalMinutes < 360) return '#EF4444';   // red   — before 06:00
-  if (totalMinutes < 420) return '#F59E0B';   // amber — 06:xx
-  return '#10B981';                            // green — 07:xx
+  if (totalMinutes < 360) {
+    // ~6시: warm coral red
+    return { fill: '#E8614D', stroke: '#2D3748', cream: '#FFF5F0', steam: '#E8614D', coffee: '#8B4513' };
+  }
+  if (totalMinutes < 420) {
+    // 6~7시: warm orange (like the reference image)
+    return { fill: '#F28B4E', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F28B4E', coffee: '#8B5E3C' };
+  }
+  // 7~8시: warm sage green
+  return { fill: '#6BAF7A', stroke: '#2D3748', cream: '#F5FFF5', steam: '#6BAF7A', coffee: '#5D4037' };
 }
 
 interface CafeMarkerProps {
@@ -29,67 +43,96 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Minimal dot marker — clean, modern, map-native feel
-// Normal: small pill dot · Selected: larger with ring · Favorite: heart badge
-function buildMarkerSvg(color: string, selected: boolean, fav: boolean): string {
+// Pin-drop marker with coffee cup icon — warm, illustrated style
+// Inspired by: thick outline pin, cream inner circle, coffee cup with steam
+function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): string {
+  const { fill, stroke, cream, steam, coffee } = colors;
+
   if (selected) {
-    // Selected: large frosted-glass pill with subtle ring
-    const s = 52;
-    const cx = s / 2;
-    const cy = 20;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s + 6}" viewBox="0 0 ${s} ${s + 6}">
+    // Selected: large pin (48x56)
+    const w = 48;
+    const h = 58;
+    const cx = w / 2;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
       <defs>
-        <filter id="ds" x="-40%" y="-20%" width="180%" height="160%">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="${color}" flood-opacity="0.35"/>
+        <filter id="ds" x="-30%" y="-10%" width="160%" height="140%">
+          <feDropShadow dx="2" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.2"/>
         </filter>
       </defs>
-      <circle cx="${cx}" cy="${cy}" r="18" fill="${color}" filter="url(#ds)"/>
-      <circle cx="${cx}" cy="${cy}" r="15" fill="white" opacity="0.2"/>
-      <circle cx="${cx}" cy="${cy}" r="8" fill="white" opacity="0.95"/>
-      <circle cx="${cx}" cy="${cy}" r="4.5" fill="${color}"/>
-      ${fav ? `<circle cx="${cx + 13}" cy="${cy - 10}" r="8" fill="white"/>
-      <path d="M${cx + 13} ${cy - 5} l-1.2-1.1c-3.2-2.9-5.3-4.8-5.3-7.1 0-1.9 1.5-3.3 3.3-3.3 1 0 2.1.5 2.7 1.3.6-.8 1.7-1.3 2.7-1.3 1.8 0 3.3 1.4 3.3 3.3 0 2.3-2.1 4.2-5.3 7.1z" fill="#EF4444"/>` : ''}
-      <polygon points="${cx},${cy + 18} ${cx - 6},${cy + 8} ${cx + 6},${cy + 8}" fill="${color}" opacity="0.9"/>
+      <!-- pin body -->
+      <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 18} 32 ${cx - 18} 20 C${cx - 18} 10 ${cx - 10} 2 ${cx} 2 C${cx + 10} 2 ${cx + 18} 10 ${cx + 18} 20 C${cx + 18} 32 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+        fill="${fill}" stroke="${stroke}" stroke-width="2" filter="url(#ds)"/>
+      <!-- highlight gloss -->
+      <ellipse cx="${cx - 5}" cy="12" rx="4" ry="6" fill="white" opacity="0.3"/>
+      <!-- cream inner circle -->
+      <circle cx="${cx}" cy="20" r="12" fill="${cream}" stroke="${stroke}" stroke-width="1.5"/>
+      <!-- coffee cup body -->
+      <rect x="${cx - 6}" y="18" width="12" height="9" rx="1.5" fill="none" stroke="${stroke}" stroke-width="1.2"/>
+      <!-- handle -->
+      <path d="M${cx + 6} 20 Q${cx + 9} 20 ${cx + 9} 23 Q${cx + 9} 26 ${cx + 6} 26" fill="none" stroke="${stroke}" stroke-width="1"/>
+      <!-- coffee liquid -->
+      <rect x="${cx - 5}" y="21" width="10" height="5" rx="1" fill="${coffee}" opacity="0.6"/>
+      <!-- steam wisps -->
+      <path d="M${cx - 3} 17 Q${cx - 4} 14 ${cx - 2} 12" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+      <path d="M${cx} 16 Q${cx + 1} 13 ${cx - 1} 11" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+      <path d="M${cx + 3} 17 Q${cx + 4} 14 ${cx + 2} 12" fill="none" stroke="${steam}" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+      ${fav ? `<circle cx="${cx + 14}" cy="6" r="7" fill="white" stroke="${stroke}" stroke-width="1"/>
+      <path d="M${cx + 14} 10 l-1-0.9c-2.6-2.3-4.2-3.9-4.2-5.7 0-1.5 1.2-2.6 2.6-2.6 0.8 0 1.7 0.4 2.2 1 0.5-0.6 1.4-1 2.2-1 1.4 0 2.6 1.1 2.6 2.6 0 1.8-1.6 3.4-4.2 5.7z" fill="#EF4444"/>` : ''}
     </svg>`;
   }
 
-  // Normal: compact dot
-  const s = fav ? 34 : 28;
-  const cx = s / 2;
-  const cy = s / 2;
-  const r = fav ? 11 : 9;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+  // Normal: small pin (32x40) or (36x44) for favorites
+  const w = fav ? 36 : 32;
+  const h = fav ? 44 : 40;
+  const cx = w / 2;
+  const pinTop = 2;
+  const circleY = 15;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <defs>
-      <filter id="ds" x="-30%" y="-20%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+      <filter id="ds" x="-25%" y="-10%" width="150%" height="140%">
+        <feDropShadow dx="1.5" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/>
       </filter>
     </defs>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" filter="url(#ds)" stroke="white" stroke-width="2"/>
-    ${fav ? `<circle cx="${cx + 8}" cy="${cy - 8}" r="6" fill="white"/>
-    <path d="M${cx + 8} ${cy - 4.5} l-.9-.8c-2.3-2.1-3.8-3.5-3.8-5.1 0-1.3 1-2.4 2.4-2.4.7 0 1.5.4 2 .9.4-.6 1.2-.9 2-.9 1.3 0 2.4 1.1 2.4 2.4 0 1.6-1.5 3-3.8 5.1z" fill="#EF4444"/>` : ''}
+    <!-- pin body -->
+    <path d="M${cx} ${h - 2} C${cx} ${h - 2} ${cx - 13} 25 ${cx - 13} ${circleY} C${cx - 13} ${pinTop + 5} ${cx - 7} ${pinTop} ${cx} ${pinTop} C${cx + 7} ${pinTop} ${cx + 13} ${pinTop + 5} ${cx + 13} ${circleY} C${cx + 13} 25 ${cx} ${h - 2} ${cx} ${h - 2}Z"
+      fill="${fill}" stroke="${stroke}" stroke-width="1.5" filter="url(#ds)"/>
+    <!-- highlight gloss -->
+    <ellipse cx="${cx - 3}" cy="${pinTop + 5}" rx="3" ry="4" fill="white" opacity="0.25"/>
+    <!-- cream inner circle -->
+    <circle cx="${cx}" cy="${circleY}" r="8.5" fill="${cream}" stroke="${stroke}" stroke-width="1"/>
+    <!-- coffee cup (simplified) -->
+    <rect x="${cx - 4}" y="${circleY - 1}" width="8" height="6" rx="1" fill="none" stroke="${stroke}" stroke-width="0.9"/>
+    <path d="M${cx + 4} ${circleY} Q${cx + 6} ${circleY} ${cx + 6} ${circleY + 2} Q${cx + 6} ${circleY + 4} ${cx + 4} ${circleY + 4}" fill="none" stroke="${stroke}" stroke-width="0.7"/>
+    <!-- coffee -->
+    <rect x="${cx - 3}" y="${circleY + 1}" width="6" height="3" rx="0.5" fill="${coffee}" opacity="0.5"/>
+    <!-- steam (single wisp) -->
+    <path d="M${cx} ${circleY - 3} Q${cx + 1} ${circleY - 5} ${cx - 1} ${circleY - 7}" fill="none" stroke="${steam}" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+    ${fav ? `<circle cx="${cx + 10}" cy="5" r="6" fill="white" stroke="${stroke}" stroke-width="0.8"/>
+    <path d="M${cx + 10} 8.5 l-0.8-0.7c-2.1-1.9-3.5-3.2-3.5-4.7 0-1.2 1-2.2 2.2-2.2 0.6 0 1.3 0.3 1.7 0.8 0.4-0.5 1.1-0.8 1.7-0.8 1.2 0 2.2 0.9 2.2 2.2 0 1.5-1.4 2.8-3.5 4.7z" fill="#EF4444"/>` : ''}
   </svg>`;
 }
 
 // Cache SVG data URIs to avoid re-encoding on every render
 const markerCache: Record<string, string> = {};
 
-function getMarkerDataUri(color: string, selected: boolean, fav: boolean): string {
-  const key = `${color}-${selected}-${fav}`;
+function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean): string {
+  const key = `${colors.fill}-${selected}-${fav}`;
   let uri = markerCache[key];
   if (!uri) {
-    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildMarkerSvg(color, selected, fav))}`;
+    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildMarkerSvg(colors, selected, fav))}`;
     markerCache[key] = uri;
   }
   return uri;
 }
 
 function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
-  const color = getMarkerColor(cafe.opening_time);
+  const colors = getMarkerColors(cafe.opening_time);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
-  const w = isSelected ? 52 : (fav ? 34 : 28);
-  const h = isSelected ? 58 : (fav ? 34 : 28);
-  const offsetY = isSelected ? h - 6 : h / 2;
+  const w = isSelected ? 48 : (fav ? 36 : 32);
+  const h = isSelected ? 58 : (fav ? 44 : 40);
+  const offsetY = h - 2; // pin tip is at bottom
 
   return (
     <MapMarker
@@ -98,7 +141,7 @@ function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerP
       onClick={() => onSelect(cafe)}
       zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{
-        src: getMarkerDataUri(color, isSelected, fav),
+        src: getMarkerDataUri(colors, isSelected, fav),
         size: { width: w, height: h },
         options: { offset: { x: w / 2, y: offsetY } },
       }}
@@ -157,18 +200,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
 
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const selectedCafe = useCafeStore((state) => state.selectedCafe);
-  // Subscribe to cafes directly so the component re-renders when fetchCafes()
-  // resolves and populates the store. Without this subscription, filteredCafes()
-  // is only invoked once at mount (when cafes is still []) because Zustand sees
-  // the stable filteredCafes function reference and skips re-renders.
-  useCafeStore((state) => state.cafes);
-  const filteredCafes = useCafeStore((state) => state.filteredCafes)();
-  // Re-render when filters change
-  useCafeStore((state) => state.timeFilter);
-  useCafeStore((state) => state.hideChains);
-  useCafeStore((state) => state.dayFilter);
-  useCafeStore((state) => state.guFilter);
-  useCafeStore((state) => state.hide24h);
+  const filteredCafes = useCafeStore((state) => state.filteredCafes);
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const [viewportBounds, setViewportBounds] = useState<ViewportBounds | null>(null);

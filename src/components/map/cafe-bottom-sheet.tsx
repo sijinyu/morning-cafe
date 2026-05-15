@@ -8,19 +8,13 @@ import {
   Phone,
   ExternalLink,
   Copy,
-  ChevronDown,
-  ChevronUp,
-  Clock,
   Check,
   Heart,
   Share2,
   Navigation,
   Bell,
   BellOff,
-  StickyNote,
   Star,
-  ImageIcon,
-  UtensilsCrossed,
 } from 'lucide-react';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
@@ -28,86 +22,12 @@ import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
+import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
-
-// ---- helpers ----------------------------------------------------------------
-
-function formatOpeningTime(openingTime: string | null): string {
-  if (!openingTime) return '정보 없음';
-  const parts = openingTime.split(':');
-  const hours = parts[0] ?? '00';
-  const minutes = parts[1] ?? '00';
-  return `${hours}:${minutes}`;
-}
-
-function getOpeningBadgeStyle(openingTime: string | null): string {
-  if (!openingTime) return 'bg-muted text-muted-foreground';
-  const parts = openingTime.split(':');
-  const totalMinutes = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
-  if (totalMinutes < 360) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-  if (totalMinutes < 420) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
-  return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-}
-
-const DAY_ORDER = ['월', '화', '수', '목', '금', '토', '일'];
-
-// ---- sub-components ---------------------------------------------------------
-
-interface HoursSectionProps {
-  hoursByDay: Record<string, string> | null;
-}
-
-function HoursSection({ hoursByDay }: HoursSectionProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (!hoursByDay || Object.keys(hoursByDay).length === 0) return null;
-
-  const entries = DAY_ORDER
-    .filter((day) => day in hoursByDay)
-    .map((day) => ({ day, hours: hoursByDay[day] ?? '' }));
-
-  if (entries.length === 0) return null;
-
-  return (
-    <div>
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-center justify-between py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          <span>요일별 영업시간</span>
-        </div>
-        {expanded ? (
-          <ChevronUp className="h-4 w-4" />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
-        )}
-      </button>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="mt-1 rounded-2xl bg-muted/50 px-4 py-3 space-y-1.5">
-              {entries.map(({ day, hours }) => (
-                <div key={day} className="flex justify-between text-sm">
-                  <span className="font-medium text-muted-foreground w-6">{day}</span>
-                  <span className="text-foreground">{hours}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+import { PhotoCarousel } from './bottom-sheet/photo-carousel';
+import { MenuSection } from './bottom-sheet/menu-section';
+import { HoursSection } from './bottom-sheet/hours-section';
+import { MemoSection } from './bottom-sheet/memo-section';
 
 // ---- height states ----------------------------------------------------------
 
@@ -133,9 +53,6 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { addRecent } = useRecentCafes();
   const { photos, menu, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
-  const [photoIdx, setPhotoIdx] = useState(0);
-  const [memoOpen, setMemoOpen] = useState(false);
-  const [memoText, setMemoText] = useState('');
   const favorited = isFavorite(cafe.id);
   const reminded = hasReminder(cafe.id);
   const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
@@ -152,11 +69,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
   useEffect(() => {
     setSheetState('half');
-    setPhotoIdx(0);
-    setMemoOpen(false);
-    setMemoText(getMemo(cafe.id));
     addRecent(cafe.id);
-  }, [cafe.id, addRecent, getMemo]);
+  }, [cafe.id, addRecent]);
 
   function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const velocity = info.velocity.y;
@@ -304,109 +218,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           <div className="px-5 pb-6 space-y-4">
             <div className="h-px bg-border" />
 
-            {/* Photo swipeable carousel */}
-            <div className="relative h-40 rounded-2xl overflow-hidden bg-muted/50">
-              {photosLoading ? (
-                <div className="flex h-full items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground/30 border-t-foreground" />
-                </div>
-              ) : photos.length > 0 ? (
-                <>
-                  <motion.div
-                    className="flex h-full"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.15}
-                    onDragEnd={(_, info) => {
-                      const threshold = 50;
-                      if (info.offset.x < -threshold) {
-                        setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
-                      } else if (info.offset.x > threshold) {
-                        setPhotoIdx((i) => Math.max(i - 1, 0));
-                      }
-                    }}
-                    animate={{ x: `-${photoIdx * (100 / photos.length)}%` }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    style={{ width: `${photos.length * 100}%`, touchAction: 'pan-y' }}
-                  >
-                    {photos.map((url, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={url}
-                        src={url}
-                        alt={`${cafe.name} 사진 ${i + 1}`}
-                        className="h-full object-cover pointer-events-none"
-                        style={{ width: `${100 / photos.length}%` }}
-                        draggable={false}
-                      />
-                    ))}
-                  </motion.div>
-                  {/* Dots indicator */}
-                  {photos.length > 1 && (
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                      {photos.map((_, i) => (
-                        <span
-                          key={i}
-                          className={cn(
-                            'h-1.5 rounded-full transition-all duration-200',
-                            i === photoIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50',
-                          )}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {cafe.place_url && (
-                    <a
-                      href={`${cafe.place_url}#photo`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] text-white backdrop-blur-sm"
-                    >
-                      <ImageIcon className="h-3 w-3" />
-                      더보기
-                    </a>
-                  )}
-                </>
-              ) : (
-                <a
-                  href={cafe.place_url ? `${cafe.place_url}#photo` : '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-full flex-col items-center justify-center gap-1"
-                >
-                  <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-                  <span className="text-xs text-muted-foreground">카카오맵 사진 보기</span>
-                </a>
-              )}
-            </div>
+            <PhotoCarousel
+              photos={photos}
+              loading={photosLoading}
+              cafeName={cafe.name}
+              placeUrl={cafe.place_url}
+            />
 
-            {/* Menu */}
-            {menu.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
-                  <UtensilsCrossed className="h-4 w-4" />
-                  <span>메뉴</span>
-                </div>
-                <div className="rounded-2xl bg-muted/50 px-4 py-3 space-y-2">
-                  {menu.map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      {item.photo && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.photo}
-                          alt={item.name}
-                          className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
-                        />
-                      )}
-                      <span className="flex-1 text-sm text-foreground truncate">{item.name}</span>
-                      {item.price && (
-                        <span className="text-sm font-medium text-foreground/70 flex-shrink-0">{item.price}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <MenuSection menu={menu} />
 
             {/* Address */}
             <div className="flex items-start gap-3">
@@ -456,59 +275,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </a>
             </div>
 
-            {/* Hours by day */}
             <HoursSection hoursByDay={cafe.hours_by_day} />
 
-            {/* 내 메모 */}
-            <div>
-              <button
-                onClick={() => setMemoOpen((v) => !v)}
-                className="flex w-full items-center justify-between py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4" />
-                  <span>내 메모</span>
-                  {getMemo(cafe.id) && !memoOpen && (
-                    <span className="text-xs text-foreground/60 truncate max-w-[160px]">{getMemo(cafe.id)}</span>
-                  )}
-                </div>
-                {memoOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </button>
-
-              <AnimatePresence>
-                {memoOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="mt-1 rounded-2xl bg-muted/50 p-3">
-                      <textarea
-                        value={memoText}
-                        onChange={(e) => setMemoText(e.target.value)}
-                        onBlur={() => setMemo(cafe.id, memoText)}
-                        placeholder="이 카페에 대한 메모를 남겨보세요..."
-                        className="w-full resize-none rounded-xl bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
-                        rows={3}
-                      />
-                      <div className="mt-1.5 flex justify-end">
-                        <button
-                          onClick={() => {
-                            setMemo(cafe.id, memoText);
-                            setMemoOpen(false);
-                          }}
-                          className="rounded-lg bg-foreground px-3 py-1 text-xs font-medium text-background"
-                        >
-                          저장
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <MemoSection cafeId={cafe.id} getMemo={getMemo} setMemo={setMemo} />
 
             {/* 리뷰 링크 */}
             {cafe.place_url && (
@@ -593,13 +362,8 @@ export function CafeBottomSheetWrapper() {
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const [wasOpen, setWasOpen] = useState(false);
 
-  // Track whether sheet was already open (for skipping enter animation on cafe switch)
   useEffect(() => {
     if (selectedCafe) {
-      // If sheet was already showing, skip animation
-      if (wasOpen) {
-        // will render without AnimatePresence enter animation via key=stable
-      }
       setWasOpen(true);
     } else {
       setWasOpen(false);
