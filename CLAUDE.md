@@ -106,6 +106,16 @@ src/
 │   └── supabase/
 │       ├── client.ts               # 브라우저용 Supabase 클라이언트
 │       └── server.ts               # 서버용 (service_role) 클라이언트
+│
+scripts/
+├── generate-stats.js               # 통계 리포트 생성 (→ docs/seoul-morning-cafe-stats.md)
+├── seed-cafes.ts                    # 카페 데이터 시딩
+├── check-db.ts                      # DB 상태 확인
+└── ...
+│
+docs/
+├── seoul-morning-cafe-stats.md      # 자동 생성 통계 리포트
+└── ...
 ```
 
 ---
@@ -209,6 +219,9 @@ npm install          # 의존성 설치
 npm run dev          # 개발 서버 (localhost:3000)
 npm run build        # 프로덕션 빌드
 npm run lint         # ESLint
+
+# 통계 리포트 생성
+node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 ```
 
 ---
@@ -226,7 +239,7 @@ npm run lint         # ESLint
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
 8. **상세보기 수직 간격**: 모든 상세 행(별점, 장점칩, 주차, 편의시설, 주소, 전화, 인스타)은 `space-y-0` 그룹 내 각 `py-2.5`로 통일.
 9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 유시진 All rights reserved."
-10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-8 w-8`, 아이콘 `h-[18px] w-[18px]`, gap 없음.
+10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-7 w-7`, 아이콘 `h-[18px] w-[18px]`, gap 없음. 밀착 배치.
 11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝커피" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.

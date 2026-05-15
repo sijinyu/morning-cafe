@@ -181,14 +181,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           </div>
         </div>
 
-        <div className="flex items-center -mr-1 flex-shrink-0">
+        <div className="flex items-center -mr-2 flex-shrink-0">
           {canRemind && (
             <motion.button
               onClick={handleBellClick}
               whileTap={{ scale: 0.85 }}
               animate={{ scale: reminded ? [1, 1.25, 1] : 1 }}
               transition={{ duration: 0.25 }}
-              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
               aria-label={reminded ? '알림 제거' : '오픈 알림 설정'}
             >
               {reminded ? (
@@ -203,7 +203,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             whileTap={{ scale: 0.85 }}
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label={favorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
           >
             <Heart
@@ -215,7 +215,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           </motion.button>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label="닫기"
           >
             <X className="h-3.5 w-3.5 text-muted-foreground" />
