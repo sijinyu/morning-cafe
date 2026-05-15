@@ -94,8 +94,8 @@ function Dropdown({ trigger, open, onToggle, children, align = 'left' }: Dropdow
 // ---- chip styles ------------------------------------------------------------
 
 const CHIP_BASE = 'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all duration-150';
-const CHIP_ACTIVE = `${CHIP_BASE} bg-primary text-primary-foreground shadow-sm`;
-const CHIP_INACTIVE = `${CHIP_BASE} bg-background/80 text-muted-foreground backdrop-blur-md border border-border hover:bg-background`;
+const CHIP_ACTIVE = `${CHIP_BASE} bg-primary text-primary-foreground shadow-md`;
+const CHIP_INACTIVE = `${CHIP_BASE} bg-background/80 text-muted-foreground backdrop-blur-md border border-border shadow-sm hover:bg-background hover:shadow-md`;
 
 // ---- main component ---------------------------------------------------------
 

@@ -2,24 +2,16 @@
   <!-- Background -->
   <rect width="512" height="512" rx="112" fill="#F59E0B"/>
 
-  <!-- Coffee cup body -->
-  <rect x="128" y="180" width="200" height="180" rx="24" fill="white"/>
+  <!-- Coffee cup body — 중앙, 미니멀 -->
+  <rect x="136" y="168" width="192" height="176" rx="28" fill="white"/>
 
   <!-- Cup handle -->
-  <path d="M328 220 C370 220 390 260 390 280 C390 300 370 340 328 340"
+  <path d="M328 216 C368 216 388 252 388 272 C388 292 368 328 328 328"
         fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
 
   <!-- Coffee surface -->
-  <ellipse cx="228" cy="240" rx="76" ry="12" fill="#5C3A1E" opacity="0.4"/>
+  <ellipse cx="232" cy="228" rx="72" ry="14" fill="#92400E" opacity="0.35"/>
 
-  <!-- Steam lines -->
-  <path d="M188 155 C188 135 208 135 208 115" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
-  <path d="M228 145 C228 125 248 125 248 105" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
-  <path d="M268 155 C268 135 288 135 288 115" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
-
-  <!-- Saucer -->
-  <ellipse cx="228" cy="370" rx="120" ry="18" fill="white" opacity="0.9"/>
-
-  <!-- AM text -->
-  <text x="256" y="460" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="white" letter-spacing="4">AM</text>
+  <!-- Glossy highlight -->
+  <rect x="160" y="184" width="56" height="24" rx="12" fill="white" opacity="0.3"/>
 </svg>
