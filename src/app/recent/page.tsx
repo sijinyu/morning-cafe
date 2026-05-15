@@ -88,7 +88,7 @@ function RecentCafeItem({ cafe, onSelect }: { cafe: Cafe; onSelect: () => void }
   const openStatus = cafe24h ? ('open' as const) : getOpenStatus(cafe);
   const openingFormatted = cafe24h ? '24시간' : formatOpeningTime(cafe.opening_time);
   const badgeStyle = cafe24h
-    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     : getOpeningBadgeStyle(cafe.opening_time);
 
   return (

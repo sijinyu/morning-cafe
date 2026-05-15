@@ -111,7 +111,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const displayAddress = cafe.road_address ?? cafe.address;
   const is24h = is24Hours(cafe);
   const openingFormatted = is24h ? '24시간' : formatOpeningTime(cafe.opening_time);
-  const badgeStyle = is24h ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : getOpeningBadgeStyle(cafe.opening_time);
+  const badgeStyle = is24h ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : getOpeningBadgeStyle(cafe.opening_time);
   const openStatus = is24h ? 'open' as const : getOpenStatus(cafe);
 
   const instagramHref = cafe.instagram_url
@@ -226,7 +226,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       {/* Scrollable detail content */}
       {sheetState !== 'peek' && (
         <div className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="px-5 pb-6 space-y-4">
+          <div className="px-5 pb-6 space-y-3">
             <div className="h-px bg-border" />
 
             <PhotoCarousel
@@ -236,11 +236,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               placeUrl={cafe.place_url}
             />
 
-            {/* All detail rows — uniform py-2.5 spacing */}
+            {/* All detail rows — compact spacing */}
             <div className="space-y-0">
               {/* Rating */}
               {rating && (
-                <div className="flex items-center gap-3 py-2.5">
+                <div className="flex items-center gap-2 py-1.5">
                   <Star className="h-4 w-4 fill-amber-400 stroke-amber-400 flex-shrink-0" />
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-semibold text-foreground">{rating.score.toFixed(1)}</span>
@@ -253,7 +253,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
               {/* Strengths */}
               {strengths.length > 0 && (
-                <div className="py-2.5">
+                <div className="py-1.5">
                   <div className="flex flex-wrap gap-1.5">
                     {strengths.map((s) => (
                       <span key={s} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{s}</span>
@@ -264,7 +264,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
               {/* Parking */}
               {parking && (
-                <div className="flex items-center gap-3 py-2.5">
+                <div className="flex items-center gap-2 py-1.5">
                   <Car className={cn('h-4 w-4 flex-shrink-0', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
                   <div className="flex-1 min-w-0">
                     <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
@@ -279,7 +279,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
               {/* Facilities */}
               {facilities.length > 0 && (
-                <div className="py-2.5">
+                <div className="py-1.5">
                   <div className="flex flex-wrap gap-1.5">
                     {facilities.map((f) => (
                       <span key={f} className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">{f}</span>
@@ -289,12 +289,12 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               )}
 
               {/* Address */}
-              <div className="flex items-center gap-3 py-2.5">
+              <div className="flex items-center gap-2 py-1.5">
                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
                 <button
                   onClick={handleCopyAddress}
-                  className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                  className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
                   aria-label="주소 복사"
                 >
                   {copied ? (
@@ -307,7 +307,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
               {/* Phone */}
               {cafe.phone && (
-                <div className="flex items-center gap-3 py-2.5">
+                <div className="flex items-center gap-2 py-1.5">
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <a
                     href={`tel:${cafe.phone}`}
@@ -317,7 +317,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   </a>
                   <button
                     onClick={handleCopyPhone}
-                    className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
                     aria-label="전화번호 복사"
                   >
                     {phoneCopied ? (
@@ -330,7 +330,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               )}
 
               {/* Instagram */}
-              <div className="flex items-center gap-3 py-2.5">
+              <div className="flex items-center gap-2 py-1.5">
                 <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <a
                   href={instagramHref}
@@ -354,13 +354,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <MemoSection cafeId={cafe.id} getMemo={getMemo} setMemo={setMemo} />
 
-            {/* 리뷰 링크 */}
+            {/* 리뷰 링크 — place.map.kakao.com/{id} → 끝에 #comment 대신 별도 경로 */}
             {cafe.place_url && (
               <a
-                href={`${cafe.place_url}#comment`}
+                href={cafe.place_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name, action: 'review' })}
+                className="flex items-center gap-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Star className="h-4 w-4" />
                 <span>카카오맵 리뷰 보기</span>

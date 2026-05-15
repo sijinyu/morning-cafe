@@ -168,11 +168,11 @@ const USER_DOT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="${USER_DOT_
     .ring { animation: pulse 1.8s ease-out infinite; }
   </style>
   <!-- pulsing ring -->
-  <circle class="ring" cx="20" cy="20" r="10" fill="#3B82F6" opacity="0.55"/>
+  <circle class="ring" cx="20" cy="20" r="10" fill="#F59E0B" opacity="0.55"/>
   <!-- white border -->
   <circle cx="20" cy="20" r="9" fill="white"/>
   <!-- blue core -->
-  <circle cx="20" cy="20" r="6.5" fill="#3B82F6"/>
+  <circle cx="20" cy="20" r="6.5" fill="#F59E0B"/>
 </svg>`;
 
 export interface CafeMapProps {

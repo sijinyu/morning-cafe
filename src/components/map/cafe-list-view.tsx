@@ -84,7 +84,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm truncate">{cafe.name}</span>
                     {cafe24h && (
-                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                         24시간
                       </span>
                     )}
