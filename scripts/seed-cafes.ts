@@ -1,18 +1,14 @@
 /**
- * Local seeding script — runs on your machine, no Edge Function limits.
+ * Seoul Cafe Seeder v2 — Optimized for speed
  *
- * 1. Scans Seoul grid via Kakao Local API (CE7 category)
- * 2. For each discovered cafe, fetches place detail from Kakao internal API
- * 3. Parses opening hours, determines earlybird status
- * 4. Upserts into Supabase via the upsert_cafe_with_location RPC
+ * Key optimizations:
+ * 1. Phase 1: 10 concurrent grid cell searches (was sequential)
+ * 2. Phase 2: 5 concurrent detail fetches (was sequential)
+ * 3. Batch upsert: 100 rows per request (was 1)
+ * 4. Skip detail fetch for cafes already in DB with opening_time
+ * 5. Minimal sleep between batches
  *
- * Usage:
- *   npx tsx scripts/seed-cafes.ts
- *
- * Requires .env.local with:
- *   KAKAO_REST_API_KEY
- *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY  (not the anon key!)
+ * Usage:  npx tsx scripts/seed-cafes.ts
  */
 
 import { config } from 'dotenv';
@@ -31,13 +27,17 @@ if (!KAKAO_REST_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
-// 서울특별시 행정경계 (경기도 제외)
 const SEOUL_BOUNDS = { minLat: 37.428, maxLat: 37.701, minLng: 126.764, maxLng: 127.183 };
-const GRID_RADIUS = 2000;
-const OVERLAP_FACTOR = 0.75;
+const GRID_RADIUS = 500;
+const OVERLAP_FACTOR = 0.5;
 const EARTH_RADIUS_M = 6_371_000;
 const DEG_PER_M_LAT = 1 / ((Math.PI / 180) * EARTH_RADIUS_M);
 const EARLYBIRD_THRESHOLD = '08:00';
+
+// Concurrency limits
+const PHASE1_CONCURRENCY = 10;  // grid searches in parallel
+const PHASE2_CONCURRENCY = 5;   // detail fetches in parallel
+const BATCH_UPSERT_SIZE = 100;  // rows per upsert
 
 // ---------------------------------------------------------------------------
 // Grid
@@ -66,7 +66,7 @@ function generateGrid(): GridCell[] {
 }
 
 // ---------------------------------------------------------------------------
-// Kakao Local API (카페 목록)
+// Kakao Local API
 // ---------------------------------------------------------------------------
 
 interface KakaoPlace { id: string; place_name: string; phone: string; address_name: string; road_address_name: string; x: string; y: string; place_url: string; category_name: string }
@@ -77,7 +77,7 @@ async function searchCell(cell: GridCell): Promise<KakaoPlace[]> {
   const seen = new Set<string>();
   const results: KakaoPlace[] = [];
 
-  for (let page = 1; page <= 45; page++) {
+  for (let page = 1; page <= 3; page++) {  // max 3 pages = 45건 (API limit anyway)
     const params = new URLSearchParams({
       category_group_code: 'CE7', x: String(cell.centerLng), y: String(cell.centerLat),
       radius: String(cell.radius), page: String(page), size: '15', sort: 'distance',
@@ -87,7 +87,10 @@ async function searchCell(cell: GridCell): Promise<KakaoPlace[]> {
       headers: { Authorization: `KakaoAK ${KAKAO_REST_API_KEY}` },
     });
 
-    if (!res.ok) { console.warn(`  Kakao API ${res.status} at page ${page}`); break; }
+    if (!res.ok) {
+      if (res.status === 429) await sleep(1000);
+      break;
+    }
     const data = await res.json();
 
     for (const p of data.documents) {
@@ -95,14 +98,13 @@ async function searchCell(cell: GridCell): Promise<KakaoPlace[]> {
     }
 
     if (data.meta.is_end) break;
-    await sleep(100); // 빠르게 — 로컬이니까
   }
 
   return results;
 }
 
 // ---------------------------------------------------------------------------
-// Kakao Place Detail API (영업시간)
+// Kakao Place Detail API
 // ---------------------------------------------------------------------------
 
 const DETAIL_HEADERS = {
@@ -111,33 +113,29 @@ const DETAIL_HEADERS = {
   'pf': 'PC',
 };
 
-async function fetchDetail(placeId: string, retries = 3): Promise<any> {
+async function fetchDetail(placeId: string, retries = 2): Promise<any> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const res = await fetch(`https://place-api.map.kakao.com/places/panel3/${placeId}`, {
         headers: DETAIL_HEADERS,
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
       if (res.status === 429) {
-        // rate limited — back off exponentially
-        const backoff = attempt * 2000;
-        console.warn(`  Rate limited on ${placeId}, backing off ${backoff}ms...`);
-        await sleep(backoff);
+        await sleep(attempt * 2000);
         continue;
       }
       if (!res.ok) {
-        if (attempt < retries) { await sleep(1000); continue; }
+        if (attempt < retries) { await sleep(500); continue; }
         return null;
       }
       const data = await res.json();
-      // 빈 응답 체크 (카카오가 가끔 빈 객체 반환)
       if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-        if (attempt < retries) { await sleep(1000); continue; }
+        if (attempt < retries) { await sleep(500); continue; }
         return null;
       }
       return data;
     } catch {
-      if (attempt < retries) { await sleep(1000); continue; }
+      if (attempt < retries) { await sleep(500); continue; }
       return null;
     }
   }
@@ -195,34 +193,20 @@ function parseInstagram(detail: any): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Supabase upsert (REST API 직접 호출 — 의존성 0)
+// Supabase — batch upsert
 // ---------------------------------------------------------------------------
 
-async function upsertCafe(payload: {
+interface CafeRow {
   kakao_place_id: string; name: string; address: string; road_address: string | null;
-  phone: string | null; lng: number; lat: number; place_url: string | null;
+  phone: string | null; latitude: number; longitude: number; place_url: string | null;
   instagram_url: string | null; category: string | null;
   opening_time: string | null; closing_time: string | null;
   hours_by_day: Record<string, string> | null; is_earlybird: boolean;
-}): Promise<boolean> {
-  // Direct REST upsert — no RPC, no PostGIS, no bullshit
-  const row = {
-    kakao_place_id: payload.kakao_place_id,
-    name: payload.name,
-    address: payload.address,
-    road_address: payload.road_address,
-    phone: payload.phone,
-    latitude: payload.lat,
-    longitude: payload.lng,
-    place_url: payload.place_url,
-    instagram_url: payload.instagram_url,
-    category: payload.category,
-    opening_time: payload.opening_time,
-    closing_time: payload.closing_time,
-    hours_by_day: payload.hours_by_day,
-    is_earlybird: payload.is_earlybird,
-    last_crawled_at: new Date().toISOString(),
-  };
+  last_crawled_at: string;
+}
+
+async function batchUpsert(rows: CafeRow[]): Promise<number> {
+  if (!rows.length) return 0;
 
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/cafes?on_conflict=kakao_place_id`,
@@ -234,16 +218,66 @@ async function upsertCafe(payload: {
         'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
         'Prefer': 'resolution=merge-duplicates',
       },
-      body: JSON.stringify(row),
+      body: JSON.stringify(rows),
     },
   );
 
   if (!res.ok) {
     const err = await res.text();
-    console.error(`  Upsert failed: ${err}`);
-    return false;
+    console.error(`  Batch upsert failed (${rows.length} rows): ${err}`);
+    return 0;
   }
-  return true;
+  return rows.length;
+}
+
+/** Fetch existing kakao_place_ids from DB to skip redundant detail fetches */
+async function getExistingIds(): Promise<Set<string>> {
+  const ids = new Set<string>();
+  let offset = 0;
+  const limit = 1000;
+
+  while (true) {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/cafes?select=kakao_place_id,opening_time&opening_time=not.is.null&offset=${offset}&limit=${limit}`,
+      {
+        headers: {
+          'apikey': SERVICE_ROLE_KEY,
+          'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        },
+      },
+    );
+    if (!res.ok) break;
+    const data = await res.json();
+    for (const row of data) ids.add(row.kakao_place_id);
+    if (data.length < limit) break;
+    offset += limit;
+  }
+
+  return ids;
+}
+
+// ---------------------------------------------------------------------------
+// Concurrency helper
+// ---------------------------------------------------------------------------
+
+async function runConcurrent<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const i = nextIndex++;
+      results[i] = await fn(items[i]!, i);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
 }
 
 // ---------------------------------------------------------------------------
@@ -251,93 +285,128 @@ async function upsertCafe(payload: {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  console.log('=== Seoul Earlybird Cafe Seeder ===\n');
+  const startTime = Date.now();
+  console.log('=== Seoul Cafe Seeder v2 (Optimized) ===\n');
 
-  // Phase 1: 서울 그리드 스캔 → 카페 place ID 수집
+  // Load existing IDs to skip redundant detail fetches
+  console.log('Loading existing cafe IDs from DB...');
+  const existingIds = await getExistingIds();
+  console.log(`  ${existingIds.size} cafes already have opening_time in DB\n`);
+
+  // Phase 1: Parallel grid scan
   const grid = generateGrid();
-  console.log(`Grid cells: ${grid.length}`);
+  console.log(`Phase 1: Scanning ${grid.length} grid cells (${PHASE1_CONCURRENCY} concurrent)...\n`);
 
   const allPlaces = new Map<string, KakaoPlace>();
+  let cellsDone = 0;
 
-  for (let i = 0; i < grid.length; i++) {
-    const cell = grid[i];
-    if ((i + 1) % 10 === 0 || i === grid.length - 1) console.log(`[${i + 1}/${grid.length}] Scanning... (${allPlaces.size} cafes found)`);
-
+  await runConcurrent(grid, PHASE1_CONCURRENCY, async (cell, _i) => {
     try {
       const places = await searchCell(cell);
       for (const p of places) allPlaces.set(p.id, p);
     } catch (e) {
-      console.warn(`\n  Cell ${i + 1} error: ${e}`);
+      // silently continue
     }
+    cellsDone++;
+    if (cellsDone % 100 === 0 || cellsDone === grid.length) {
+      console.log(`  [${cellsDone}/${grid.length}] ${allPlaces.size} unique cafes`);
+    }
+    await sleep(20); // minimal delay
+  });
 
-    await sleep(50);
-  }
+  const phase1Time = ((Date.now() - startTime) / 1000).toFixed(0);
+  console.log(`\nPhase 1 done: ${allPlaces.size} unique cafes in ${phase1Time}s\n`);
 
-  console.log(`\n\nPhase 1 complete: ${allPlaces.size} unique cafes found\n`);
+  // Phase 2: Detail fetch + upsert (parallel)
+  // Filter: Seoul only + skip already-detailed cafes
+  const places = [...allPlaces.values()].filter(p => p.address_name.includes('서울'));
+  const needsDetail = places.filter(p => !existingIds.has(p.id));
+  const alreadyHaveDetail = places.filter(p => existingIds.has(p.id));
 
-  // Phase 2: 각 카페 상세 조회 → 영업시간 파싱 → DB upsert
-  const places = [...allPlaces.values()];
+  console.log(`Phase 2: ${places.length} Seoul cafes`);
+  console.log(`  ${alreadyHaveDetail.length} already in DB (will upsert basic info only)`);
+  console.log(`  ${needsDetail.length} need detail fetch (${PHASE2_CONCURRENCY} concurrent)\n`);
+
   let upserted = 0;
   let earlybirds = 0;
-  let skipped = 0;
   let detailFailed = 0;
   let noHours = 0;
+  const now = new Date().toISOString();
+  let batch: CafeRow[] = [];
 
-  for (let i = 0; i < places.length; i++) {
-    const place = places[i];
-    if ((i + 1) % 50 === 0 || i === places.length - 1) console.log(`[${i + 1}/${places.length}] earlybirds:${earlybirds} upserted:${upserted} detailFail:${detailFailed} noHours:${noHours} skipped:${skipped}`);
+  async function flushBatch() {
+    if (!batch.length) return;
+    const count = await batchUpsert(batch);
+    upserted += count;
+    batch = [];
+  }
 
-    // 상세 조회 — 랜덤 jitter로 rate limit 회피
-    const detail = await fetchDetail(place.id);
-    await sleep(400 + Math.random() * 200); // 400~600ms 랜덤 딜레이
-
-    const { openingTime, closingTime, hoursByDay } = detail ? parseHours(detail) : { openingTime: null, closingTime: null, hoursByDay: null };
-    const instagram = detail ? parseInstagram(detail) : null;
-    const isEarlybird = openingTime !== null && openingTime < EARLYBIRD_THRESHOLD;
-
-    if (!detail) {
-      detailFailed++;
-    } else if (!openingTime) {
-      noHours++;
-    }
-
-    const lng = parseFloat(place.x);
-    const lat = parseFloat(place.y);
-
-    if (isNaN(lng) || isNaN(lat)) { skipped++; continue; }
-
-    // 서울특별시 한정 — 주소에 "서울"이 없으면 스킵
-    if (!place.address_name.includes('서울')) { skipped++; continue; }
-
-    const ok = await upsertCafe({
+  function buildRow(place: KakaoPlace, openingTime: string | null, closingTime: string | null, hoursByDay: Record<string, string> | null, instagram: string | null): CafeRow {
+    return {
       kakao_place_id: place.id,
       name: place.place_name,
       address: place.address_name,
       road_address: place.road_address_name || null,
       phone: place.phone || null,
-      lng, lat,
+      latitude: parseFloat(place.y),
+      longitude: parseFloat(place.x),
       place_url: `https://place.map.kakao.com/${place.id}`,
       instagram_url: instagram,
       category: place.category_name?.split('>').pop()?.trim() ?? null,
       opening_time: openingTime,
       closing_time: closingTime,
       hours_by_day: hoursByDay,
-      is_earlybird: isEarlybird,
-    });
-
-    if (ok) {
-      upserted++;
-      if (isEarlybird) earlybirds++;
-    }
+      is_earlybird: openingTime !== null && openingTime < EARLYBIRD_THRESHOLD,
+      last_crawled_at: now,
+    };
   }
 
-  console.log(`\n\n=== Done ===`);
-  console.log(`Total cafes: ${places.length}`);
-  console.log(`Upserted: ${upserted}`);
-  console.log(`Earlybirds: ${earlybirds}`);
+  // 2a: Upsert already-known cafes (no detail fetch needed — just update basic info)
+  // These already have opening_time in DB, so we only upsert coords/name/address without wiping hours
+  // Actually skip these entirely — they're already complete in DB
+  console.log(`  Skipping ${alreadyHaveDetail.length} already-complete cafes\n`);
+
+  // 2b: Fetch details for new cafes
+  let detailDone = 0;
+
+  await runConcurrent(needsDetail, PHASE2_CONCURRENCY, async (place) => {
+    const detail = await fetchDetail(place.id);
+    await sleep(200 + Math.random() * 100); // 200-300ms jitter
+
+    const { openingTime, closingTime, hoursByDay } = detail ? parseHours(detail) : { openingTime: null, closingTime: null, hoursByDay: null };
+    const instagram = detail ? parseInstagram(detail) : null;
+
+    if (!detail) detailFailed++;
+    else if (!openingTime) noHours++;
+    if (openingTime !== null && openingTime < EARLYBIRD_THRESHOLD) earlybirds++;
+
+    const lng = parseFloat(place.x);
+    const lat = parseFloat(place.y);
+    if (isNaN(lng) || isNaN(lat)) return;
+
+    const row = buildRow(place, openingTime, closingTime, hoursByDay, instagram);
+    batch.push(row);
+
+    if (batch.length >= BATCH_UPSERT_SIZE) {
+      await flushBatch();
+    }
+
+    detailDone++;
+    if (detailDone % 100 === 0 || detailDone === needsDetail.length) {
+      console.log(`  [${detailDone}/${needsDetail.length}] upserted:${upserted} earlybirds:${earlybirds} failed:${detailFailed} noHours:${noHours}`);
+    }
+  });
+
+  await flushBatch(); // final batch
+
+  const totalTime = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
+  console.log(`\n=== Done in ${totalTime} min ===`);
+  console.log(`Total unique Seoul cafes found: ${places.length}`);
+  console.log(`New cafes upserted: ${upserted}`);
+  console.log(`New earlybirds: ${earlybirds}`);
   console.log(`Detail fetch failed: ${detailFailed}`);
   console.log(`No hours data: ${noHours}`);
-  console.log(`Skipped (non-Seoul/bad coords): ${skipped}`);
+  console.log(`Already in DB (skipped): ${alreadyHaveDetail.length}`);
 }
 
 main().catch(console.error);
