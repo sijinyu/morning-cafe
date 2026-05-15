@@ -75,7 +75,7 @@ export function SplashScreen({ ready }: SplashScreenProps) {
               {/* 핀 몸체 — 둥근 상단 + 뾰족한 하단 */}
               <path
                 d="M50 126C50 126 10 72 10 42C10 19.9 27.9 2 50 2C72.1 2 90 19.9 90 42C90 72 50 126 50 126Z"
-                fill="#E8501F"
+                fill="#F59E0B"
               />
               {/* 핀 하이라이트 (glossy) */}
               <ellipse
@@ -105,7 +105,7 @@ export function SplashScreen({ ready }: SplashScreenProps) {
 
           {/* 로고 텍스트 */}
           <motion.h1
-            className="text-2xl font-black tracking-tight text-[#E8501F] dark:text-[#F0733E]"
+            className="text-2xl font-black tracking-tight text-[#F59E0B] dark:text-[#FBBF24]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -134,9 +134,9 @@ export function SplashScreen({ ready }: SplashScreenProps) {
               Loading...
             </span>
             {/* 프로그레스 바 */}
-            <div className="h-1 w-32 overflow-hidden rounded-full bg-[#E8501F]/15 dark:bg-[#F0733E]/15">
+            <div className="h-1 w-32 overflow-hidden rounded-full bg-[#F59E0B]/15 dark:bg-[#FBBF24]/15">
               <motion.div
-                className="h-full rounded-full bg-[#E8501F] dark:bg-[#F0733E]"
+                className="h-full rounded-full bg-[#F59E0B] dark:bg-[#FBBF24]"
                 initial={{ width: '0%' }}
                 animate={{ width: '100%' }}
                 transition={{

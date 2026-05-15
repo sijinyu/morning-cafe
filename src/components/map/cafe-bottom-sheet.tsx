@@ -364,7 +364,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               >
                 <Star className="h-4 w-4" />
                 <span>카카오맵 리뷰 보기</span>
-                <ExternalLink className="h-3 w-3 ml-auto" />
+                <ExternalLink className="h-4 w-4 ml-auto" />
               </a>
             )}
 

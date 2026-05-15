@@ -89,7 +89,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
       <motion.div
         animate={{
           boxShadow: focused
-            ? '0 4px 24px rgba(232,80,31,0.18)'
+            ? '0 4px 24px rgba(245,158,11,0.2)'
             : '0 2px 8px rgba(0,0,0,0.08)',
         }}
         className={cn(

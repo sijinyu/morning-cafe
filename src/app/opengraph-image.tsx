@@ -27,7 +27,7 @@ export default function OgImage() {
             style={{
               fontSize: 72,
               fontWeight: 900,
-              color: '#E8501F',
+              color: '#F59E0B',
               lineHeight: 1.1,
               letterSpacing: '-0.02em',
             }}
@@ -38,7 +38,7 @@ export default function OgImage() {
             style={{
               fontSize: 72,
               fontWeight: 900,
-              color: '#E8501F',
+              color: '#F59E0B',
               lineHeight: 1.1,
               letterSpacing: '-0.02em',
             }}
@@ -73,9 +73,9 @@ export default function OgImage() {
                 style={{
                   padding: '8px 18px',
                   borderRadius: 999,
-                  border: '2px solid #E8501F',
+                  border: '2px solid #F59E0B',
                   backgroundColor: '#FFF8F0',
-                  color: '#E8501F',
+                  color: '#F59E0B',
                   fontSize: 18,
                   fontWeight: 600,
                 }}
@@ -144,7 +144,7 @@ export default function OgImage() {
             {/* 핀 몸체 */}
             <path
               d="M50 126C50 126 10 72 10 42C10 19.9 27.9 2 50 2C72.1 2 90 19.9 90 42C90 72 50 126 50 126Z"
-              fill="#E8501F"
+              fill="#F59E0B"
             />
             {/* 하이라이트 */}
             <ellipse cx="38" cy="28" rx="18" ry="14" fill="white" opacity="0.18" />

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <!-- Background -->
-  <rect width="512" height="512" rx="112" fill="#E8501F"/>
+  <rect width="512" height="512" rx="112" fill="#F59E0B"/>
 
   <!-- Coffee cup body -->
   <rect x="128" y="180" width="200" height="180" rx="24" fill="white"/>
