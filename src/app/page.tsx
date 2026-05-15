@@ -73,7 +73,7 @@ export default function MapPage() {
           <CafeBottomSheetWrapper />
         </>
       ) : (
-        <div className="h-full pt-14">
+        <div className="h-full pt-28">
           <CafeListView
             userLocation={userLocation}
             onSelectCafe={(cafe) => {
