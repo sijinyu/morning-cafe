@@ -97,21 +97,6 @@ export function SplashScreen({ ready }: SplashScreenProps) {
             </svg>
           </motion.div>
 
-          {/* 타이포 */}
-          <motion.div
-            className="mt-8 flex flex-col items-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h1 className="text-[28px] font-black tracking-[-0.04em] text-[#1A1A1A] dark:text-[#F5F5F5] uppercase">
-              Morning Coffee
-            </h1>
-            <p className="mt-1.5 text-[11px] font-medium tracking-[0.25em] text-[#999] dark:text-[#666] uppercase">
-              Seoul · Since 2026
-            </p>
-          </motion.div>
-
           {/* 하단 로딩 라인 */}
           <motion.div
             className="absolute bottom-12 left-1/2 -translate-x-1/2"
