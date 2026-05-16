@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
       .filter(Boolean)
       .map((url) => {
         if (url.includes('pstatic.net')) {
-          const original = `${url.split('?')[0]}?type=w400`;
-          return `/api/photo-proxy?url=${encodeURIComponent(original)}`;
+          const clean = url.split('?')[0];
+          return `/api/photo-proxy?url=${encodeURIComponent(clean)}`;
         }
         return url;
       }) as string[];
