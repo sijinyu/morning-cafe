@@ -3,7 +3,7 @@
 import { useMemo, useRef } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, type Cafe, type DayFilter } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,7 @@ interface CafeListViewProps {
 
 export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
   const filteredCafes = useCafeStore((state) => state.filteredCafes);
+  const dayFilter = useCafeStore((state) => state.dayFilter);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const sortedCafes: readonly CafeWithDistance[] = useMemo(() => {
@@ -125,17 +126,20 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                         {openStatus === 'open' ? '영업중' : '영업 전'}
                       </span>
                     )}
-                    {cafe.opening_time && !cafe24h && (
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
-                          getOpeningBadgeStyle(cafe.opening_time),
-                        )}
-                      >
-                        <Clock className="mr-0.5 h-2.5 w-2.5" />
-                        {formatOpeningTime(cafe.opening_time)}
-                      </span>
-                    )}
+                    {(() => {
+                      const dayTime = getOpeningTimeForDay(cafe, dayFilter);
+                      return dayTime && !cafe24h ? (
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
+                            getOpeningBadgeStyle(dayTime),
+                          )}
+                        >
+                          <Clock className="mr-0.5 h-2.5 w-2.5" />
+                          {formatOpeningTime(dayTime)}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
                     {cafe.road_address ?? cafe.address}

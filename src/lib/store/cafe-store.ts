@@ -319,6 +319,17 @@ function resolveDayKey(dayFilter: DayFilter): string {
   return dayFilter;
 }
 
+/** 특정 요일의 오픈 시간 문자열을 반환 ("HH:MM" 형식). 없으면 opening_time fallback. */
+export function getOpeningTimeForDay(cafe: Cafe, dayFilter: DayFilter = 'today'): string | null {
+  const dayKey = resolveDayKey(dayFilter);
+  const dayHours = cafe.hours_by_day?.[dayKey];
+  if (dayHours) {
+    const match = dayHours.match(/^(\d{2}:\d{2})~/);
+    if (match) return match[1]!;
+  }
+  return cafe.opening_time;
+}
+
 /** 특정 요일의 오픈 시간(분)을 반환 */
 function getOpeningMinutesForDay(cafe: Cafe, dayKey: string): number | null {
   const dayHours = cafe.hours_by_day?.[dayKey];
@@ -349,7 +360,7 @@ function computeFilteredCafes(
       const gu = extractGu(cafe.address);
       if (gu !== guFilter) return false;
     }
-    if (dayFilter !== 'today' && cafe.hours_by_day) {
+    if (cafe.hours_by_day) {
       const dayHours = cafe.hours_by_day[dayKey];
       if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
     }
