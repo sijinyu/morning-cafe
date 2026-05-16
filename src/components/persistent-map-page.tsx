@@ -51,17 +51,6 @@ export function PersistentMapPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep GPS fresh when switching to list view if we don't have a fix yet.
-  useEffect(() => {
-    if (viewMode === 'list' && !userLocation && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {},
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
-      );
-    }
-  }, [viewMode, userLocation]);
-
   function handleLocationUpdate(lat: number, lng: number) {
     setUserLocation({ lat, lng });
     panToRef.current?.(lat, lng);

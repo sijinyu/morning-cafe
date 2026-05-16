@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
@@ -118,7 +118,7 @@ function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean)
   return uri;
 }
 
-function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
+const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
   const colors = getMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
@@ -139,7 +139,11 @@ function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerP
       }}
     />
   );
-}
+}, (prev, next) =>
+  prev.cafe.id === next.cafe.id &&
+  prev.isSelected === next.isSelected &&
+  prev.isFavorite === next.isFavorite
+);
 
 interface MapCenter {
   lat: number;

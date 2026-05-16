@@ -26,6 +26,7 @@ const EMPTY: PlaceDetailResponse = {
   strengths: [],
 };
 
+const MAX_CACHE_SIZE = 50;
 const cache = new Map<string, PlaceDetailResponse>();
 
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
@@ -51,6 +52,10 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
       .then((r) => r.json())
       .then((json: PlaceDetailResponse) => {
         if (cancelled) return;
+        if (cache.size >= MAX_CACHE_SIZE) {
+          const oldest = cache.keys().next().value;
+          if (oldest !== undefined) cache.delete(oldest);
+        }
         cache.set(kakaoPlaceId, json);
         setData(json);
       })
