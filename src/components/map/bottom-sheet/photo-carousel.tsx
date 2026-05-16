@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ImageIcon, ImageOff } from 'lucide-react';
+import { PhotoLightbox } from './photo-lightbox';
 
 interface PhotoCarouselProps {
   photos: string[];
@@ -62,6 +63,7 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
     align: 'start',
     containScroll: 'trimSnaps',
   });
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Reset scroll position when photos change (new cafe selected)
   useEffect(() => {
@@ -94,7 +96,17 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
           {photos.map((url, i) => (
             <div
               key={url}
-              className="relative h-40 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-muted"
+              role="button"
+              tabIndex={0}
+              aria-label={`${cafeName} 사진 ${i + 1} 크게 보기`}
+              onClick={() => setLightboxIndex(i)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setLightboxIndex(i);
+                }
+              }}
+              className="relative h-40 w-36 flex-shrink-0 cursor-pointer overflow-hidden rounded-xl bg-muted"
             >
               <SlideImage
                 url={url}
@@ -116,6 +128,16 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
           <ImageIcon className="h-3 w-3" />
           {photos.length}장
         </a>
+      )}
+
+      {/* Fullscreen lightbox */}
+      {lightboxIndex !== null && (
+        <PhotoLightbox
+          photos={photos}
+          initialIndex={lightboxIndex}
+          cafeName={cafeName}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </div>
   );
