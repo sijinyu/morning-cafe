@@ -9,6 +9,12 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 't1.daumcdn.net' },
+      { protocol: 'https', hostname: 'postfiles.pstatic.net' },
+    ],
+  },
 };
 
 export default withSerwist(nextConfig);

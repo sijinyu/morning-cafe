@@ -353,11 +353,11 @@ function computeFilteredCafes(
     if (minutes === null) return false;
     switch (timeFilter) {
       case 'before6':
-        return minutes <= 360;
+        return minutes < 360;
       case '6to7':
-        return minutes > 360 && minutes <= 420;
+        return minutes >= 360 && minutes <= 420;
       case '7to8':
-        return minutes > 420 && minutes <= 480;
+        return minutes >= 420 && minutes <= 480;
       default:
         return true;
     }
@@ -371,6 +371,103 @@ function computeAvailableGus(cafes: Cafe[]): string[] {
     if (gu) gus.add(gu);
   }
   return [...gus].sort();
+}
+
+// --- sessionStorage cache helpers ---
+
+const CACHE_KEY = 'morning-cafe:cafes';
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+interface CafeCache {
+  timestamp: number;
+  rows: Record<string, unknown>[];
+}
+
+function readCache(): Record<string, unknown>[] | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed: CafeCache = JSON.parse(raw);
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
+      sessionStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return parsed.rows;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(rows: Record<string, unknown>[]): void {
+  try {
+    const entry: CafeCache = { timestamp: Date.now(), rows };
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+  } catch {
+    // sessionStorage full or unavailable — silently ignore
+  }
+}
+
+async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
+  const supabase = createClient();
+  const allRows: Record<string, unknown>[] = [];
+  const PAGE_SIZE = 1000;
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('cafes_with_coords')
+      .select('*')
+      .eq('is_earlybird', true)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) return null;
+
+    allRows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return allRows;
+}
+
+function mapRowsToCafes(rows: Record<string, unknown>[]): Cafe[] {
+  return rows.map((row) => ({
+    id: row.id as string,
+    kakao_place_id: row.kakao_place_id as string,
+    name: row.name as string,
+    address: row.address as string,
+    road_address: row.road_address as string | null,
+    phone: row.phone as string | null,
+    latitude: row.latitude as number,
+    longitude: row.longitude as number,
+    place_url: row.place_url as string | null,
+    instagram_url: row.instagram_url as string | null,
+    category: row.category as string | null,
+    opening_time: row.opening_time as string | null,
+    closing_time: row.closing_time as string | null,
+    hours_by_day: row.hours_by_day as Record<string, string> | null,
+    is_earlybird: row.is_earlybird as boolean,
+    last_crawled_at: row.last_crawled_at as string | null,
+  }));
+}
+
+function computeChainCafeIds(cafes: Cafe[]): Set<string> {
+  const ids = new Set<string>();
+  for (const cafe of cafes) {
+    if (isChainCafe(cafe.name)) ids.add(cafe.id);
+  }
+  return ids;
+}
+
+function applyData(
+  rows: Record<string, unknown>[],
+  get: () => CafeState,
+  set: (partial: Partial<CafeState>) => void,
+) {
+  const cafes = mapRowsToCafes(rows);
+  const chainCafeIds = computeChainCafeIds(cafes);
+  set({ cafes, chainCafeIds, availableGus: computeAvailableGus(cafes), loading: false });
+  recompute(get, set);
 }
 
 /** Recompute derived state and merge into store. */
@@ -396,56 +493,30 @@ export const useCafeStore = create<CafeState>((set, get) => ({
 
   async fetchCafes() {
     set({ loading: true });
-    try {
-      const supabase = createClient();
 
-      const allRows: any[] = [];
-      const PAGE_SIZE = 1000;
-      let from = 0;
-
-      while (true) {
-        const { data, error } = await supabase
-          .from('cafes_with_coords')
-          .select('*')
-          .eq('is_earlybird', true)
-          .range(from, from + PAGE_SIZE - 1);
-
-        if (error) {
-          set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
-          return;
+    // Stale-While-Revalidate: serve cache immediately, refresh in background
+    const cached = readCache();
+    if (cached) {
+      applyData(cached, get, set);
+      // Background refresh — don't await
+      fetchFromSupabase().then((freshRows) => {
+        if (freshRows) {
+          writeCache(freshRows);
+          applyData(freshRows, get, set);
         }
+      });
+      return;
+    }
 
-        allRows.push(...(data ?? []));
-        if (!data || data.length < PAGE_SIZE) break;
-        from += PAGE_SIZE;
+    // No cache — fetch from Supabase directly
+    try {
+      const rows = await fetchFromSupabase();
+      if (!rows) {
+        set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
+        return;
       }
-
-      const cafes: Cafe[] = allRows.map((row) => ({
-        id: row.id as string,
-        kakao_place_id: row.kakao_place_id as string,
-        name: row.name as string,
-        address: row.address as string,
-        road_address: row.road_address as string | null,
-        phone: row.phone as string | null,
-        latitude: row.latitude as number,
-        longitude: row.longitude as number,
-        place_url: row.place_url as string | null,
-        instagram_url: row.instagram_url as string | null,
-        category: row.category as string | null,
-        opening_time: row.opening_time as string | null,
-        closing_time: row.closing_time as string | null,
-        hours_by_day: row.hours_by_day as Record<string, string> | null,
-        is_earlybird: row.is_earlybird as boolean,
-        last_crawled_at: row.last_crawled_at as string | null,
-      }));
-
-      const chainCafeIds = new Set<string>();
-      for (const cafe of cafes) {
-        if (isChainCafe(cafe.name)) chainCafeIds.add(cafe.id);
-      }
-
-      set({ cafes, chainCafeIds, availableGus: computeAvailableGus(cafes), loading: false });
-      recompute(get, set);
+      writeCache(rows);
+      applyData(rows, get, set);
     } catch {
       set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
     }

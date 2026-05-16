@@ -1,8 +1,12 @@
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
 
+let instance: ReturnType<typeof supabaseCreateClient> | null = null;
+
 export function createClient() {
-  return supabaseCreateClient(
+  if (instance) return instance;
+  instance = supabaseCreateClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
+  return instance;
 }

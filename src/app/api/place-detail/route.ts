@@ -60,7 +60,13 @@ export async function GET(request: NextRequest) {
     const photos = rawPhotos
       .slice(0, 5)
       .map((p) => p.url?.replace('http://', 'https://'))
-      .filter(Boolean) as string[];
+      .filter(Boolean)
+      .map((url) => {
+        if (url.includes('postfiles.pstatic.net')) {
+          return `${url.split('?')[0]}?type=w400`;
+        }
+        return url;
+      }) as string[];
 
     // Menu — yogiyo_menus (배달메뉴) or yogiyo_pickup_menus (픽업메뉴)
     const menuData = data?.menu ?? {};
