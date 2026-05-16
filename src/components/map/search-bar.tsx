@@ -16,7 +16,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchBarProps) {
-  const cafes = useCafeStore((state) => state.cafes);
+  const cafes = useCafeStore((state) => state.filteredCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
   const [query, setQuery] = useState('');
