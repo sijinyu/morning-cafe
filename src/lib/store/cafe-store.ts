@@ -215,6 +215,7 @@ const CHAIN_KEYWORDS = [
   '무인카페', '무인 카페', '무인24',
   // 추가
   '트리플에이',
+  '베어글스',
 ] as const;
 
 const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
