@@ -8,6 +8,7 @@ import { PhotoLightbox } from './photo-lightbox';
 
 interface PhotoCarouselProps {
   photos: string[];
+  photosHd: string[];
   loading: boolean;
   cafeName: string;
   placeUrl: string | null;
@@ -57,7 +58,7 @@ function SkeletonCards() {
   );
 }
 
-export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCarouselProps) {
+export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }: PhotoCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     dragFree: true,
     align: 'start',
@@ -133,7 +134,7 @@ export function PhotoCarousel({ photos, loading, cafeName, placeUrl }: PhotoCaro
       {/* Fullscreen lightbox */}
       {lightboxIndex !== null && (
         <PhotoLightbox
-          photos={photos}
+          photos={photosHd.length > 0 ? photosHd : photos}
           initialIndex={lightboxIndex}
           cafeName={cafeName}
           onClose={() => setLightboxIndex(null)}

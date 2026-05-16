@@ -54,7 +54,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   // const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photos, menu, rating, parking, facilities, strengths, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
+  const { photos, photosHd, menu, rating, parking, facilities, strengths, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
   // const reminded = hasReminder(cafe.id);
@@ -233,6 +233,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <PhotoCarousel
               photos={photos}
+              photosHd={photosHd}
               loading={photosLoading}
               cafeName={cafe.name}
               placeUrl={cafe.place_url}

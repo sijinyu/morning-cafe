@@ -7,6 +7,7 @@ export type { MenuItem, RatingInfo, ParkingInfo };
 
 interface UsePlaceDetailResult {
   photos: string[];
+  photosHd: string[];
   menu: MenuItem[];
   rating: RatingInfo | null;
   parking: ParkingInfo | null;
@@ -17,6 +18,7 @@ interface UsePlaceDetailResult {
 
 const EMPTY: PlaceDetailResponse = {
   photos: [],
+  photosHd: [],
   menu: [],
   rating: null,
   parking: null,
@@ -66,6 +68,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
 
   return {
     photos: data.photos,
+    photosHd: data.photosHd ?? [],
     menu: data.menu,
     rating: data.rating ?? null,
     parking: data.parking ?? null,

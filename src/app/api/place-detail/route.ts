@@ -25,6 +25,7 @@ export interface ParkingInfo {
 
 export interface PlaceDetailResponse {
   photos: string[];
+  photosHd: string[];
   menu: MenuItem[];
   rating: RatingInfo | null;
   parking: ParkingInfo | null;
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('placeId');
   if (!placeId || !/^\d+$/.test(placeId)) {
     return NextResponse.json(
-      { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
       { status: 400 },
     );
   }
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+        { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
       );
     }
 
@@ -57,17 +58,25 @@ export async function GET(request: NextRequest) {
 
     // Photos
     const rawPhotos: { url: string }[] = data?.photos?.photos ?? [];
-    const photos = rawPhotos
+    const httpsUrls = rawPhotos
       .slice(0, 5)
       .map((p) => p.url?.replace('http://', 'https://'))
-      .filter(Boolean)
-      .map((url) => {
-        if (url.includes('pstatic.net')) {
-          const clean = url.split('?')[0];
-          return `/api/photo-proxy?url=${encodeURIComponent(clean)}`;
-        }
-        return url;
-      }) as string[];
+      .filter(Boolean) as string[];
+
+    const photos = httpsUrls.map((url) => {
+      if (url.includes('pstatic.net')) {
+        return `/api/photo-proxy?url=${encodeURIComponent(url)}`;
+      }
+      return url;
+    });
+
+    const photosHd = httpsUrls.map((url) => {
+      if (url.includes('pstatic.net')) {
+        const hdUrl = `${url.split('?')[0]}?type=w966`;
+        return `/api/photo-proxy?url=${encodeURIComponent(hdUrl)}`;
+      }
+      return url;
+    });
 
     // Menu — yogiyo_menus (배달메뉴) or yogiyo_pickup_menus (픽업메뉴)
     const menuData = data?.menu ?? {};
@@ -118,7 +127,7 @@ export async function GET(request: NextRequest) {
       .filter((n): n is string => Boolean(n));
 
     return NextResponse.json(
-      { photos, menu, rating, parking, facilities, strengths } satisfies PlaceDetailResponse,
+      { photos, photosHd, menu, rating, parking, facilities, strengths } satisfies PlaceDetailResponse,
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
@@ -127,7 +136,7 @@ export async function GET(request: NextRequest) {
     );
   } catch {
     return NextResponse.json(
-      { photos: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [] } satisfies PlaceDetailResponse,
     );
   }
 }
