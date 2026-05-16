@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,11 @@ function formatDistance(km: number): string {
   return `${km.toFixed(1)}km`;
 }
 
+interface CafeWithDistance {
+  readonly cafe: Cafe;
+  readonly distance: number | null;
+}
+
 interface CafeListViewProps {
   userLocation: { lat: number; lng: number } | null;
   onSelectCafe: (cafe: Cafe) => void;
@@ -28,8 +33,9 @@ interface CafeListViewProps {
 
 export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
   const filteredCafes = useCafeStore((state) => state.filteredCafes);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const sortedCafes = useMemo(() => {
+  const sortedCafes: readonly CafeWithDistance[] = useMemo(() => {
     let cafes = filteredCafes;
 
     // 리스트 내 검색 필터
@@ -42,13 +48,25 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
       );
     }
 
-    if (!userLocation) return cafes;
-    return [...cafes].sort((a, b) => {
-      const dA = haversineKm(userLocation.lat, userLocation.lng, a.latitude, a.longitude);
-      const dB = haversineKm(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
-      return dA - dB;
-    });
+    // 거리 한 번만 계산 + 정렬 + 결과에 포함
+    if (!userLocation) {
+      return cafes.map((cafe) => ({ cafe, distance: null }));
+    }
+
+    return cafes
+      .map((cafe) => ({
+        cafe,
+        distance: haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude),
+      }))
+      .toSorted((a, b) => a.distance - b.distance);
   }, [filteredCafes, userLocation, searchQuery]);
+
+  const virtualizer = useVirtualizer({
+    count: sortedCafes.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 88,
+    overscan: 5,
+  });
 
   if (sortedCafes.length === 0) {
     return (
@@ -60,25 +78,28 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
   }
 
   return (
-    <div className="h-full overflow-y-auto">
-      <ul className="divide-y divide-border">
-        {sortedCafes.map((cafe, idx) => {
+    <div ref={scrollRef} className="h-full overflow-y-auto">
+      <div
+        className="relative w-full"
+        style={{ height: `${virtualizer.getTotalSize()}px` }}
+      >
+        {virtualizer.getVirtualItems().map((virtualRow) => {
+          const { cafe, distance } = sortedCafes[virtualRow.index];
           const cafe24h = is24Hours(cafe);
           const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
-          const dist = userLocation
-            ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
-            : null;
 
           return (
-            <motion.li
+            <div
               key={cafe.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(idx * 0.02, 0.3) }}
+              className="absolute left-0 top-0 w-full"
+              style={{
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
             >
               <button
                 onClick={() => onSelectCafe(cafe)}
-                className="flex w-full items-start gap-3 px-5 py-3.5 hover:bg-muted/50 transition-colors text-left"
+                className="flex w-full items-start gap-3 px-5 py-3.5 hover:bg-muted/50 transition-colors text-left border-b border-border"
               >
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -120,17 +141,17 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     {cafe.road_address ?? cafe.address}
                   </p>
                 </div>
-                {dist !== null && (
+                {distance !== null && (
                   <div className="flex-shrink-0 flex items-center gap-1 text-xs text-muted-foreground pt-0.5">
                     <Navigation className="h-3 w-3" />
-                    {formatDistance(dist)}
+                    {formatDistance(distance)}
                   </div>
                 )}
               </button>
-            </motion.li>
+            </div>
           );
         })}
-      </ul>
+      </div>
     </div>
   );
 }

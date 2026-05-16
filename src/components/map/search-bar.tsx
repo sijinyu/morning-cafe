@@ -39,11 +39,13 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
 
   const showDropdown = !isListMode && focused && results.length > 0;
 
-  // 리스트 모드: 쿼리 변경 시 부모에 알림
+  // 리스트 모드: 300ms debounce로 부모에 알림 (매 키입력마다 필터링 방지)
   useEffect(() => {
-    if (isListMode) {
+    if (!isListMode) return;
+    const timer = setTimeout(() => {
       onQueryChange?.(query);
-    }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [query, isListMode, onQueryChange]);
 
   // 모드 전환 시 쿼리 초기화
