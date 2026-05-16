@@ -17,7 +17,7 @@ import {
   Star,
   Car,
 } from 'lucide-react';
-import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 // import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
@@ -48,6 +48,7 @@ interface CafeBottomSheetProps {
 }
 
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
+  const dayFilter = useCafeStore((s) => s.dayFilter);
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
@@ -110,7 +111,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
   const displayAddress = cafe.road_address ?? cafe.address;
   const is24h = is24Hours(cafe);
-  const todayOpeningTime = getOpeningTimeForDay(cafe);
+  const todayOpeningTime = getOpeningTimeForDay(cafe, dayFilter);
   const openingFormatted = is24h ? '24시간' : formatOpeningTime(todayOpeningTime);
   const badgeStyle = is24h ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : getOpeningBadgeStyle(todayOpeningTime);
   const openStatus = is24h ? 'open' as const : getOpenStatus(cafe);
@@ -176,7 +177,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   badgeStyle
                 )}
               >
-                {is24h ? '24시간 영업' : `아침 ${openingFormatted} 오픈`}
+                {is24h ? '24시간 영업' : `${getDayLabel(dayFilter)} ${openingFormatted} 오픈`}
               </span>
             )}
           </div>

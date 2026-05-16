@@ -314,8 +314,14 @@ function parseOpeningMinutes(openingTime: string | null): number | null {
 }
 
 /** 요일 필터에 해당하는 day key 반환 */
-function resolveDayKey(dayFilter: DayFilter): string {
+export function resolveDayKey(dayFilter: DayFilter): string {
   if (dayFilter === 'today') return DAY_KEYS[new Date().getDay()]!;
+  return dayFilter;
+}
+
+/** 배지용 요일 라벨 ("오늘" 또는 "토") */
+export function getDayLabel(dayFilter: DayFilter): string {
+  if (dayFilter === 'today') return '오늘';
   return dayFilter;
 }
 

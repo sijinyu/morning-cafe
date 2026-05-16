@@ -3,7 +3,7 @@
 import { useMemo, useRef } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, type Cafe, type DayFilter } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
@@ -136,7 +136,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                           )}
                         >
                           <Clock className="mr-0.5 h-2.5 w-2.5" />
-                          {formatOpeningTime(dayTime)}
+                          {getDayLabel(dayFilter)} {formatOpeningTime(dayTime)}
                         </span>
                       ) : null;
                     })()}
