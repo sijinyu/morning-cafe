@@ -213,11 +213,15 @@ const CHAIN_KEYWORDS = [
   '커피기업',
   // 무인카페
   '무인카페', '무인 카페', '무인24',
+  // 추가
+  '트리플에이',
 ] as const;
+
+const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
 
 export function isChainCafe(name: string): boolean {
   const lower = name.toLowerCase();
-  return CHAIN_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+  return CHAIN_KEYWORDS_LOWER.some((kw) => lower.includes(kw));
 }
 
 // 24시간 영업 판단

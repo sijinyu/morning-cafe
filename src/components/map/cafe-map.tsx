@@ -105,6 +105,18 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
   </svg>`;
 }
 
+// Cache marker colors by cafe ID — opening_time is static so colors never change.
+const colorCache: Record<string, MarkerColors> = {};
+
+function getCachedMarkerColors(cafe: Cafe): MarkerColors {
+  let colors = colorCache[cafe.id];
+  if (!colors) {
+    colors = getMarkerColors(cafe);
+    colorCache[cafe.id] = colors;
+  }
+  return colors;
+}
+
 // Cache SVG data URIs to avoid re-encoding on every render
 const markerCache: Record<string, string> = {};
 
@@ -119,7 +131,7 @@ function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean)
 }
 
 const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
-  const colors = getMarkerColors(cafe);
+  const colors = getCachedMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
   const w = isSelected ? 44 : (fav ? 34 : 28);
