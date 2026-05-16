@@ -29,7 +29,7 @@ function SlideImage({ url, alt, priority }: { url: string; alt: string; priority
       alt={alt}
       fill
       sizes="144px"
-      quality={75}
+      unoptimized
       referrerPolicy="no-referrer"
       priority={priority}
       className="object-cover"
