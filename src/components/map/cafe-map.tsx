@@ -263,12 +263,16 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     mapInstanceRef.current = map;
     if (onPanToReady) {
       onPanToReady((lat, lng) => {
-        const latlng = new kakao.maps.LatLng(lat, lng);
         // 검색으로 카페 선택 시 줌인 (레벨 3 = 거리 수준)
         if (map.getLevel() > 3) {
           map.setLevel(3);
         }
-        map.panTo(latlng);
+        // 바텀시트(55vh)가 하단을 덮으므로, 지도 중심을 남쪽으로 오프셋하여
+        // 마커가 시트 위 영역에 보이도록 조정
+        const bounds = map.getBounds();
+        const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
+        const offsetLat = lat - latSpan * 0.2;
+        map.panTo(new kakao.maps.LatLng(offsetLat, lng));
       });
     }
     // 지도 클릭 시 바텀시트 닫기
