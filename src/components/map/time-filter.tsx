@@ -9,6 +9,7 @@ import {
   type DayFilter,
 } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 // ---- data -------------------------------------------------------------------
 
@@ -147,7 +148,7 @@ export function TimeFilter() {
             {TIME_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => { setTimeFilter(value); }}
+                onClick={() => { trackEvent('filter_time', { value }); setTimeFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
                   timeFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
@@ -164,7 +165,7 @@ export function TimeFilter() {
             {DAY_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => { setDayFilter(value); }}
+                onClick={() => { trackEvent('filter_day', { value }); setDayFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
                   dayFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
@@ -195,7 +196,7 @@ export function TimeFilter() {
       >
         <div className="w-36 max-h-60 overflow-y-auto">
           <button
-            onClick={() => { setGuFilter(null); setOpenDropdown(null); }}
+            onClick={() => { trackEvent('filter_gu', { value: 'all' }); setGuFilter(null); setOpenDropdown(null); }}
             className={cn(
               'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
               !guFilter ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
@@ -206,7 +207,7 @@ export function TimeFilter() {
           {availableGus.map((gu) => (
             <button
               key={gu}
-              onClick={() => { setGuFilter(gu); setOpenDropdown(null); }}
+              onClick={() => { trackEvent('filter_gu', { value: gu }); setGuFilter(gu); setOpenDropdown(null); }}
               className={cn(
                 'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
                 guFilter === gu ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
@@ -220,7 +221,7 @@ export function TimeFilter() {
 
       {/* 체인점 토글 */}
       <button
-        onClick={() => setHideChains(!hideChains)}
+        onClick={() => { trackEvent('filter_chains', { hide: !hideChains ? 'yes' : 'no' }); setHideChains(!hideChains); }}
         className={hideChains ? CHIP_ACTIVE : CHIP_INACTIVE}
       >
         <Store className="h-3 w-3" />

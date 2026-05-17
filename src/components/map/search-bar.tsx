@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface SearchBarProps {
   /** 지도 모드: 카페 선택 시 panTo */
@@ -55,12 +56,13 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
 
   const handleSelect = useCallback(
     (cafe: Cafe) => {
+      trackEvent('search_select', { cafe_name: cafe.name, query });
       setSelectedCafe(cafe);
       onSelectCafe(cafe.latitude, cafe.longitude);
       setQuery('');
       inputRef.current?.blur();
     },
-    [setSelectedCafe, onSelectCafe]
+    [setSelectedCafe, onSelectCafe, query]
   );
 
   function handleClear() {

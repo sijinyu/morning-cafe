@@ -82,12 +82,15 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
     if (velocity > 300 || offset > 120) {
       if (sheetState === 'peek') {
+        trackEvent('sheet_close', { cafe_name: cafe.name });
         onClose();
       } else {
+        trackEvent('sheet_peek', { cafe_name: cafe.name });
         setSheetState('peek');
       }
     } else if (velocity < -300 || offset < -80) {
       if (sheetState === 'peek') {
+        trackEvent('sheet_expand', { cafe_name: cafe.name });
         setSheetState('half');
       }
     }

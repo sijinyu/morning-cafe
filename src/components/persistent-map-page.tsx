@@ -12,6 +12,7 @@ import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { cn } from '@/lib/utils';
 import { SplashScreen } from '@/components/splash-screen';
+import { trackEvent } from '@/lib/analytics';
 import dynamic from 'next/dynamic';
 
 const CafeBottomSheetWrapper = dynamic(
@@ -41,9 +42,12 @@ export function PersistentMapPage() {
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => {
+        trackEvent('gps_result', { status: 'granted' });
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
       () => {
-        // Permission denied or unavailable — map stays at Seoul City Hall fallback.
+        trackEvent('gps_result', { status: 'denied' });
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
     );
@@ -98,7 +102,7 @@ export function PersistentMapPage() {
       {/* 뷰 모드 토글 — 현위치 버튼과 같은 수평선, 양끝 */}
       <div className="absolute bottom-18 md:bottom-6 left-4 z-10">
         <motion.button
-          onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
+          onClick={() => { const next = viewMode === 'map' ? 'list' : 'map'; trackEvent('toggle_view', { mode: next }); setViewMode(next); }}
           whileTap={{ scale: 0.92 }}
           className={cn(
             'flex h-12 items-center gap-2 rounded-full px-4',
