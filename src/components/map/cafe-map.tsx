@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
@@ -105,6 +105,18 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
   </svg>`;
 }
 
+// Cache marker colors by cafe ID — opening_time is static so colors never change.
+const colorCache: Record<string, MarkerColors> = {};
+
+function getCachedMarkerColors(cafe: Cafe): MarkerColors {
+  let colors = colorCache[cafe.id];
+  if (!colors) {
+    colors = getMarkerColors(cafe);
+    colorCache[cafe.id] = colors;
+  }
+  return colors;
+}
+
 // Cache SVG data URIs to avoid re-encoding on every render
 const markerCache: Record<string, string> = {};
 
@@ -118,8 +130,8 @@ function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean)
   return uri;
 }
 
-function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
-  const colors = getMarkerColors(cafe);
+const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
+  const colors = getCachedMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
   const w = isSelected ? 44 : (fav ? 34 : 28);
@@ -139,7 +151,11 @@ function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerP
       }}
     />
   );
-}
+}, (prev, next) =>
+  prev.cafe.id === next.cafe.id &&
+  prev.isSelected === next.isSelected &&
+  prev.isFavorite === next.isFavorite
+);
 
 interface MapCenter {
   lat: number;
@@ -247,12 +263,16 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     mapInstanceRef.current = map;
     if (onPanToReady) {
       onPanToReady((lat, lng) => {
-        const latlng = new kakao.maps.LatLng(lat, lng);
         // 검색으로 카페 선택 시 줌인 (레벨 3 = 거리 수준)
         if (map.getLevel() > 3) {
           map.setLevel(3);
         }
-        map.panTo(latlng);
+        // 바텀시트(55vh)가 하단을 덮으므로, 지도 중심을 남쪽으로 오프셋하여
+        // 마커가 시트 위 영역에 보이도록 조정
+        const bounds = map.getBounds();
+        const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
+        const offsetLat = lat - latSpan * 0.2;
+        map.panTo(new kakao.maps.LatLng(offsetLat, lng));
       });
     }
     // 지도 클릭 시 바텀시트 닫기

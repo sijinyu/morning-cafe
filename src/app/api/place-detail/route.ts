@@ -65,7 +65,8 @@ export async function GET(request: NextRequest) {
 
     const photos = httpsUrls.map((url) => {
       if (url.includes('pstatic.net')) {
-        return `/api/photo-proxy?url=${encodeURIComponent(url)}`;
+        const thumbUrl = `${url.split('?')[0]}?type=w400`;
+        return `/api/photo-proxy?url=${encodeURIComponent(thumbUrl)}`;
       }
       return url;
     });

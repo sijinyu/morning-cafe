@@ -34,6 +34,7 @@ function SlideImage({ url, alt, priority }: { url: string; alt: string; priority
       unoptimized
       referrerPolicy="no-referrer"
       priority={priority}
+      loading={priority ? undefined : 'lazy'}
       className="object-cover"
       onError={() => setError(true)}
     />

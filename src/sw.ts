@@ -45,6 +45,19 @@ const serwist = new Serwist({
         ],
       }),
     },
+    // Naver photos via proxy — cache-first (7 days, 100 entries)
+    {
+      matcher: /\/api\/photo-proxy\?.*/i,
+      handler: new CacheFirst({
+        cacheName: "cafe-photos-proxy",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
     // Place-detail API — stale-while-revalidate (1 day, 50 entries)
     {
       matcher: /\/api\/place-detail\?.*/i,

@@ -26,24 +26,41 @@ const EMPTY: PlaceDetailResponse = {
   strengths: [],
 };
 
+const MAX_CACHE_SIZE = 50;
 const cache = new Map<string, PlaceDetailResponse>();
 
+/** Preload the first photo so the browser starts downloading before React renders <Image>. */
+function preloadFirstPhoto(photos: string[]) {
+  const url = photos[0];
+  if (!url) return;
+  // Avoid duplicate preload links
+  if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = url;
+  document.head.appendChild(link);
+}
+
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
-  const [data, setData] = useState<PlaceDetailResponse>(EMPTY);
+  const [fetchedData, setFetchedData] = useState<PlaceDetailResponse>(EMPTY);
   const [loading, setLoading] = useState(false);
+
+  // Synchronous cache read — previously loaded cafes show instantly without skeleton flash
+  const cached = kakaoPlaceId ? cache.get(kakaoPlaceId) : undefined;
 
   useEffect(() => {
     if (!kakaoPlaceId) {
-      setData(EMPTY);
+      setFetchedData(EMPTY);
       return;
     }
 
-    const cached = cache.get(kakaoPlaceId);
-    if (cached) {
-      setData(cached);
+    if (cache.has(kakaoPlaceId)) {
+      setFetchedData(cache.get(kakaoPlaceId)!);
       return;
     }
 
+    setFetchedData(EMPTY);
     let cancelled = false;
     setLoading(true);
 
@@ -51,11 +68,16 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
       .then((r) => r.json())
       .then((json: PlaceDetailResponse) => {
         if (cancelled) return;
+        if (cache.size >= MAX_CACHE_SIZE) {
+          const oldest = cache.keys().next().value;
+          if (oldest !== undefined) cache.delete(oldest);
+        }
         cache.set(kakaoPlaceId, json);
-        setData(json);
+        preloadFirstPhoto(json.photos);
+        setFetchedData(json);
       })
       .catch(() => {
-        if (!cancelled) setData(EMPTY);
+        if (!cancelled) setFetchedData(EMPTY);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -66,6 +88,8 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
     };
   }, [kakaoPlaceId]);
 
+  const data = cached ?? fetchedData;
+
   return {
     photos: data.photos,
     photosHd: data.photosHd ?? [],
@@ -74,6 +98,6 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
     parking: data.parking ?? null,
     facilities: data.facilities ?? [],
     strengths: data.strengths ?? [],
-    loading,
+    loading: cached ? false : loading,
   };
 }

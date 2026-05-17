@@ -56,6 +56,8 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://t1.daumcdn.net" />
+        <link rel="dns-prefetch" href="https://t1.daumcdn.net" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className="h-full bg-background text-foreground antialiased">

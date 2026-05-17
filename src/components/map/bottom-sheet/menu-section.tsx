@@ -24,6 +24,7 @@ export function MenuSection({ menu }: MenuSectionProps) {
               <img
                 src={item.photo}
                 alt={item.name}
+                referrerPolicy="no-referrer"
                 className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
               />
             )}

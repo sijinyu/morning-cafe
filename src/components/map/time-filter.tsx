@@ -111,7 +111,7 @@ export function TimeFilter() {
   const hide24h = useCafeStore((s) => s.hide24h);
   const setHide24h = useCafeStore((s) => s.setHide24h);
   const availableGus = useCafeStore((s) => s.availableGus);
-  const filteredCount = useCafeStore((s) => s.filteredCafes).length;
+  const filteredCount = useCafeStore((s) => s.filteredCafes.length);
 
   const [openDropdown, setOpenDropdown] = useState<'time' | 'area' | null>(null);
 
