@@ -213,11 +213,16 @@ const CHAIN_KEYWORDS = [
   '커피기업',
   // 무인카페
   '무인카페', '무인 카페', '무인24',
+  // 추가
+  '트리플에이',
+  '베어글스',
 ] as const;
+
+const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
 
 export function isChainCafe(name: string): boolean {
   const lower = name.toLowerCase();
-  return CHAIN_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()));
+  return CHAIN_KEYWORDS_LOWER.some((kw) => lower.includes(kw));
 }
 
 // 24시간 영업 판단
@@ -309,9 +314,26 @@ function parseOpeningMinutes(openingTime: string | null): number | null {
 }
 
 /** 요일 필터에 해당하는 day key 반환 */
-function resolveDayKey(dayFilter: DayFilter): string {
+export function resolveDayKey(dayFilter: DayFilter): string {
   if (dayFilter === 'today') return DAY_KEYS[new Date().getDay()]!;
   return dayFilter;
+}
+
+/** 배지용 요일 라벨 ("오늘" 또는 "토") */
+export function getDayLabel(dayFilter: DayFilter): string {
+  if (dayFilter === 'today') return '오늘';
+  return dayFilter;
+}
+
+/** 특정 요일의 오픈 시간 문자열을 반환 ("HH:MM" 형식). 없으면 opening_time fallback. */
+export function getOpeningTimeForDay(cafe: Cafe, dayFilter: DayFilter = 'today'): string | null {
+  const dayKey = resolveDayKey(dayFilter);
+  const dayHours = cafe.hours_by_day?.[dayKey];
+  if (dayHours) {
+    const match = dayHours.match(/^(\d{2}:\d{2})~/);
+    if (match) return match[1]!;
+  }
+  return cafe.opening_time;
 }
 
 /** 특정 요일의 오픈 시간(분)을 반환 */
@@ -344,7 +366,7 @@ function computeFilteredCafes(
       const gu = extractGu(cafe.address);
       if (gu !== guFilter) return false;
     }
-    if (dayFilter !== 'today' && cafe.hours_by_day) {
+    if (cafe.hours_by_day) {
       const dayHours = cafe.hours_by_day[dayKey];
       if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
     }
