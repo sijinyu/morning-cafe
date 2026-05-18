@@ -54,6 +54,10 @@ src/
 │   ├── layout.tsx                  # 루트 레이아웃 (ThemeProvider, DesktopSidebar, BottomNav)
 │   ├── globals.css                 # Tailwind + 글로벌 스타일
 │   ├── manifest.ts                 # PWA manifest
+│   ├── cafe/
+│   │   └── [id]/
+│   │       ├── page.tsx            # 개별 카페 페이지 (SSR + 24h ISR, OG메타, JSON-LD)
+│   │       └── share-button.tsx    # 카카오톡/웹 공유 버튼 (client component)
 │   ├── cafes/
 │   │   ├── layout.tsx              # cafes 공통 레이아웃 (root layout 상속)
 │   │   ├── page.tsx                # 전체 구 목록 인덱스 (SSR + 24h ISR)
@@ -261,6 +265,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 14. **SEO 구별 페이지**: `/cafes/[gu]`는 Server Component (SSG + 24h ISR). `generateStaticParams()`에서 raw 한글 문자열 반환 (Next.js가 자동 인코딩). `fetchCafesByGu()`는 `isSupabaseConfigured()` 체크 필수.
 15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (7일, 200개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
 16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
+17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
+18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morningcoffee.kr/cafe/{id}`. GA4 이벤트: `share_cafe`.
+19. **딥링크**: `/?cafeId=xxx` → PersistentMapPage에서 cafes 로드 후 해당 카페 자동 select + panTo. `useSearchParams()` 사용 → `<Suspense>` 래핑 필수.
 
 ### 커밋 메시지
 
@@ -277,8 +284,8 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 구별 SEO 랜딩 페이지 (`/cafes/[gu]`) — SSG + ISR, OG 이미지, sitemap 연동
 - [x] 이미지 로딩 개선 — eager loading, Referer 헤더, SW 캐시 전략 수정
 - [x] 시간 필터 요일 fallback 버그 수정 — 주말 잘못된 필터링 방지
-- [ ] 개별 카페 페이지 `/cafe/[id]` (카카오톡 공유 기능과 함께)
-- [ ] JSON-LD 구조화 데이터 (LocalBusiness 스키마)
+- [x] 개별 카페 페이지 `/cafe/[id]` — SSR, OG 메타, 카카오톡/웹 공유, 딥링크
+- [x] JSON-LD 구조화 데이터 (CafeOrCoffeeShop 스키마)
 - [ ] `extractGu`, `Cafe` 타입을 `cafe-store.ts`에서 별도 공유 모듈로 분리 (서버/클라이언트 경계)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
