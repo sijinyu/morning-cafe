@@ -6,27 +6,27 @@
 - **오픈**: 06:00
 - **주소**: 서울 성북구 종암로24가길 53
 - **전화**: 010-7980-0369
-- **링크**: https://morningcoffee.kr/cafe/01e1dc63-8836-4aab-a2ac-6b625b568319
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/01e1dc63-8836-4aab-a2ac-6b625b568319
 
 ## 2. 아모르파티
 - **오픈**: 06:30
 - **주소**: 서울 성북구 월곡로18길 7
 - **전화**: 070-7677-0117
-- **링크**: https://morningcoffee.kr/cafe/db1aab33-1b23-4cd4-8cd8-cdea0a0b768b
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/db1aab33-1b23-4cd4-8cd8-cdea0a0b768b
 
 ## 3. 우지커피고대 고대안암점
 - **오픈**: 07:00
 - **주소**: 서울 성북구 개운사길 22-3
-- **링크**: https://morningcoffee.kr/cafe/f6f42390-aa48-48f4-ae18-a4754ab2295a
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/f6f42390-aa48-48f4-ae18-a4754ab2295a
 
 ## 4. 베어글스 성신여대점
 - **오픈**: 07:00
 - **주소**: 서울 성북구 동소문로13나길 15-17
 - **전화**: 0503-7152-4671
-- **링크**: https://morningcoffee.kr/cafe/7d0bddf5-ee58-4b76-817f-3bda9d26112c
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/7d0bddf5-ee58-4b76-817f-3bda9d26112c
 
 ## 5. 카페브릭스
 - **오픈**: 07:30
 - **주소**: 서울 성북구 정릉로26길 6-5
-- **링크**: https://morningcoffee.kr/cafe/9dbdf4b5-1903-4e7e-a33b-a24061fde963
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/9dbdf4b5-1903-4e7e-a33b-a24061fde963
 

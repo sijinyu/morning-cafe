@@ -5,28 +5,28 @@
 ## 1. 한정선 녹 서울역점
 - **오픈**: 05:00
 - **주소**: 서울 중구 한강대로 405
-- **링크**: https://morningcoffee.kr/cafe/5226be18-04f7-4fc6-bba7-ec930c0ef131
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/5226be18-04f7-4fc6-bba7-ec930c0ef131
 
 ## 2. 푸드스토리705
 - **오픈**: 05:00
 - **주소**: 서울 중구 장충단로7길 9-1
-- **링크**: https://morningcoffee.kr/cafe/056ce0d3-9a0e-439a-bc6c-c9fa36565529
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/056ce0d3-9a0e-439a-bc6c-c9fa36565529
 
 ## 3. 짜드라 을지로점
 - **오픈**: 05:30
 - **주소**: 서울 중구 을지로 지하 58
 - **전화**: 010-8715-6111
-- **링크**: https://morningcoffee.kr/cafe/a66fb67f-d41d-47ad-b1ab-15c328695d0c
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/a66fb67f-d41d-47ad-b1ab-15c328695d0c
 
 ## 4. 잠바주스 서울역점
 - **오픈**: 06:00
 - **주소**: 서울 중구 한강대로 405
 - **전화**: 02-364-8944
-- **링크**: https://morningcoffee.kr/cafe/3de96794-ceb3-4191-8442-0cc71641638d
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/3de96794-ceb3-4191-8442-0cc71641638d
 
 ## 5. 블루보틀 서울역 카페
 - **오픈**: 06:00
 - **주소**: 서울 중구 한강대로 405
 - **전화**: 02-1533-6906
-- **링크**: https://morningcoffee.kr/cafe/dfc9f324-596b-4922-893e-264ac6260586
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/dfc9f324-596b-4922-893e-264ac6260586
 

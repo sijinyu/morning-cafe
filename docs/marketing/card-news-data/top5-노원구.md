@@ -6,28 +6,28 @@
 - **오픈**: 05:00
 - **주소**: 서울 노원구 공릉로59길 15
 - **전화**: 1533-1054
-- **링크**: https://morningcoffee.kr/cafe/1864cf47-42f9-433d-9864-abfd4d3dd921
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/1864cf47-42f9-433d-9864-abfd4d3dd921
 
 ## 2. 카페해야
 - **오픈**: 07:00
 - **주소**: 서울 노원구 초안산로2라길 26
-- **링크**: https://morningcoffee.kr/cafe/62f73464-662d-47d8-80e8-ddcc8283d5bf
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/62f73464-662d-47d8-80e8-ddcc8283d5bf
 
 ## 3. 우지커피 태릉입구역점
 - **오픈**: 07:00
 - **주소**: 서울 노원구 동일로 986
 - **전화**: 02-6012-5001
-- **링크**: https://morningcoffee.kr/cafe/63b37715-3a48-4cb2-94c9-4d18f6d899a2
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/63b37715-3a48-4cb2-94c9-4d18f6d899a2
 
 ## 4. 메종그리즈
 - **오픈**: 07:00
 - **주소**: 서울 노원구 노원로1라길 5
 - **전화**: 070-8868-4200
-- **링크**: https://morningcoffee.kr/cafe/7292703e-18f0-4fac-9de0-576bb5625a3f
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/7292703e-18f0-4fac-9de0-576bb5625a3f
 
 ## 5. 공덕리커피
 - **오픈**: 07:00
 - **주소**: 서울 노원구 동일로176길 27
 - **전화**: 010-5648-6619
-- **링크**: https://morningcoffee.kr/cafe/a20c6918-78b5-42d8-a9e7-78acbd63f2ac
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/a20c6918-78b5-42d8-a9e7-78acbd63f2ac
 

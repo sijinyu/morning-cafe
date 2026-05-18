@@ -5,27 +5,27 @@
 ## 1. 비트 코레일유통 신도림역점
 - **오픈**: 05:30
 - **주소**: 서울 구로구 새말로 지하 117-21
-- **링크**: https://morningcoffee.kr/cafe/6d87f8bb-5c41-4d90-b48d-f122189c91d4
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/6d87f8bb-5c41-4d90-b48d-f122189c91d4
 
 ## 2. 블루터틀
 - **오픈**: 06:30
 - **주소**: 서울 구로구 안양천로539길 11
 - **전화**: 02-2618-1878
-- **링크**: https://morningcoffee.kr/cafe/51ce6cfc-0464-4b88-92c1-0526c6eae65b
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/51ce6cfc-0464-4b88-92c1-0526c6eae65b
 
 ## 3. 엑스엑스커피메이커 구로디지털단지역점
 - **오픈**: 06:30
 - **주소**: 서울 구로구 디지털로32나길 17-38
-- **링크**: https://morningcoffee.kr/cafe/a23cff5f-11aa-427f-b6ec-8a554bfab6e7
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/a23cff5f-11aa-427f-b6ec-8a554bfab6e7
 
 ## 4. 냉정과열정사이
 - **오픈**: 07:00
 - **주소**: 서울 구로구 가마산로27길 24
-- **링크**: https://morningcoffee.kr/cafe/488c9cd6-8d27-45b8-8fb0-c602c3f63958
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/488c9cd6-8d27-45b8-8fb0-c602c3f63958
 
 ## 5. 에쏠로지 구로
 - **오픈**: 07:00
 - **주소**: 서울 구로구 가마산로 286
 - **전화**: 02-863-1002
-- **링크**: https://morningcoffee.kr/cafe/3e6440b6-8901-4487-a00e-c48c88c0062e
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/3e6440b6-8901-4487-a00e-c48c88c0062e
 

@@ -107,7 +107,7 @@ export default async function OgImage({ params }: { params: Promise<{ gu: string
               fontWeight: 500,
             }}
           >
-            morningcoffee.kr
+            morning-cafe-phi.vercel.app
           </div>
         </div>
 

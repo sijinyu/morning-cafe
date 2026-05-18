@@ -126,7 +126,7 @@ function generateGuTop5(cafes, targetGu = null) {
       md += `- **오픈**: ${formatTime(cafe.opening_time)}\n`;
       md += `- **주소**: ${addr}\n`;
       if (cafe.phone) md += `- **전화**: ${cafe.phone}\n`;
-      md += `- **링크**: https://morningcoffee.kr/cafe/${cafe.id}\n`;
+      md += `- **링크**: https://morning-cafe-phi.vercel.app/cafe/${cafe.id}\n`;
       md += '\n';
     });
 
@@ -177,7 +177,7 @@ function generateWeekendCafes(cafes) {
     md += `- **토요일**: ${cafe.satHours}\n`;
     md += `- **일요일**: ${cafe.sunHours}\n`;
     md += `- **주소**: ${cafe.road_address ?? cafe.address}\n`;
-    md += `- **링크**: https://morningcoffee.kr/cafe/${cafe.id}\n\n`;
+    md += `- **링크**: https://morning-cafe-phi.vercel.app/cafe/${cafe.id}\n\n`;
   });
 
   return md;

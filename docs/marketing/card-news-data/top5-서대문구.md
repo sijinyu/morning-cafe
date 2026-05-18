@@ -6,26 +6,26 @@
 - **오픈**: 06:00
 - **주소**: 서울 서대문구 통일로 111
 - **전화**: 02-313-4569
-- **링크**: https://morningcoffee.kr/cafe/4f3224cf-adcf-456e-8c7f-d8cf469489d2
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/4f3224cf-adcf-456e-8c7f-d8cf469489d2
 
 ## 2. 카페문
 - **오픈**: 06:00
 - **주소**: 서울 서대문구 이화여대2가길 10
 - **전화**: 0502-5552-7654
-- **링크**: https://morningcoffee.kr/cafe/0a152e16-b7a0-4fe2-a1e4-e86d67a7b295
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/0a152e16-b7a0-4fe2-a1e4-e86d67a7b295
 
 ## 3. 해브커피
 - **오픈**: 07:00
 - **주소**: 서울 서대문구 서소문로 61
-- **링크**: https://morningcoffee.kr/cafe/70964567-9308-4ada-90dc-cf526335b916
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/70964567-9308-4ada-90dc-cf526335b916
 
 ## 4. 피프 에스프레소바 서소문아파트점
 - **오픈**: 07:00
 - **주소**: 서울 서대문구 충정로6길 59
-- **링크**: https://morningcoffee.kr/cafe/6e0450c5-c5ee-428f-8628-4018773c349c
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/6e0450c5-c5ee-428f-8628-4018773c349c
 
 ## 5. 스트렝스커피 서대문역점
 - **오픈**: 07:00
 - **주소**: 서울 서대문구 충정로6길 59
-- **링크**: https://morningcoffee.kr/cafe/67e67540-77d5-484c-b712-4430b612a6ec
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/67e67540-77d5-484c-b712-4430b612a6ec
 

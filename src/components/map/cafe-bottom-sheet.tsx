@@ -417,7 +417,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               <button
                 onClick={() => {
                   trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
-                  const shareUrl = `https://morningcoffee.kr/cafe/${cafe.id}`;
+                  const shareUrl = `https://morning-cafe-phi.vercel.app/cafe/${cafe.id}`;
                   const shareText = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}`;
 
                   // 1. Kakao Share
@@ -430,7 +430,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                           content: {
                             title: cafe.name,
                             description: shareText,
-                            imageUrl: 'https://morningcoffee.kr/icons/icon-512x512.png',
+                            imageUrl: 'https://morning-cafe-phi.vercel.app/icons/icon-512x512.png',
                             link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
                           },
                           buttons: [{ title: '모닝커피에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],

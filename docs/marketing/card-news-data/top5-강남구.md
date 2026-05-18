@@ -6,28 +6,28 @@
 - **오픈**: 05:00
 - **주소**: 서울 강남구 학동로20길 67
 - **전화**: 02-512-0310
-- **링크**: https://morningcoffee.kr/cafe/f9395eb5-a2dd-4880-a395-8ef129f89afb
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/f9395eb5-a2dd-4880-a395-8ef129f89afb
 
 ## 2. 카페이레
 - **오픈**: 05:30
 - **주소**: 서울 강남구 영동대로96길 37
 - **전화**: 02-567-5976
-- **링크**: https://morningcoffee.kr/cafe/34c3e3fe-0bc6-45e1-a5b2-c8f7942d8143
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/34c3e3fe-0bc6-45e1-a5b2-c8f7942d8143
 
 ## 3. 나비잠안마의자 역삼점
 - **오픈**: 06:00
 - **주소**: 서울 강남구 테헤란로21길 5
 - **전화**: 010-4993-6983
-- **링크**: https://morningcoffee.kr/cafe/bd8b2112-5245-4d35-ade0-76d13b7e75ea
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/bd8b2112-5245-4d35-ade0-76d13b7e75ea
 
 ## 4. 레이어프로젝트
 - **오픈**: 06:00
 - **주소**: 서울 강남구 역삼로63길 19
 - **전화**: 02-501-3920
-- **링크**: https://morningcoffee.kr/cafe/3a88b751-f053-43d0-b565-6762f549795a
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/3a88b751-f053-43d0-b565-6762f549795a
 
 ## 5. 정글주스 테헤란로 한신점
 - **오픈**: 06:00
 - **주소**: 서울 강남구 테헤란로 322
-- **링크**: https://morningcoffee.kr/cafe/b9e1b256-90b9-409b-928b-51b54510cd6f
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/b9e1b256-90b9-409b-928b-51b54510cd6f
 

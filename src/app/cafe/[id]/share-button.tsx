@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const BASE_URL = 'https://morningcoffee.kr';
+const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
 interface CafeShareButtonProps {
   cafe: Cafe;

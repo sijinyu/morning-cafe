@@ -38,7 +38,7 @@
 ## 우선순위 2: 1~2주 후
 
 ### 인스타그램
-- [ ] 계정 생성 (@morningcoffee.kr)
+- [ ] 계정 생성 (@morning-cafe-phi.vercel.app)
 - [ ] 프로필 설정 (링크, 소개)
 - [ ] 카드뉴스 1화 게시 (→ `card-news-plan.md`)
 - [ ] 해시태그 세트 준비
@@ -87,7 +87,7 @@
 
 ### UTM 규칙
 ```
-morningcoffee.kr/?utm_source={채널}&utm_medium={형태}&utm_campaign={캠페인}
+morning-cafe-phi.vercel.app/?utm_source={채널}&utm_medium={형태}&utm_campaign={캠페인}
 
 예시:
 ?utm_source=geekist&utm_medium=post&utm_campaign=launch

@@ -6,28 +6,28 @@
 - **오픈**: 06:00
 - **주소**: 서울 서초구 신반포로45길 52
 - **전화**: 070-8633-8308
-- **링크**: https://morningcoffee.kr/cafe/864a37c6-1683-495a-8720-65ddbd2c18b5
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/864a37c6-1683-495a-8720-65ddbd2c18b5
 
 ## 2. 손커피연구소 양재우성점
 - **오픈**: 06:00
 - **주소**: 서울 서초구 바우뫼로 101
 - **전화**: 010-7768-0314
-- **링크**: https://morningcoffee.kr/cafe/f4a73502-7f22-47d2-99b1-cba6d31683b2
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/f4a73502-7f22-47d2-99b1-cba6d31683b2
 
 ## 3. 벨랄라커피
 - **오픈**: 06:00
 - **주소**: 서울 서초구 효령로 289
-- **링크**: https://morningcoffee.kr/cafe/873518b9-70cd-4b24-adf5-eef26cd258d8
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/873518b9-70cd-4b24-adf5-eef26cd258d8
 
 ## 4. 그래놀라와 오슬로우
 - **오픈**: 06:20
 - **주소**: 서울 서초구 반포대로8길 7
 - **전화**: 02-6014-0355
-- **링크**: https://morningcoffee.kr/cafe/74f28ec5-7d78-4997-99cf-4cfb62cca15f
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/74f28ec5-7d78-4997-99cf-4cfb62cca15f
 
 ## 5. 커피나인 강남역점
 - **오픈**: 06:30
 - **주소**: 서울 서초구 서초대로74길 23
 - **전화**: 02-3474-2999
-- **링크**: https://morningcoffee.kr/cafe/0ed20013-a701-4fa8-87ea-09fb0eb51e71
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/0ed20013-a701-4fa8-87ea-09fb0eb51e71
 

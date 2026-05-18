@@ -5,27 +5,27 @@
 ## 1. 벤티프레소 가산대륭20차점
 - **오픈**: 06:00
 - **주소**: 서울 금천구 가산디지털1로 5
-- **링크**: https://morningcoffee.kr/cafe/a022e24f-02f8-47f2-b6bf-42b7ce424377
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/a022e24f-02f8-47f2-b6bf-42b7ce424377
 
 ## 2. 로스티드바이 본점
 - **오픈**: 06:00
 - **주소**: 서울 금천구 시흥대로 315
-- **링크**: https://morningcoffee.kr/cafe/b0626384-bd4a-4bd1-b454-997b44a58dfe
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/b0626384-bd4a-4bd1-b454-997b44a58dfe
 
 ## 3. 나이스카페인클럽 가산대륭5차점
 - **오픈**: 06:20
 - **주소**: 서울 금천구 디지털로9길 68
-- **링크**: https://morningcoffee.kr/cafe/26c9b819-7d13-4112-a91a-8c02688e101a
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/26c9b819-7d13-4112-a91a-8c02688e101a
 
 ## 4. 95도씨 커피앤버블티 벽산6차점
 - **오픈**: 06:30
 - **주소**: 서울 금천구 가산디지털1로 219
 - **전화**: 02-855-8925
-- **링크**: https://morningcoffee.kr/cafe/1a032b21-a626-4b87-9c39-1570134b43e8
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/1a032b21-a626-4b87-9c39-1570134b43e8
 
 ## 5. 헤이듀커피 가산리더스타워점
 - **오픈**: 07:00
 - **주소**: 서울 금천구 벚꽃로 286
 - **전화**: 02-867-0304
-- **링크**: https://morningcoffee.kr/cafe/791757df-c8d6-44f5-afae-a21da8c8b8a9
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/791757df-c8d6-44f5-afae-a21da8c8b8a9
 

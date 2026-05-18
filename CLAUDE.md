@@ -266,7 +266,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (7일, 200개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
 16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
 17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
-18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morningcoffee.kr/cafe/{id}`. GA4 이벤트: `share_cafe`.
+18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`.
 19. **딥링크**: `/?cafeId=xxx` → PersistentMapPage에서 cafes 로드 후 해당 카페 자동 select + panTo. `useSearchParams()` 사용 → `<Suspense>` 래핑 필수.
 
 ### 커밋 메시지

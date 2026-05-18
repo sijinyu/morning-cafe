@@ -6,27 +6,27 @@
 - **오픈**: 06:00
 - **주소**: 서울 성동구 아차산로13길 31
 - **전화**: 02-462-9977
-- **링크**: https://morningcoffee.kr/cafe/64de7362-8430-48a2-91d7-83d538a06fff
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/64de7362-8430-48a2-91d7-83d538a06fff
 
 ## 2. 멀티커피 서울숲점
 - **오픈**: 06:30
 - **주소**: 서울 성동구 왕십리로 84
-- **링크**: https://morningcoffee.kr/cafe/f244b110-4c86-44ad-b646-04c6f5516232
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/f244b110-4c86-44ad-b646-04c6f5516232
 
 ## 3. 원빈 1호점
 - **오픈**: 06:50
 - **주소**: 서울 성동구 성수일로4길 45
-- **링크**: https://morningcoffee.kr/cafe/57cc6504-58cf-45e6-9f62-01592b7e8ad0
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/57cc6504-58cf-45e6-9f62-01592b7e8ad0
 
 ## 4. 커피마당
 - **오픈**: 07:00
 - **주소**: 서울 성동구 자동차시장1길 70
 - **전화**: 02-2244-5355
-- **링크**: https://morningcoffee.kr/cafe/c641ef79-91e1-47ec-a98e-483bb064c12d
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/c641ef79-91e1-47ec-a98e-483bb064c12d
 
 ## 5. 커피니 여의도순복음성동교회점
 - **오픈**: 07:00
 - **주소**: 서울 성동구 천호대로 316
 - **전화**: 02-2212-4778
-- **링크**: https://morningcoffee.kr/cafe/0e586b0f-0b59-49bf-b4f2-661492d80569
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/0e586b0f-0b59-49bf-b4f2-661492d80569
 

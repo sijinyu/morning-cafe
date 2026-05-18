@@ -5,27 +5,27 @@
 ## 1. 나비잠안마의자 서여의도점
 - **오픈**: 05:00
 - **주소**: 서울 영등포구 은행로 29
-- **링크**: https://morningcoffee.kr/cafe/b59d93ca-0efa-44bc-990b-a0372c537dbe
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/b59d93ca-0efa-44bc-990b-a0372c537dbe
 
 ## 2. 카페스터닝
 - **오픈**: 06:00
 - **주소**: 서울 영등포구 은행로 29
 - **전화**: 02-785-0290
-- **링크**: https://morningcoffee.kr/cafe/1126ec16-bd32-4b5a-99f1-ed1c47a42426
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/1126ec16-bd32-4b5a-99f1-ed1c47a42426
 
 ## 3. 사과당 여의도점
 - **오픈**: 06:00
 - **주소**: 서울 영등포구 여의나루로 42
-- **링크**: https://morningcoffee.kr/cafe/6b1cb193-0ad3-4a98-8393-3bd7a1a7b0dd
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/6b1cb193-0ad3-4a98-8393-3bd7a1a7b0dd
 
 ## 4. 무인카페선
 - **오픈**: 06:00
 - **주소**: 서울 영등포구 영등포로34길 3
-- **링크**: https://morningcoffee.kr/cafe/7bba4a90-370f-47bb-b4fa-5ca54aa49a12
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/7bba4a90-370f-47bb-b4fa-5ca54aa49a12
 
 ## 5. 브루다커피 여의도역점
 - **오픈**: 06:00
 - **주소**: 서울 영등포구 여의나루로 42
 - **전화**: 070-8888-4096
-- **링크**: https://morningcoffee.kr/cafe/946a639a-b8aa-4d25-a63e-977f4600568a
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/946a639a-b8aa-4d25-a63e-977f4600568a
 

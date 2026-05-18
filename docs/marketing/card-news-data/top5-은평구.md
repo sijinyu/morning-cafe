@@ -6,28 +6,28 @@
 - **오픈**: 05:00
 - **주소**: 서울 은평구 역말로 12
 - **전화**: 010-9590-1141
-- **링크**: https://morningcoffee.kr/cafe/93efa432-aec7-4a4b-915e-b9a18a109bb5
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/93efa432-aec7-4a4b-915e-b9a18a109bb5
 
 ## 2. 카페원츠
 - **오픈**: 06:00
 - **주소**: 서울 은평구 응암로21가길 8
 - **전화**: 0507-2085-2453
-- **링크**: https://morningcoffee.kr/cafe/282c2f09-9220-414e-ad3d-0cbf900088bf
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/282c2f09-9220-414e-ad3d-0cbf900088bf
 
 ## 3. 라파엘스
 - **오픈**: 06:30
 - **주소**: 서울 은평구 통일로 1030
 - **전화**: 070-7576-2564
-- **링크**: https://morningcoffee.kr/cafe/2783116f-ee94-4940-8256-6d7cb1b9cd86
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/2783116f-ee94-4940-8256-6d7cb1b9cd86
 
 ## 4. 커피디지 불광점
 - **오픈**: 07:00
 - **주소**: 서울 은평구 통일로 687
 - **전화**: 02-6012-3234
-- **링크**: https://morningcoffee.kr/cafe/4b457a68-5e24-4d9f-a5c4-d9e0f97c7eaf
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/4b457a68-5e24-4d9f-a5c4-d9e0f97c7eaf
 
 ## 5. 빈티지204
 - **오픈**: 07:00
 - **주소**: 서울 은평구 은평로 193-1
-- **링크**: https://morningcoffee.kr/cafe/28d06adc-897c-440a-8b31-007e13c11068
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/28d06adc-897c-440a-8b31-007e13c11068
 

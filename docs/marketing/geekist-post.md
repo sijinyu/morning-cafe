@@ -15,7 +15,7 @@
 
 **모닝커피** — 서울에서 아침 일찍(6~8시) 여는 카페를 카카오 지도에서 한눈에 찾아주는 웹앱
 
-🔗 **https://morningcoffee.kr**
+🔗 **https://morning-cafe-phi.vercel.app**
 
 ### 핵심 기능
 

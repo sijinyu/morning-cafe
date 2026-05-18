@@ -32,7 +32,7 @@
 
 써보시고 피드백 주시면 감사하겠습니다.
 
-👉 morningcoffee.kr
+👉 morning-cafe-phi.vercel.app
 
 #사이드프로젝트 #개발자 #서울카페 #아침루틴 #프로덕트 #카페추천 #얼리버드
 

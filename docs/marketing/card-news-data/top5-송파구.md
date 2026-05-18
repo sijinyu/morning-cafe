@@ -6,27 +6,27 @@
 - **오픈**: 06:00
 - **주소**: 서울 송파구 법원로 114
 - **전화**: 02-6177-9339
-- **링크**: https://morningcoffee.kr/cafe/d9f9a62c-6fda-4c54-978d-de47620d908c
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/d9f9a62c-6fda-4c54-978d-de47620d908c
 
 ## 2. 똣똣카페
 - **오픈**: 06:00
 - **주소**: 서울 송파구 삼전로 88
 - **전화**: 0502-5550-1554
-- **링크**: https://morningcoffee.kr/cafe/56f4aa7a-5cc9-46f3-832e-6c08072832f5
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/56f4aa7a-5cc9-46f3-832e-6c08072832f5
 
 ## 3. 미디엄커피
 - **오픈**: 06:30
 - **주소**: 서울 송파구 백제고분로18길 16
 - **전화**: 02-6082-5859
-- **링크**: https://morningcoffee.kr/cafe/87accc67-ecba-4e45-b86d-0401c3c4f990
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/87accc67-ecba-4e45-b86d-0401c3c4f990
 
 ## 4. 타이거커피
 - **오픈**: 06:40
 - **주소**: 서울 송파구 올림픽로35길 124
-- **링크**: https://morningcoffee.kr/cafe/d7dfba95-ad83-4208-acf7-6c7c3e6ac866
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/d7dfba95-ad83-4208-acf7-6c7c3e6ac866
 
 ## 5. 연즈카페
 - **오픈**: 07:00
 - **주소**: 서울 송파구 중대로16길 8
-- **링크**: https://morningcoffee.kr/cafe/0cfc6200-23b6-4cb6-bea6-0688349f7f87
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/0cfc6200-23b6-4cb6-bea6-0688349f7f87
 

@@ -19,7 +19,7 @@ import { CafeShareButton } from './share-button';
 // SSR — revalidate every 24h
 export const revalidate = 86400;
 
-const BASE_URL = 'https://morningcoffee.kr';
+const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
 interface PageProps {
   params: Promise<{ id: string }>;

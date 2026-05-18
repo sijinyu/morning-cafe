@@ -6,27 +6,27 @@
 - **오픈**: 06:00
 - **주소**: 서울 동작구 동작대로35가길 1
 - **전화**: 070-8211-0766
-- **링크**: https://morningcoffee.kr/cafe/66f60fd7-2a9e-4d79-a049-cceed41d96e0
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/66f60fd7-2a9e-4d79-a049-cceed41d96e0
 
 ## 2. 데일리프룻 상도점
 - **오픈**: 06:00
 - **주소**: 서울 동작구 양녕로25길 38
-- **링크**: https://morningcoffee.kr/cafe/40e5a2fb-13db-45c0-be4d-dd66d224b6b0
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/40e5a2fb-13db-45c0-be4d-dd66d224b6b0
 
 ## 3. 루이스프루타
 - **오픈**: 06:00
 - **주소**: 서울 동작구 신대방길 47
 - **전화**: 010-7612-0682
-- **링크**: https://morningcoffee.kr/cafe/c44082f9-1b4a-4ffd-b887-94d52e493f52
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/c44082f9-1b4a-4ffd-b887-94d52e493f52
 
 ## 4. 카페일분 상도터널점
 - **오픈**: 06:00
 - **주소**: 서울 동작구 매봉로 51
-- **링크**: https://morningcoffee.kr/cafe/2db1dd39-9974-4bf0-ac00-8b70942ff5c4
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/2db1dd39-9974-4bf0-ac00-8b70942ff5c4
 
 ## 5. 메리커피플레이스
 - **오픈**: 06:30
 - **주소**: 서울 동작구 보라매로5길 5
 - **전화**: 0507-1466-0939
-- **링크**: https://morningcoffee.kr/cafe/d7247eec-967b-473d-b635-73d94d5a6d56
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/d7247eec-967b-473d-b635-73d94d5a6d56
 

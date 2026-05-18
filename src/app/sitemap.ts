@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { fetchAllGus } from '@/lib/supabase/queries';
 
-const BASE_URL = 'https://morningcoffee.kr';
+const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let gus: string[] = [];

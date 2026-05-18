@@ -5,27 +5,27 @@
 ## 1. 라라무인카페
 - **오픈**: 05:00
 - **주소**: 서울 광진구 광나루로56길 34
-- **링크**: https://morningcoffee.kr/cafe/e94d4b56-af3b-4bd6-9426-344d51bea0e7
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/e94d4b56-af3b-4bd6-9426-344d51bea0e7
 
 ## 2. 널 위한 커피
 - **오픈**: 05:30
 - **주소**: 서울 광진구 뚝섬로36가길 8
 - **전화**: 0502-5551-8990
-- **링크**: https://morningcoffee.kr/cafe/87498df1-ec1e-468e-8eb2-7f1c7c2d383d
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/87498df1-ec1e-468e-8eb2-7f1c7c2d383d
 
 ## 3. 커피니 건대입구역점
 - **오픈**: 06:00
 - **주소**: 서울 광진구 자양동 1-5
 - **전화**: 02-461-5925
-- **링크**: https://morningcoffee.kr/cafe/89b64418-bcd4-4bb8-94db-420bacc42c5e
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/89b64418-bcd4-4bb8-94db-420bacc42c5e
 
 ## 4. 다이스웍스 자양점
 - **오픈**: 06:00
 - **주소**: 서울 광진구 뚝섬로49길 7
-- **링크**: https://morningcoffee.kr/cafe/58a9eba3-d81a-4bea-9dd8-0534b23dd509
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/58a9eba3-d81a-4bea-9dd8-0534b23dd509
 
 ## 5. 비트커피 군자역점
 - **오픈**: 06:00
 - **주소**: 서울 광진구 능동로37길 35
-- **링크**: https://morningcoffee.kr/cafe/58cc6e2a-1211-4a31-a62c-3018fe393152
+- **링크**: https://morning-cafe-phi.vercel.app/cafe/58cc6e2a-1211-4a31-a62c-3018fe393152
 
