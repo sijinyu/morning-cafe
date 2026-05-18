@@ -63,4 +63,13 @@ const serwist = new Serwist({
   ],
 });
 
+// 새 SW 활성화 시 옛날 w400 URL이 담긴 캐시 삭제
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.delete("place-detail-api").then(() =>
+      caches.delete("cafe-photos-proxy")
+    )
+  );
+});
+
 serwist.addEventListeners();
