@@ -17,12 +17,17 @@ const ALLOWED_MIMES = [
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
-const PROXY_HEADERS: Record<string, string> = {
-  'User-Agent':
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-  Referer: 'https://place.map.kakao.com/',
-};
+function buildProxyHeaders(hostname: string): Record<string, string> {
+  return {
+    'User-Agent':
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+    // pstatic.net requires same-origin Referer; daum CDN accepts kakao referer
+    Referer: hostname.endsWith('pstatic.net')
+      ? `https://${hostname}/`
+      : 'https://place.map.kakao.com/',
+  };
+}
 
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get('url');
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const upstream = await fetch(rawUrl, {
-      headers: PROXY_HEADERS,
+      headers: buildProxyHeaders(parsed.hostname),
       signal: AbortSignal.timeout(4000),
     });
 
