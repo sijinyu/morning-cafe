@@ -165,38 +165,38 @@ function CafeCard({ cafe }: { cafe: Cafe }) {
   const displayAddress = cafe.road_address ?? cafe.address;
 
   return (
-    <li className="flex items-start gap-3 px-5 py-3.5">
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold truncate">{cafe.name}</span>
-          {cafe.opening_time && (
-            <span
-              className={cn(
-                'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',
-                getOpeningBadgeStyle(cafe.opening_time),
-              )}
-            >
-              <Clock className="mr-0.5 h-2.5 w-2.5" />
-              {formatOpeningTime(cafe.opening_time)}
+    <li>
+      <Link
+        href={`/cafe/${cafe.id}`}
+        className="flex items-start gap-3 px-5 py-3.5 hover:bg-muted/50 transition-colors"
+      >
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold truncate">{cafe.name}</span>
+            {cafe.opening_time && (
+              <span
+                className={cn(
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',
+                  getOpeningBadgeStyle(cafe.opening_time),
+                )}
+              >
+                <Clock className="mr-0.5 h-2.5 w-2.5" />
+                {formatOpeningTime(cafe.opening_time)}
+              </span>
+            )}
+          </div>
+          <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+            <MapPin className="h-3 w-3 flex-shrink-0" />
+            {displayAddress}
+          </p>
+          {cafe.place_url && (
+            <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
+              <ExternalLink className="h-3 w-3" />
+              카카오맵
             </span>
           )}
         </div>
-        <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-          <MapPin className="h-3 w-3 flex-shrink-0" />
-          {displayAddress}
-        </p>
-        {cafe.place_url && (
-          <a
-            href={cafe.place_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ExternalLink className="h-3 w-3" />
-            카카오맵
-          </a>
-        )}
-      </div>
+      </Link>
     </li>
   );
 }

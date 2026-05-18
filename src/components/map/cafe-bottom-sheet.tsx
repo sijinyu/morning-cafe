@@ -416,12 +416,36 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </a>
               <button
                 onClick={() => {
-                  trackEvent('share', { cafe_name: cafe.name });
-                  const text = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}${cafe.place_url ? `\n${cafe.place_url}` : ''}`;
+                  trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
+                  const shareUrl = `https://morningcoffee.kr/cafe/${cafe.id}`;
+                  const shareText = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}`;
+
+                  // 1. Kakao Share
+                  if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Kakao) {
+                    const Kakao = (window as unknown as { Kakao: { isInitialized: () => boolean; Share: { sendDefault: (o: Record<string, unknown>) => void } } }).Kakao;
+                    if (Kakao.isInitialized()) {
+                      try {
+                        Kakao.Share.sendDefault({
+                          objectType: 'feed',
+                          content: {
+                            title: cafe.name,
+                            description: shareText,
+                            imageUrl: 'https://morningcoffee.kr/icons/icon-512x512.png',
+                            link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+                          },
+                          buttons: [{ title: '모닝커피에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+                        });
+                        return;
+                      } catch { /* fallback */ }
+                    }
+                  }
+
+                  // 2. Web Share API
                   if (navigator.share) {
-                    navigator.share({ title: cafe.name, text }).catch(() => {});
+                    navigator.share({ title: cafe.name, text: shareText, url: shareUrl }).catch(() => {});
                   } else {
-                    navigator.clipboard.writeText(text).catch(() => {});
+                    // 3. Clipboard fallback
+                    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).catch(() => {});
                   }
                 }}
                 className={cn(

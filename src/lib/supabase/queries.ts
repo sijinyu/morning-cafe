@@ -7,6 +7,20 @@ function isSupabaseConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
+/** Fetch a single cafe by its UUID. */
+export async function fetchCafeById(id: string): Promise<Cafe | null> {
+  if (!isSupabaseConfigured()) return null;
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from('cafes_with_coords')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return null;
+  return mapRowToCafe(data as Record<string, unknown>);
+}
+
 /** Fetch earlybird cafes in a specific 구, sorted by opening_time ASC. */
 export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
   if (!isSupabaseConfigured()) return [];

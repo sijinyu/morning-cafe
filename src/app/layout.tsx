@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import { Geist } from 'next/font/google';
 import Script from 'next/script';
 import { ThemeProvider } from '@/components/layout/theme-provider';
@@ -81,7 +82,7 @@ export default function RootLayout({
           <div className="flex h-full">
             <DesktopSidebar />
             <main className="relative flex-1 overflow-hidden pb-14 md:pb-0">
-              <PersistentMapPage />
+              <Suspense><PersistentMapPage /></Suspense>
               {children}
             </main>
           </div>

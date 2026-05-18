@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCafeStore } from '@/lib/store/cafe-store';
@@ -24,6 +24,7 @@ type ViewMode = 'map' | 'list';
 
 export function PersistentMapPage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isMapRoute = pathname === '/';
 
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
@@ -33,10 +34,24 @@ export function PersistentMapPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [listSearchQuery, setListSearchQuery] = useState('');
+  const deepLinkHandledRef = useRef<string | null>(null);
 
   useEffect(() => {
     fetchCafes();
   }, [fetchCafes]);
+
+  // Deep link: /?cafeId=xxx → select and pan to the cafe
+  useEffect(() => {
+    const cafeId = searchParams.get('cafeId');
+    if (!cafeId || cafes.length === 0) return;
+    if (deepLinkHandledRef.current === cafeId) return;
+    const target = cafes.find((c) => c.id === cafeId);
+    if (target) {
+      deepLinkHandledRef.current = cafeId;
+      setSelectedCafe(target);
+      setTimeout(() => panToRef.current?.(target.latitude, target.longitude), 200);
+    }
+  }, [searchParams, cafes, setSelectedCafe]);
 
   // Auto-request GPS on first load so the map can zoom to the user's location.
   useEffect(() => {
