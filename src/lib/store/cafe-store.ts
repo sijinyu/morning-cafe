@@ -9,6 +9,27 @@ import { extractGu, type Cafe } from '@/lib/types/cafe';
 export type TimeFilter = 'all' | 'before6' | '6to7' | '7to8';
 export type DayFilter = 'today' | '월' | '화' | '수' | '목' | '금' | '토' | '일';
 
+// 휴무 판별 정규식 (모듈 레벨 상수 — 매번 컴파일 방지)
+const CLOSED_REGEX = /휴무|정기|쉼/;
+
+// 카페 메타데이터 사전 캐시 (gu, is24h — 데이터 로드 시 1회 계산)
+interface CafeMeta { gu: string | null; is24h: boolean }
+const cafeMetaCache = new Map<string, CafeMeta>();
+
+function buildCafeMetaCache(cafes: Cafe[]): void {
+  cafeMetaCache.clear();
+  for (const cafe of cafes) {
+    cafeMetaCache.set(cafe.id, {
+      gu: extractGu(cafe.address),
+      is24h: is24Hours(cafe),
+    });
+  }
+}
+
+function getCafeMeta(cafe: Cafe): CafeMeta {
+  return cafeMetaCache.get(cafe.id) ?? { gu: extractGu(cafe.address), is24h: is24Hours(cafe) };
+}
+
 // 체인점 키워드
 const CHAIN_KEYWORDS = [
   // 대형 프랜차이즈
@@ -347,16 +368,14 @@ function computeFilteredCafes(
   const dayKey = resolveDayKey(dayFilter);
 
   return cafes.filter((cafe) => {
+    const meta = getCafeMeta(cafe);
     if (hideChains && chainCafeIds.has(cafe.id)) return false;
-    if (hide24h && is24Hours(cafe)) return false;
-    if (guFilter) {
-      const gu = extractGu(cafe.address);
-      if (gu !== guFilter) return false;
-    }
+    if (hide24h && meta.is24h) return false;
+    if (guFilter && meta.gu !== guFilter) return false;
     if (cafe.hours_by_day) {
       const dayHours = cafe.hours_by_day[dayKey];
       // 명시적 휴무 텍스트
-      if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
+      if (dayHours && CLOSED_REGEX.test(dayHours)) return false;
       // hours_by_day는 있는데 이 요일 키가 아예 없으면 = 휴무/정보없음 → 시간 필터 시 제외
       if (!dayHours && timeFilter !== 'all') return false;
     }
@@ -379,8 +398,8 @@ function computeFilteredCafes(
 function computeAvailableGus(cafes: Cafe[]): string[] {
   const gus = new Set<string>();
   for (const cafe of cafes) {
-    const gu = extractGu(cafe.address);
-    if (gu) gus.add(gu);
+    const meta = getCafeMeta(cafe);
+    if (meta.gu) gus.add(meta.gu);
   }
   return [...gus].sort();
 }
@@ -477,6 +496,7 @@ function applyData(
   set: (partial: Partial<CafeState>) => void,
 ) {
   const cafes = mapRowsToCafes(rows);
+  buildCafeMetaCache(cafes);
   const chainCafeIds = computeChainCafeIds(cafes);
   set({ cafes, chainCafeIds, availableGus: computeAvailableGus(cafes), loading: false });
   recompute(get, set);

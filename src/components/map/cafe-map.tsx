@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
+import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { trackEvent } from '@/lib/analytics';
@@ -217,9 +218,13 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
 
-  const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
-  const selectedCafe = useCafeStore((state) => state.selectedCafe);
-  const filteredCafes = useCafeStore((state) => state.filteredCafes);
+  const { selectedCafe, filteredCafes, setSelectedCafe } = useCafeStore(
+    useShallow((state) => ({
+      selectedCafe: state.selectedCafe,
+      filteredCafes: state.filteredCafes,
+      setSelectedCafe: state.setSelectedCafe,
+    })),
+  );
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const [viewportBounds, setViewportBounds] = useState<ViewportBounds | null>(null);

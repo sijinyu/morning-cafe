@@ -3,6 +3,7 @@
 import { useMemo, useRef } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
@@ -32,35 +33,37 @@ interface CafeListViewProps {
 }
 
 export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
-  const filteredCafes = useCafeStore((state) => state.filteredCafes);
-  const dayFilter = useCafeStore((state) => state.dayFilter);
+  const { filteredCafes, dayFilter } = useCafeStore(
+    useShallow((state) => ({
+      filteredCafes: state.filteredCafes,
+      dayFilter: state.dayFilter,
+    })),
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // 1단계: 검색 필터 (검색 쿼리 변경 시에만 재계산)
+  const searchFilteredCafes = useMemo(() => {
+    if (!searchQuery.trim()) return filteredCafes;
+    const q = searchQuery.trim().toLowerCase();
+    return filteredCafes.filter((c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.address.toLowerCase().includes(q) ||
+      (c.road_address?.toLowerCase().includes(q) ?? false)
+    );
+  }, [filteredCafes, searchQuery]);
+
+  // 2단계: 거리 계산 + 정렬 (위치 변경 시에만 재계산, 검색만 바뀌면 거리 계산 스킵)
   const sortedCafes: readonly CafeWithDistance[] = useMemo(() => {
-    let cafes = filteredCafes;
-
-    // 리스트 내 검색 필터
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      cafes = cafes.filter((c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.address.toLowerCase().includes(q) ||
-        (c.road_address?.toLowerCase().includes(q) ?? false)
-      );
-    }
-
-    // 거리 한 번만 계산 + 정렬 + 결과에 포함
     if (!userLocation) {
-      return cafes.map((cafe) => ({ cafe, distance: null }));
+      return searchFilteredCafes.map((cafe) => ({ cafe, distance: null }));
     }
-
-    return cafes
+    return searchFilteredCafes
       .map((cafe) => ({
         cafe,
         distance: haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude),
       }))
       .toSorted((a, b) => a.distance - b.distance);
-  }, [filteredCafes, userLocation, searchQuery]);
+  }, [searchFilteredCafes, userLocation]);
 
   const virtualizer = useVirtualizer({
     count: sortedCafes.length,

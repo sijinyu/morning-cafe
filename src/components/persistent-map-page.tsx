@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { CafeMap } from '@/components/map/cafe-map';
 import { TimeFilter } from '@/components/map/time-filter';
@@ -27,9 +28,13 @@ export function PersistentMapPage() {
   const searchParams = useSearchParams();
   const isMapRoute = pathname === '/';
 
-  const fetchCafes = useCafeStore((state) => state.fetchCafes);
-  const cafes = useCafeStore((state) => state.cafes);
-  const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
+  const { fetchCafes, cafes, setSelectedCafe } = useCafeStore(
+    useShallow((state) => ({
+      fetchCafes: state.fetchCafes,
+      cafes: state.cafes,
+      setSelectedCafe: state.setSelectedCafe,
+    })),
+  );
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);

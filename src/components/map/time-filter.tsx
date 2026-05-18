@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Store, ChevronDown } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import {
   useCafeStore,
   type TimeFilter as TimeFilterType,
@@ -101,17 +102,25 @@ const CHIP_INACTIVE = `${CHIP_BASE} bg-background/80 text-muted-foreground backd
 // ---- main component ---------------------------------------------------------
 
 export function TimeFilter() {
-  const timeFilter = useCafeStore((s) => s.timeFilter);
-  const setTimeFilter = useCafeStore((s) => s.setTimeFilter);
-  const dayFilter = useCafeStore((s) => s.dayFilter);
-  const setDayFilter = useCafeStore((s) => s.setDayFilter);
-  const guFilter = useCafeStore((s) => s.guFilter);
-  const setGuFilter = useCafeStore((s) => s.setGuFilter);
-  const hideChains = useCafeStore((s) => s.hideChains);
-  const setHideChains = useCafeStore((s) => s.setHideChains);
-  const hide24h = useCafeStore((s) => s.hide24h);
-  const setHide24h = useCafeStore((s) => s.setHide24h);
-  const availableGus = useCafeStore((s) => s.availableGus);
+  const { timeFilter, dayFilter, guFilter, hideChains, hide24h, availableGus } = useCafeStore(
+    useShallow((s) => ({
+      timeFilter: s.timeFilter,
+      dayFilter: s.dayFilter,
+      guFilter: s.guFilter,
+      hideChains: s.hideChains,
+      hide24h: s.hide24h,
+      availableGus: s.availableGus,
+    })),
+  );
+  const { setTimeFilter, setDayFilter, setGuFilter, setHideChains, setHide24h } = useCafeStore(
+    useShallow((s) => ({
+      setTimeFilter: s.setTimeFilter,
+      setDayFilter: s.setDayFilter,
+      setGuFilter: s.setGuFilter,
+      setHideChains: s.setHideChains,
+      setHide24h: s.setHide24h,
+    })),
+  );
   const filteredCount = useCafeStore((s) => s.filteredCafes.length);
 
   const [openDropdown, setOpenDropdown] = useState<'time' | 'area' | null>(null);
