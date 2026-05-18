@@ -4,7 +4,7 @@ import { MapPin, Clock, ExternalLink, Map } from 'lucide-react';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
-import type { Cafe } from '@/lib/store/cafe-store';
+import type { Cafe } from '@/lib/types/cafe';
 
 export const revalidate = 86400; // 24h ISR
 

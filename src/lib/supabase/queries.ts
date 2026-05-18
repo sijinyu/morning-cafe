@@ -1,5 +1,5 @@
 import { createServiceClient } from './server';
-import { extractGu, type Cafe } from '@/lib/store/cafe-store';
+import { extractGu, type Cafe } from '@/lib/types/cafe';
 
 const PAGE_SIZE = 1000;
 

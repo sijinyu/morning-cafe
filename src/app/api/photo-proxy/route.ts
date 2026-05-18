@@ -58,10 +58,11 @@ export async function GET(request: NextRequest) {
   try {
     const upstream = await fetch(rawUrl, {
       headers: buildProxyHeaders(parsed.hostname),
-      signal: AbortSignal.timeout(4000),
+      signal: AbortSignal.timeout(6000),
     });
 
     if (!upstream.ok) {
+      console.error(`[photo-proxy] upstream ${upstream.status} for ${rawUrl}`);
       return new NextResponse('Upstream error', { status: upstream.status });
     }
 
@@ -86,7 +87,8 @@ export async function GET(request: NextRequest) {
         'Content-Security-Policy': "default-src 'none'",
       },
     });
-  } catch {
+  } catch (err) {
+    console.error(`[photo-proxy] fetch failed for ${rawUrl}:`, err);
     return new NextResponse('Failed to fetch image', { status: 502 });
   }
 }

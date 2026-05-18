@@ -32,19 +32,6 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Naver pstatic cafe photos — URL-immutable, cache-first (7 days, 100 entries)
-    {
-      matcher: /^https:\/\/postfiles\.pstatic\.net\/.*/i,
-      handler: new CacheFirst({
-        cacheName: "cafe-photos-naver",
-        plugins: [
-          new ExpirationPlugin({
-            maxEntries: 100,
-            maxAgeSeconds: 7 * 24 * 60 * 60,
-          }),
-        ],
-      }),
-    },
     // Naver photos via proxy — stale-while-revalidate (1 day, 100 entries)
     {
       matcher: /\/api\/photo-proxy\?.*/i,
