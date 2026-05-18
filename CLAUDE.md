@@ -291,6 +291,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
 - [ ] 카페 데이터 자동 갱신 (크롤링 주기)
+- [x] 마케팅 문서 준비 — 지피터스, 링크드인, 인플루언서 DM, 채널 체크리스트, 카드뉴스 소재 25개 구
+- [x] Supabase 서버 쿼리 anon key fallback (SUPABASE_SERVICE_ROLE_KEY 미설정 대비)
+- [x] 도메인 `morning-cafe-phi.vercel.app`으로 전체 통일
 
 ---
 
