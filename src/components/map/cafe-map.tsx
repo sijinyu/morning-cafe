@@ -19,7 +19,7 @@ const SEOUL_BOUNDS = {
 };
 
 // 줌아웃 최대 레벨 (서울 전체가 보이는 정도)
-const MAX_ZOOM_LEVEL = 9;
+const MAX_ZOOM_LEVEL = 7;
 
 // Color palette — warm cafe tones per opening hour bracket
 interface MarkerColors {
