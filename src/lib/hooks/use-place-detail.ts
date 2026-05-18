@@ -29,17 +29,20 @@ const EMPTY: PlaceDetailResponse = {
 const MAX_CACHE_SIZE = 50;
 const cache = new Map<string, PlaceDetailResponse>();
 
-/** Preload the first photo so the browser starts downloading before React renders <Image>. */
-function preloadFirstPhoto(photos: string[]) {
-  const url = photos[0];
-  if (!url) return;
-  // Avoid duplicate preload links
-  if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = url;
-  document.head.appendChild(link);
+/** Preload the first 2 photos so the browser starts downloading before React renders <Image>. */
+function preloadPhotos(photos: string[]) {
+  const urls = photos.slice(0, 2);
+  for (const url of urls) {
+    if (!url) continue;
+    // Avoid duplicate preload links
+    if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
+    document.head.appendChild(link);
+  }
 }
 
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
@@ -73,7 +76,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
           if (oldest !== undefined) cache.delete(oldest);
         }
         cache.set(kakaoPlaceId, json);
-        preloadFirstPhoto(json.photos);
+        preloadPhotos(json.photos);
         setFetchedData(json);
       })
       .catch(() => {

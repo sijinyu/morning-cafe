@@ -16,6 +16,7 @@ interface PhotoCarouselProps {
 
 function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: boolean }) {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   if (error) {
     return (
@@ -26,17 +27,26 @@ function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: bool
   }
 
   return (
-    <Image
-      src={url}
-      alt={alt}
-      fill
-      sizes="144px"
-      unoptimized
-      referrerPolicy="no-referrer"
-      loading={eager ? 'eager' : 'lazy'}
-      className="object-cover"
-      onError={() => setError(true)}
-    />
+    <>
+      {/* Shimmer placeholder — visible until image loads */}
+      {!loaded && (
+        <div className="absolute inset-0 overflow-hidden bg-stone-200 dark:bg-stone-700">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent" />
+        </div>
+      )}
+      <Image
+        src={url}
+        alt={alt}
+        fill
+        sizes="144px"
+        unoptimized
+        referrerPolicy="no-referrer"
+        loading={eager ? 'eager' : 'lazy'}
+        className={`object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
+    </>
   );
 }
 
