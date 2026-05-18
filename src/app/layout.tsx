@@ -10,6 +10,7 @@ import { PersistentMapPage } from '@/components/persistent-map-page';
 import './globals.css';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const KAKAO_JS_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 
 const geistSans = Geist({
   variable: '--font-sans',
@@ -74,6 +75,27 @@ export default function RootLayout({
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
+        {KAKAO_JS_KEY && (
+          <>
+            <Script
+              src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+              integrity="sha384-DKYJZ8NLiK8MN4/C5P2ezmFnkrWRhOme9y/8M1MIo2OKIRBIMgjOV/W63VDcUls"
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+            <Script id="kakao-init" strategy="afterInteractive">
+              {`
+                (function wait(){
+                  if(window.Kakao && !window.Kakao.isInitialized()){
+                    window.Kakao.init('${KAKAO_JS_KEY}');
+                  } else if(!window.Kakao){
+                    setTimeout(wait, 100);
+                  }
+                })();
               `}
             </Script>
           </>
