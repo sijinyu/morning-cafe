@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
@@ -27,16 +27,18 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
 
   const isListMode = mode === 'list';
 
-  // 지도 모드: 드롭다운 결과
-  const results: Cafe[] = (!isListMode && query.trim().length >= 1)
-    ? cafes
-        .filter((cafe) =>
-          cafe.name.toLowerCase().includes(query.toLowerCase()) ||
-          cafe.address.toLowerCase().includes(query.toLowerCase()) ||
-          (cafe.road_address?.toLowerCase().includes(query.toLowerCase()) ?? false)
-        )
-        .slice(0, 5)
-    : [];
+  // 지도 모드: 드롭다운 결과 (useMemo로 캐싱, query/cafes 변경 시에만 재계산)
+  const results = useMemo<Cafe[]>(() => {
+    if (isListMode || query.trim().length < 1) return [];
+    const q = query.trim().toLowerCase();
+    return cafes
+      .filter((cafe) =>
+        cafe.name.toLowerCase().includes(q) ||
+        cafe.address.toLowerCase().includes(q) ||
+        (cafe.road_address?.toLowerCase().includes(q) ?? false)
+      )
+      .slice(0, 5);
+  }, [cafes, query, isListMode]);
 
   const showDropdown = !isListMode && focused && results.length > 0;
 

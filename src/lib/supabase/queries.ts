@@ -1,7 +1,10 @@
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
-import { extractGu, type Cafe } from '@/lib/types/cafe';
+import { type Cafe } from '@/lib/types/cafe';
 
 const PAGE_SIZE = 1000;
+
+// Cafe 타입에 필요한 컬럼만 선택 (select('*') 대신 사용)
+const CAFE_COLUMNS = 'id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at';
 
 function isSupabaseConfigured(): boolean {
   return !!(process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -26,7 +29,7 @@ export async function fetchCafeById(id: string): Promise<Cafe | null> {
   const supabase = createServerClient();
   const { data, error } = await supabase
     .from('cafes_with_coords')
-    .select('*')
+    .select(CAFE_COLUMNS)
     .eq('id', id)
     .single();
 
@@ -44,9 +47,9 @@ export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
   while (true) {
     const { data, error } = await supabase
       .from('cafes_with_coords')
-      .select('*')
+      .select(CAFE_COLUMNS)
       .eq('is_earlybird', true)
-      .ilike('address', `%${gu}%`)
+      .eq('gu', gu)
       .order('opening_time', { ascending: true, nullsFirst: false })
       .range(from, from + PAGE_SIZE - 1);
 
@@ -66,44 +69,50 @@ export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
 export async function fetchAllGus(): Promise<string[]> {
   if (!isSupabaseConfigured()) return [];
   const supabase = createServerClient();
-  const gus = new Set<string>();
-  let from = 0;
 
-  while (true) {
-    const { data, error } = await supabase
-      .from('cafes_with_coords')
-      .select('address')
-      .eq('is_earlybird', true)
-      .range(from, from + PAGE_SIZE - 1);
+  // gu 컬럼에서 distinct 조회 (인덱스 활용)
+  const { data, error } = await supabase
+    .from('cafes_with_coords')
+    .select('gu')
+    .eq('is_earlybird', true)
+    .not('gu', 'is', null);
 
-    if (error) {
-      throw new Error(`Failed to fetch addresses: ${error.message}`);
-    }
-
-    for (const row of data ?? []) {
-      const gu = extractGu(row.address as string);
-      if (gu) gus.add(gu);
-    }
-
-    if (!data || data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
+  if (error) {
+    throw new Error(`Failed to fetch gus: ${error.message}`);
   }
 
+  const gus = new Set<string>();
+  for (const row of data ?? []) {
+    if (row.gu) gus.add(row.gu as string);
+  }
   return [...gus].sort();
 }
 
-/** Fetch cafe count per 구 for the index page. */
+/** Fetch cafe count per 구 for the index page.
+ *  Uses PostgreSQL RPC function (002-gu-stats-function.sql) for server-side aggregation.
+ *  Fallback: JS aggregation if RPC not available. */
 export async function fetchGuStats(): Promise<{ gu: string; count: number; earliest: string | null }[]> {
   if (!isSupabaseConfigured()) return [];
   const supabase = createServerClient();
+
+  // RPC 함수 호출 시도 (서버 사이드 집계 — 25행만 반환)
+  const { data: rpcData, error: rpcError } = await supabase.rpc('get_gu_stats');
+
+  if (!rpcError && rpcData) {
+    return (rpcData as { gu: string; count: number; earliest: string | null }[])
+      .filter((row) => row.gu != null);
+  }
+
+  // Fallback: RPC 함수 미생성 시 JS 집계
   const guMap = new Map<string, { count: number; earliest: string | null }>();
   let from = 0;
 
   while (true) {
     const { data, error } = await supabase
       .from('cafes_with_coords')
-      .select('address, opening_time')
+      .select('gu, opening_time')
       .eq('is_earlybird', true)
+      .not('gu', 'is', null)
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
@@ -111,7 +120,7 @@ export async function fetchGuStats(): Promise<{ gu: string; count: number; earli
     }
 
     for (const row of data ?? []) {
-      const gu = extractGu(row.address as string);
+      const gu = row.gu as string;
       if (!gu) continue;
 
       const existing = guMap.get(gu);
