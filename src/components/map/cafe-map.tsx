@@ -10,6 +10,17 @@ import { trackEvent } from '@/lib/analytics';
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
 
+// 서울시 경계 (팬 제한용, 약간의 여유 포함)
+const SEOUL_BOUNDS = {
+  swLat: 37.413,  // 남쪽 (서초/강남 남단)
+  swLng: 126.734, // 서쪽 (강서구)
+  neLat: 37.715,  // 북쪽 (도봉/노원 북단)
+  neLng: 127.269, // 동쪽 (강동구)
+};
+
+// 줌아웃 최대 레벨 (서울 전체가 보이는 정도)
+const MAX_ZOOM_LEVEL = 9;
+
 // Color palette — warm cafe tones per opening hour bracket
 interface MarkerColors {
   fill: string;       // pin body
@@ -279,8 +290,11 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     kakao.maps.event.addListener(map, 'click', () => {
       setSelectedCafe(null);
     });
-    // 줌 변경 시 bounds 갱신
+    // 줌 변경 시 레벨 제한 + bounds 갱신
     kakao.maps.event.addListener(map, 'zoom_changed', () => {
+      if (map.getLevel() > MAX_ZOOM_LEVEL) {
+        map.setLevel(MAX_ZOOM_LEVEL);
+      }
       updateBounds(map);
     });
     // 초기 bounds 설정
@@ -289,7 +303,20 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
 
   function handleCenterChange(map: kakao.maps.Map) {
     const latlng = map.getCenter();
-    setCenter({ lat: latlng.getLat(), lng: latlng.getLng() });
+    let lat = latlng.getLat();
+    let lng = latlng.getLng();
+
+    // 서울 경계 밖으로 나가면 클램핑
+    const clampedLat = Math.max(SEOUL_BOUNDS.swLat, Math.min(SEOUL_BOUNDS.neLat, lat));
+    const clampedLng = Math.max(SEOUL_BOUNDS.swLng, Math.min(SEOUL_BOUNDS.neLng, lng));
+
+    if (clampedLat !== lat || clampedLng !== lng) {
+      map.setCenter(new kakao.maps.LatLng(clampedLat, clampedLng));
+      lat = clampedLat;
+      lng = clampedLng;
+    }
+
+    setCenter({ lat, lng });
     updateBounds(map);
   }
 
