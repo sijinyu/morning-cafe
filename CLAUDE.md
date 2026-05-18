@@ -54,6 +54,12 @@ src/
 │   ├── layout.tsx                  # 루트 레이아웃 (ThemeProvider, DesktopSidebar, BottomNav)
 │   ├── globals.css                 # Tailwind + 글로벌 스타일
 │   ├── manifest.ts                 # PWA manifest
+│   ├── cafes/
+│   │   ├── layout.tsx              # cafes 공통 레이아웃 (root layout 상속)
+│   │   ├── page.tsx                # 전체 구 목록 인덱스 (SSR + 24h ISR)
+│   │   └── [gu]/
+│   │       ├── page.tsx            # 구별 카페 목록 (SSG + 24h ISR, SEO 핵심)
+│   │       └── opengraph-image.tsx # 구별 OG 이미지 (Edge runtime)
 │   ├── favorites/
 │   │   ├── page.tsx                # 즐겨찾기 페이지 (카드 클릭 → 지도 이동)
 │   │   └── layout.tsx              # SEO metadata
@@ -64,9 +70,10 @@ src/
 │   │   ├── page.tsx                # 카페 제보 폼
 │   │   └── layout.tsx              # SEO metadata
 │   ├── robots.ts                   # robots.txt 자동 생성
-│   ├── sitemap.ts                  # sitemap.xml 자동 생성
+│   ├── sitemap.ts                  # sitemap.xml 동적 생성 (구별 URL 포함)
 │   └── api/
 │       ├── place-detail/route.ts   # 카카오 Place API 프록시 (사진+메뉴+별점+주차+편의시설)
+│       ├── photo-proxy/route.ts    # Naver pstatic 이미지 프록시 (Referer 우회)
 │       └── reports/route.ts        # 제보 POST → Supabase insert + Resend 이메일
 │
 ├── components/
@@ -105,7 +112,8 @@ src/
 │   │   └── use-cafe-memos.ts       # 카페별 메모 (localStorage)
 │   └── supabase/
 │       ├── client.ts               # 브라우저용 Supabase 클라이언트
-│       └── server.ts               # 서버용 (service_role) 클라이언트
+│       ├── server.ts               # 서버용 (service_role) 클라이언트
+│       └── queries.ts              # 서버사이드 쿼리 (fetchCafesByGu, fetchAllGus, fetchGuStats)
 │
 scripts/
 ├── generate-stats.js               # 통계 리포트 생성 (→ docs/seoul-morning-cafe-stats.md)
@@ -188,6 +196,13 @@ docs/
   ```
 - 서버 키 사용: `KAKAO_REST_API_KEY`
 
+### GET `/api/photo-proxy?url={encoded_naver_url}`
+Naver pstatic 이미지 프록시. Referer 제한 우회.
+- 허용 호스트: `postfiles.pstatic.net`, `blogfiles.pstatic.net`, `blogpfthumb-phinf.pstatic.net`
+- 타임아웃: 4초
+- 캐시: `Cache-Control: public, max-age=604800`
+- 이미지 MIME 검증, 10MB 제한
+
 ### POST `/api/reports`
 사용자 카페 제보.
 - body: `{ type, cafe_name, content }`
@@ -233,7 +248,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 1. **Zustand 파생 상태**: `filteredCafes`, `availableGus`는 함수가 아닌 배열. 필터/데이터 변경 시 `recompute()` 호출 필수.
 2. **바텀시트 bottom**: 모바일 `bottom-14`, 데스크탑 `bottom-0`. BottomNav 높이 고려.
 3. **마커 SVG**: `buildMarkerSvg()` 수정 시 `markerCache` 키가 올바른지 확인.
-4. **사진 로딩**: `SlideImage`에 스켈레톤(animate-pulse) + onLoad/onError 처리. 로딩 중 스켈레톤 → 로드 완료 시 opacity 트랜지션.
+4. **사진 로딩**: 캐러셀 처음 3장은 `loading="eager"`, 나머지 `lazy`. 라이트박스는 현재 ±1 슬라이드 `eager`. photo-proxy에 `Referer: https://place.map.kakao.com/` 필수. 타임아웃 4초.
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
@@ -243,6 +258,8 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝커피" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
+14. **SEO 구별 페이지**: `/cafes/[gu]`는 Server Component (SSG + 24h ISR). `generateStaticParams()`에서 raw 한글 문자열 반환 (Next.js가 자동 인코딩). `fetchCafesByGu()`는 `isSupabaseConfigured()` 체크 필수.
+15. **서비스워커 캐싱**: photo-proxy는 `StaleWhileRevalidate` (1일). daum/naver CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
 
 ### 커밋 메시지
 
@@ -256,8 +273,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] SEO 최적화 (OG/Twitter meta, robots.txt, sitemap.xml)
 - [x] 스플래시 스크린 (커피잔 애니메이션)
 - [x] 카카오 API 데이터 확장 (별점, 주차, 편의시설, 장점)
-- [ ] OG 이미지 디자인 (커피잔 일러스트)
-- [ ] 오프라인 캐싱 개선 (Serwist 설정)
+- [x] 구별 SEO 랜딩 페이지 (`/cafes/[gu]`) — SSG + ISR, OG 이미지, sitemap 연동
+- [x] 이미지 로딩 개선 — eager loading, Referer 헤더, SW 캐시 전략 수정
+- [ ] 개별 카페 페이지 `/cafe/[id]` (카카오톡 공유 기능과 함께)
+- [ ] JSON-LD 구조화 데이터 (LocalBusiness 스키마)
+- [ ] `extractGu`, `Cafe` 타입을 `cafe-store.ts`에서 별도 공유 모듈로 분리 (서버/클라이언트 경계)
+- [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
 - [ ] 카페 데이터 자동 갱신 (크롤링 주기)
