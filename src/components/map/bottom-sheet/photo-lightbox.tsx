@@ -14,7 +14,7 @@ interface PhotoLightboxProps {
   readonly onClose: () => void;
 }
 
-function LightboxImage({ url, alt }: { readonly url: string; readonly alt: string }) {
+function LightboxImage({ url, alt, eager }: { readonly url: string; readonly alt: string; readonly eager: boolean }) {
   const [error, setError] = useState(false);
 
   if (error) {
@@ -33,6 +33,7 @@ function LightboxImage({ url, alt }: { readonly url: string; readonly alt: strin
       sizes="100vw"
       unoptimized
       referrerPolicy="no-referrer"
+      loading={eager ? 'eager' : 'lazy'}
       className="object-contain"
       onError={() => setError(true)}
     />
@@ -132,6 +133,7 @@ export function PhotoLightbox({ photos, initialIndex, cafeName, onClose }: Photo
                 <LightboxImage
                   url={url}
                   alt={`${cafeName} 사진 ${i + 1}`}
+                  eager={Math.abs(i - currentIndex) <= 1}
                 />
               </div>
             ))}

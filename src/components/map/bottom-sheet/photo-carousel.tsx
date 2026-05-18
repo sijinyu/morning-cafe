@@ -14,7 +14,7 @@ interface PhotoCarouselProps {
   placeUrl: string | null;
 }
 
-function SlideImage({ url, alt, priority }: { url: string; alt: string; priority: boolean }) {
+function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: boolean }) {
   const [error, setError] = useState(false);
 
   if (error) {
@@ -33,8 +33,7 @@ function SlideImage({ url, alt, priority }: { url: string; alt: string; priority
       sizes="144px"
       unoptimized
       referrerPolicy="no-referrer"
-      priority={priority}
-      loading={priority ? undefined : 'lazy'}
+      loading={eager ? 'eager' : 'lazy'}
       className="object-cover"
       onError={() => setError(true)}
     />
@@ -113,7 +112,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
               <SlideImage
                 url={url}
                 alt={`${cafeName} 사진 ${i + 1}`}
-                priority={i === 0}
+                eager={i < 3}
               />
             </div>
           ))}
