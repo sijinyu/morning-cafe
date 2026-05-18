@@ -1,16 +1,29 @@
-import { createServiceClient } from './server';
+import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
 import { extractGu, type Cafe } from '@/lib/types/cafe';
 
 const PAGE_SIZE = 1000;
 
 function isSupabaseConfigured(): boolean {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY));
+}
+
+/** Create Supabase client — prefers service role key, falls back to anon key */
+function createServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error('Missing Supabase URL or key');
+  }
+
+  return supabaseCreateClient(url, key);
 }
 
 /** Fetch a single cafe by its UUID. */
 export async function fetchCafeById(id: string): Promise<Cafe | null> {
   if (!isSupabaseConfigured()) return null;
-  const supabase = createServiceClient();
+  const supabase = createServerClient();
   const { data, error } = await supabase
     .from('cafes_with_coords')
     .select('*')
@@ -24,7 +37,7 @@ export async function fetchCafeById(id: string): Promise<Cafe | null> {
 /** Fetch earlybird cafes in a specific 구, sorted by opening_time ASC. */
 export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
   if (!isSupabaseConfigured()) return [];
-  const supabase = createServiceClient();
+  const supabase = createServerClient();
   const allRows: Record<string, unknown>[] = [];
   let from = 0;
 
@@ -52,7 +65,7 @@ export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
 /** Extract all unique 구 names from earlybird cafes, sorted alphabetically. */
 export async function fetchAllGus(): Promise<string[]> {
   if (!isSupabaseConfigured()) return [];
-  const supabase = createServiceClient();
+  const supabase = createServerClient();
   const gus = new Set<string>();
   let from = 0;
 
@@ -82,7 +95,7 @@ export async function fetchAllGus(): Promise<string[]> {
 /** Fetch cafe count per 구 for the index page. */
 export async function fetchGuStats(): Promise<{ gu: string; count: number; earliest: string | null }[]> {
   if (!isSupabaseConfigured()) return [];
-  const supabase = createServiceClient();
+  const supabase = createServerClient();
   const guMap = new Map<string, { count: number; earliest: string | null }>();
   let from = 0;
 
