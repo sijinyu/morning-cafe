@@ -308,22 +308,29 @@ export function getDayLabel(dayFilter: DayFilter): string {
 /** 특정 요일의 오픈 시간 문자열을 반환 ("HH:MM" 형식). 없으면 opening_time fallback. */
 export function getOpeningTimeForDay(cafe: Cafe, dayFilter: DayFilter = 'today'): string | null {
   const dayKey = resolveDayKey(dayFilter);
-  const dayHours = cafe.hours_by_day?.[dayKey];
-  if (dayHours) {
+  if (cafe.hours_by_day) {
+    // hours_by_day가 있으면 해당 요일 데이터만 사용 (없으면 null = 정보없음)
+    const dayHours = cafe.hours_by_day[dayKey];
+    if (!dayHours) return null;
     const match = dayHours.match(/^(\d{2}:\d{2})~/);
     if (match) return match[1]!;
+    return null;
   }
+  // hours_by_day 자체가 null이면 opening_time fallback
   return cafe.opening_time;
 }
 
 /** 특정 요일의 오픈 시간(분)을 반환 */
 function getOpeningMinutesForDay(cafe: Cafe, dayKey: string): number | null {
-  const dayHours = cafe.hours_by_day?.[dayKey];
-  if (dayHours) {
+  if (cafe.hours_by_day) {
+    // hours_by_day가 있으면 해당 요일 데이터만 사용 (없으면 null = 정보없음)
+    const dayHours = cafe.hours_by_day[dayKey];
+    if (!dayHours) return null;
     const match = dayHours.match(/^(\d{2}):(\d{2})~/);
     if (match) return parseInt(match[1]!, 10) * 60 + parseInt(match[2]!, 10);
+    return null;
   }
-  // fallback: 전체 opening_time
+  // hours_by_day 자체가 null이면 opening_time fallback (요일 정보 없는 카페)
   return parseOpeningMinutes(cafe.opening_time);
 }
 
@@ -348,7 +355,10 @@ function computeFilteredCafes(
     }
     if (cafe.hours_by_day) {
       const dayHours = cafe.hours_by_day[dayKey];
+      // 명시적 휴무 텍스트
       if (dayHours && /휴무|정기|쉼/.test(dayHours)) return false;
+      // hours_by_day는 있는데 이 요일 키가 아예 없으면 = 휴무/정보없음 → 시간 필터 시 제외
+      if (!dayHours && timeFilter !== 'all') return false;
     }
     if (timeFilter === 'all') return true;
     const minutes = getOpeningMinutesForDay(cafe, dayKey);
