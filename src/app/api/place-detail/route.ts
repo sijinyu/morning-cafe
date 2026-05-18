@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 const DETAIL_HEADERS = {
   'User-Agent':
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -63,18 +65,17 @@ export async function GET(request: NextRequest) {
       .map((p) => p.url?.replace('http://', 'https://'))
       .filter(Boolean) as string[];
 
+    // Use kakaocdn cthumb proxy for pstatic images — no need for our own photo-proxy
     const photos = httpsUrls.map((url) => {
       if (url.includes('pstatic.net')) {
-        const thumbUrl = `${url.split('?')[0]}?type=w773`;
-        return `/api/photo-proxy?url=${encodeURIComponent(thumbUrl)}`;
+        return `https://img1.kakaocdn.net/cthumb/local/C280x280.q70/?fname=${encodeURIComponent(url)}`;
       }
       return url;
     });
 
     const photosHd = httpsUrls.map((url) => {
       if (url.includes('pstatic.net')) {
-        const hdUrl = `${url.split('?')[0]}?type=w966`;
-        return `/api/photo-proxy?url=${encodeURIComponent(hdUrl)}`;
+        return `https://img1.kakaocdn.net/cthumb/local/R800x0/?fname=${encodeURIComponent(url)}`;
       }
       return url;
     });

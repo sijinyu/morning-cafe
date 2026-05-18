@@ -32,15 +32,15 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Naver photos via proxy — stale-while-revalidate (1 day, 100 entries)
+    // Kakao CDN cthumb photos — cache-first (7 days, 200 entries)
     {
-      matcher: /\/api\/photo-proxy\?.*/i,
-      handler: new StaleWhileRevalidate({
-        cacheName: "cafe-photos-proxy",
+      matcher: /^https:\/\/img1\.kakaocdn\.net\/cthumb\/.*/i,
+      handler: new CacheFirst({
+        cacheName: "cafe-photos-kakaocdn",
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 100,
-            maxAgeSeconds: 24 * 60 * 60,
+            maxEntries: 200,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
           }),
         ],
       }),
@@ -63,12 +63,13 @@ const serwist = new Serwist({
   ],
 });
 
-// 새 SW 활성화 시 옛날 w400 URL이 담긴 캐시 삭제
+// 새 SW 활성화 시 옛 photo-proxy/place-detail 캐시 삭제 (kakaocdn으로 전환)
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.delete("place-detail-api").then(() =>
-      caches.delete("cafe-photos-proxy")
-    )
+    Promise.all([
+      caches.delete("place-detail-api"),
+      caches.delete("cafe-photos-proxy"),
+    ])
   );
 });
 

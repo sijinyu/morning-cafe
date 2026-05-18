@@ -248,7 +248,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 1. **Zustand 파생 상태**: `filteredCafes`, `availableGus`는 함수가 아닌 배열. 필터/데이터 변경 시 `recompute()` 호출 필수.
 2. **바텀시트 bottom**: 모바일 `bottom-14`, 데스크탑 `bottom-0`. BottomNav 높이 고려.
 3. **마커 SVG**: `buildMarkerSvg()` 수정 시 `markerCache` 키가 올바른지 확인.
-4. **사진 로딩**: 캐러셀 처음 3장은 `loading="eager"`, 나머지 `lazy`. 라이트박스는 현재 ±1 슬라이드 `eager`. photo-proxy에 `Referer: https://place.map.kakao.com/` 필수. 타임아웃 4초.
+4. **사진 로딩**: pstatic 이미지는 `img1.kakaocdn.net/cthumb/` 프록시 사용 (카카오 CDN 리사이즈). 캐러셀 `C280x280.q70`, 라이트박스 `R800x0`. 캐러셀 처음 3장 `loading="eager"`, 나머지 `lazy`. photo-proxy API는 deprecated (kakaocdn으로 전환).
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
@@ -259,7 +259,8 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
 14. **SEO 구별 페이지**: `/cafes/[gu]`는 Server Component (SSG + 24h ISR). `generateStaticParams()`에서 raw 한글 문자열 반환 (Next.js가 자동 인코딩). `fetchCafesByGu()`는 `isSupabaseConfigured()` 체크 필수.
-15. **서비스워커 캐싱**: photo-proxy는 `StaleWhileRevalidate` (1일). daum/naver CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
+15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (7일, 200개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
+16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
 
 ### 커밋 메시지
 
@@ -275,6 +276,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 카카오 API 데이터 확장 (별점, 주차, 편의시설, 장점)
 - [x] 구별 SEO 랜딩 페이지 (`/cafes/[gu]`) — SSG + ISR, OG 이미지, sitemap 연동
 - [x] 이미지 로딩 개선 — eager loading, Referer 헤더, SW 캐시 전략 수정
+- [x] 시간 필터 요일 fallback 버그 수정 — 주말 잘못된 필터링 방지
 - [ ] 개별 카페 페이지 `/cafe/[id]` (카카오톡 공유 기능과 함께)
 - [ ] JSON-LD 구조화 데이터 (LocalBusiness 스키마)
 - [ ] `extractGu`, `Cafe` 타입을 `cafe-store.ts`에서 별도 공유 모듈로 분리 (서버/클라이언트 경계)
