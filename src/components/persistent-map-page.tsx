@@ -54,7 +54,18 @@ export function PersistentMapPage() {
     if (target) {
       deepLinkHandledRef.current = cafeId;
       setSelectedCafe(target);
-      setTimeout(() => panToRef.current?.(target.latitude, target.longitude), 200);
+      // panTo retry: 카카오 SDK 초기화 전에 cafes가 먼저 로드되면
+      // panToRef가 아직 null일 수 있으므로 최대 5회 재시도
+      let attempts = 0;
+      const tryPanTo = () => {
+        if (panToRef.current) {
+          panToRef.current(target.latitude, target.longitude);
+        } else if (attempts < 5) {
+          attempts++;
+          setTimeout(tryPanTo, 300);
+        }
+      };
+      setTimeout(tryPanTo, 200);
     }
   }, [searchParams, cafes, setSelectedCafe]);
 

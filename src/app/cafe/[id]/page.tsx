@@ -11,7 +11,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { fetchCafeById } from '@/lib/supabase/queries';
-import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { is24Hours, formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import type { Cafe } from '@/lib/types/cafe';
 import { CafeShareButton } from './share-button';
@@ -151,7 +151,7 @@ export default async function CafePage({ params }: PageProps) {
   }
 
   const displayAddress = cafe.road_address ?? cafe.address;
-  const is24h = cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00';
+  const is24h = is24Hours(cafe);
   const openingFormatted = is24h ? '24시간 영업' : cafe.opening_time ? `${formatOpeningTime(cafe.opening_time)} 오픈` : null;
   const badgeStyle = is24h
     ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'

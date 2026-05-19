@@ -1,12 +1,14 @@
 import type { MetadataRoute } from 'next';
-import { fetchAllGus } from '@/lib/supabase/queries';
+import { fetchAllGus, fetchAllCafeIds } from '@/lib/supabase/queries';
 
 const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let gus: string[] = [];
+  let cafeIds: string[] = [];
+
   try {
-    gus = await fetchAllGus();
+    [gus, cafeIds] = await Promise.all([fetchAllGus(), fetchAllCafeIds()]);
   } catch {
     // Fallback to empty if Supabase is unavailable during build
   }
@@ -16,6 +18,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
     changeFrequency: 'daily',
     priority: 0.8,
+  }));
+
+  const cafeEntries: MetadataRoute.Sitemap = cafeIds.map((id) => ({
+    url: `${BASE_URL}/cafe/${id}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.7,
   }));
 
   return [
@@ -32,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     ...guEntries,
+    ...cafeEntries,
     {
       url: `${BASE_URL}/favorites`,
       lastModified: new Date(),

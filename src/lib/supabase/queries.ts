@@ -88,6 +88,32 @@ export async function fetchAllGus(): Promise<string[]> {
   return [...gus].sort();
 }
 
+/** Fetch all earlybird cafe IDs for sitemap generation (lightweight — id only). */
+export async function fetchAllCafeIds(): Promise<string[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = createServerClient();
+  const allIds: string[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('cafes_with_coords')
+      .select('id')
+      .eq('is_earlybird', true)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) break;
+
+    for (const row of data ?? []) {
+      allIds.push(row.id as string);
+    }
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return allIds;
+}
+
 /** Fetch cafe count per 구 for the index page.
  *  Uses PostgreSQL RPC function (002-gu-stats-function.sql) for server-side aggregation.
  *  Fallback: JS aggregation if RPC not available. */

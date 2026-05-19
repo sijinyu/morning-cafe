@@ -1,5 +1,17 @@
 /** Shared cafe display utilities — single source of truth. */
 
+import type { Cafe } from '@/lib/types/cafe';
+
+/** 24시간 영업 판단 — 서버/클라이언트 양쪽에서 사용 가능 */
+export function is24Hours(cafe: Pick<Cafe, 'opening_time' | 'closing_time' | 'hours_by_day'>): boolean {
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '24:00:00') return true;
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00') return true;
+  // hours_by_day에 "00:00~24:00" 패턴
+  const sample = Object.values(cafe.hours_by_day ?? {})[0];
+  if (sample && /^00:00~24:00$/.test(sample)) return true;
+  return false;
+}
+
 /** Format "HH:MM:SS" → "HH:MM" for display. */
 export function formatOpeningTime(openingTime: string | null): string {
   if (!openingTime) return '정보 없음';

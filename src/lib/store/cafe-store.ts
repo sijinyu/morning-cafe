@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase/client';
 
 export type { Cafe } from '@/lib/types/cafe';
 export { extractGu } from '@/lib/types/cafe';
+export { is24Hours } from '@/lib/cafe-utils';
 import { extractGu, type Cafe } from '@/lib/types/cafe';
+import { is24Hours } from '@/lib/cafe-utils';
 
 export type TimeFilter = 'all' | 'before6' | '6to7' | '7to8';
 export type DayFilter = 'today' | '월' | '화' | '수' | '목' | '금' | '토' | '일';
@@ -229,16 +231,6 @@ const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
 export function isChainCafe(name: string): boolean {
   const lower = name.toLowerCase();
   return CHAIN_KEYWORDS_LOWER.some((kw) => lower.includes(kw));
-}
-
-// 24시간 영업 판단
-export function is24Hours(cafe: Cafe): boolean {
-  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '24:00:00') return true;
-  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00') return true;
-  // hours_by_day에 "00:00~24:00" 패턴
-  const sample = Object.values(cafe.hours_by_day ?? {})[0];
-  if (sample && /^00:00~24:00$/.test(sample)) return true;
-  return false;
 }
 
 // 요일 매핑 (Date.getDay() → Korean day key in hours_by_day)
