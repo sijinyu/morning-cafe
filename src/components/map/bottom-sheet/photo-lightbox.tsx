@@ -9,13 +9,25 @@ import { X, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 
 interface PhotoLightboxProps {
   readonly photos: readonly string[];
+  readonly thumbnails: readonly string[];
   readonly initialIndex: number;
   readonly cafeName: string;
   readonly onClose: () => void;
 }
 
-function LightboxImage({ url, alt, eager }: { readonly url: string; readonly alt: string; readonly eager: boolean }) {
+function LightboxImage({
+  url,
+  thumbnailUrl,
+  alt,
+  eager,
+}: {
+  readonly url: string;
+  readonly thumbnailUrl: string | undefined;
+  readonly alt: string;
+  readonly eager: boolean;
+}) {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   if (error) {
     return (
@@ -26,21 +38,61 @@ function LightboxImage({ url, alt, eager }: { readonly url: string; readonly alt
   }
 
   return (
-    <Image
-      src={url}
-      alt={alt}
-      fill
-      sizes="100vw"
-      unoptimized
-      referrerPolicy="no-referrer"
-      loading={eager ? 'eager' : 'lazy'}
-      className="object-contain"
-      onError={() => setError(true)}
-    />
+    <>
+      {/* LQIP: cached carousel thumbnail as blur placeholder (Instagram/Facebook pattern) */}
+      {thumbnailUrl && (
+        <Image
+          src={thumbnailUrl}
+          alt=""
+          fill
+          sizes="100vw"
+          unoptimized
+          referrerPolicy="no-referrer"
+          className={`object-contain blur-lg scale-105 transition-opacity duration-500 ${loaded ? 'opacity-0' : 'opacity-100'}`}
+          aria-hidden
+        />
+      )}
+      {/* HD image — crossfades in over the blur placeholder */}
+      <Image
+        src={url}
+        alt={alt}
+        fill
+        sizes="100vw"
+        unoptimized
+        referrerPolicy="no-referrer"
+        loading={eager ? 'eager' : 'lazy'}
+        className={`object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
+    </>
   );
 }
 
-export function PhotoLightbox({ photos, initialIndex, cafeName, onClose }: PhotoLightboxProps) {
+/** Preload HD images for adjacent slides so swipe feels instant */
+function usePreloadAdjacentImages(photos: readonly string[], currentIndex: number) {
+  useEffect(() => {
+    const preloadOffsets = [-1, 1, -2, 2];
+    const len = photos.length;
+    if (len <= 1) return;
+
+    const images: HTMLImageElement[] = [];
+    for (const offset of preloadOffsets) {
+      const idx = ((currentIndex + offset) % len + len) % len;
+      const img = new globalThis.Image();
+      img.src = photos[idx];
+      images.push(img);
+    }
+
+    return () => {
+      for (const img of images) {
+        img.src = '';
+      }
+    };
+  }, [photos, currentIndex]);
+}
+
+export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onClose }: PhotoLightboxProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     startIndex: initialIndex,
@@ -49,6 +101,9 @@ export function PhotoLightbox({ photos, initialIndex, cafeName, onClose }: Photo
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  // Preload ±2 adjacent HD images for instant swipe
+  usePreloadAdjacentImages(photos, currentIndex);
 
   // Sync current slide index
   useEffect(() => {
@@ -132,6 +187,7 @@ export function PhotoLightbox({ photos, initialIndex, cafeName, onClose }: Photo
               <div key={url} className="relative h-full w-full flex-shrink-0">
                 <LightboxImage
                   url={url}
+                  thumbnailUrl={thumbnails[i]}
                   alt={`${cafeName} 사진 ${i + 1}`}
                   eager={Math.abs(i - currentIndex) <= 1}
                 />

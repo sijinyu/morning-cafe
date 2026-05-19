@@ -145,6 +145,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
       {lightboxIndex !== null && (
         <PhotoLightbox
           photos={photosHd.length > 0 ? photosHd : photos}
+          thumbnails={photos}
           initialIndex={lightboxIndex}
           cafeName={cafeName}
           onClose={() => setLightboxIndex(null)}
