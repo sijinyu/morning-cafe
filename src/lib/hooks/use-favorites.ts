@@ -15,8 +15,10 @@ function getSnapshot(): Set<string> {
   }
 }
 
+const EMPTY_SET: Set<string> = new Set();
+
 function getServerSnapshot(): Set<string> {
-  return new Set();
+  return EMPTY_SET;
 }
 
 let cachedSet: Set<string> | null = null;

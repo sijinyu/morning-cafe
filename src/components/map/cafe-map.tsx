@@ -59,33 +59,88 @@ interface CafeMarkerProps {
   cafe: Cafe;
   isSelected: boolean;
   isFavorite: boolean;
+  isChain: boolean;
   onSelect: (cafe: Cafe) => void;
 }
 
+// Selected marker stroke color (blue-600)
+const SELECTED_STROKE = '#2563EB';
+const SELECTED_STROKE_WIDTH = 3;
+
+// Build pin-shaped path (teardrop) for individual cafes
+function buildPinPath(w: number, h: number, s: number): string {
+  return `M${w / 2} ${h - 2}C${w / 2} ${h - 2} ${3 * s} ${(h - 13.5 * s)} ${3 * s} ${14 * s}C${3 * s} ${7.4 * s} ${7.9 * s} ${2 * s} ${14 * s} ${2 * s}C${20.1 * s} ${2 * s} ${25 * s} ${7.4 * s} ${25 * s} ${14 * s}C${25 * s} ${(h - 13.5 * s)} ${w / 2} ${h - 2} ${w / 2} ${h - 2}Z`;
+}
+
+// Build rounded-rect pin path (square top + pointed tail) for chain/franchise cafes
+function buildSquarePinPath(w: number, h: number, s: number): string {
+  const r = 4 * s;   // corner radius
+  const l = 3 * s;   // left edge
+  const ri = 25 * s; // right edge
+  const t = 2 * s;   // top edge
+  const b = 22 * s;  // bottom of rect body
+  const cx = w / 2;
+  const tip = h - 2;
+  const tailW = 4 * s; // half-width of tail base
+  return `M${l + r} ${t}L${ri - r} ${t}Q${ri} ${t} ${ri} ${t + r}L${ri} ${b - r}Q${ri} ${b} ${ri - r} ${b}L${cx + tailW} ${b}L${cx} ${tip}L${cx - tailW} ${b}L${l + r} ${b}Q${l} ${b} ${l} ${b - r}L${l} ${t + r}Q${l} ${t} ${l + r} ${t}Z`;
+}
+
+// Build the inner icons (glossy highlight, sparkle, coffee mug circle, cup, coffee, squiggle)
+function buildInnerIcons(w: number, h: number, s: number, colors: MarkerColors, isChain: boolean): string {
+  const { cream, stroke, coffee } = colors;
+  // Chain markers have a shorter body, so shift inner content up slightly
+  const yOff = isChain ? -2 * s : 0;
+  const cx = 14 * s;
+  const cy = 14 * s + yOff;
+  return [
+    // Glossy highlight
+    `<ellipse cx="${10.4 * s}" cy="${(7.6 * s) + yOff}" rx="${2.8 * s}" ry="${1.9 * s}" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 ${10.4 * s} ${(7.6 * s) + yOff})"/>`,
+    // Sparkle
+    `<path d="M${22.1 * s} ${(5.8 * s) + yOff}L${22.8 * s} ${(7.3 * s) + yOff}L${24.4 * s} ${(8 * s) + yOff}L${22.8 * s} ${(8.7 * s) + yOff}L${22.1 * s} ${(10.2 * s) + yOff}L${21.4 * s} ${(8.7 * s) + yOff}L${19.8 * s} ${(8 * s) + yOff}L${21.4 * s} ${(7.3 * s) + yOff}L${22.1 * s} ${(5.8 * s) + yOff}Z" fill="${cream}" stroke="${stroke}" stroke-width="0.9" stroke-linejoin="round"/>`,
+    // Inner circle
+    `<circle cx="${cx}" cy="${cy}" r="${6.8 * s}" fill="${cream}" stroke="${stroke}" stroke-width="1.2"/>`,
+    // Mug body
+    `<rect x="${10.5 * s}" y="${(11.6 * s) + yOff}" width="${6.3 * s}" height="${5.4 * s}" rx="${1.1 * s}" fill="none" stroke="${stroke}" stroke-width="1"/>`,
+    // Mug handle
+    `<path d="M${16.8 * s} ${(12.9 * s) + yOff}C${18 * s} ${(12.9 * s) + yOff} ${18.7 * s} ${(13.5 * s) + yOff} ${18.7 * s} ${(14.3 * s) + yOff}C${18.7 * s} ${(15.1 * s) + yOff} ${18 * s} ${(15.7 * s) + yOff} ${16.8 * s} ${(15.7 * s) + yOff}" stroke="${stroke}" stroke-width="0.9" stroke-linecap="round"/>`,
+    // Coffee fill
+    `<rect x="${11.3 * s}" y="${(14.1 * s) + yOff}" width="${4.5 * s}" height="${1.8 * s}" rx="${0.4 * s}" fill="${coffee}" opacity="0.92"/>`,
+    // Squiggle tail (only for pin shapes, not chain)
+    ...(isChain ? [] : [
+      `<path d="M${11.2 * s} ${25.1 * s}C${12 * s} ${24.5 * s} ${12.7 * s} ${24.5 * s} ${13.4 * s} ${25.1 * s}C${14 * s} ${25.7 * s} ${14.7 * s} ${25.7 * s} ${15.4 * s} ${25 * s}" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>`,
+    ]),
+  ].join('\n    ');
+}
+
 // New marker design with sparkle + coffee mug + squiggle tail
-function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): string {
+// isChain=true renders a rounded-rect (square) pin for franchise cafes
+function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean, isChain: boolean): string {
   const { fill, stroke, cream, coffee } = colors;
 
   if (selected) {
     // Selected: larger version (44x54)
     const w = 44;
     const h = 54;
+    const s = w / 28;
+    const shapePath = isChain ? buildSquarePinPath(w, h, s) : `M22 52C22 52 4.7 35.4 4.7 22C4.7 11.6 12.4 3.1 22 3.1C31.6 3.1 39.3 11.6 39.3 22C39.3 35.4 22 52 22 52Z`;
+    const yOff = isChain ? -2 * s : 0;
+
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
       <defs>
         <filter id="ds" x="-30%" y="-20%" width="160%" height="180%">
           <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000" flood-opacity="0.2"/>
         </filter>
       </defs>
-      <path d="M22 52C22 52 4.7 35.4 4.7 22C4.7 11.6 12.4 3.1 22 3.1C31.6 3.1 39.3 11.6 39.3 22C39.3 35.4 22 52 22 52Z"
-        fill="${fill}" stroke="${stroke}" stroke-width="2" filter="url(#ds)"/>
-      <ellipse cx="16.3" cy="12" rx="4.4" ry="3" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 16.3 12)"/>
-      <path d="M34.7 9.1L35.8 11.5L38.3 12.6L35.8 13.7L34.7 16.1L33.6 13.7L31.1 12.6L33.6 11.5L34.7 9.1Z"
+      <path d="${shapePath}"
+        fill="${fill}" stroke="${SELECTED_STROKE}" stroke-width="${SELECTED_STROKE_WIDTH}" filter="url(#ds)"/>
+      <ellipse cx="16.3" cy="${12 + yOff}" rx="4.4" ry="3" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 16.3 ${12 + yOff})"/>
+      <path d="M34.7 ${9.1 + yOff}L35.8 ${11.5 + yOff}L38.3 ${12.6 + yOff}L35.8 ${13.7 + yOff}L34.7 ${16.1 + yOff}L33.6 ${13.7 + yOff}L31.1 ${12.6 + yOff}L33.6 ${11.5 + yOff}L34.7 ${9.1 + yOff}Z"
         fill="${cream}" stroke="${stroke}" stroke-width="1.1" stroke-linejoin="round"/>
-      <circle cx="22" cy="22" r="10.7" fill="${cream}" stroke="${stroke}" stroke-width="1.4"/>
-      <rect x="16.5" y="18.2" width="9.9" height="8.5" rx="1.7" fill="none" stroke="${stroke}" stroke-width="1.3"/>
-      <path d="M26.4 20.3C28.3 20.3 29.4 21.2 29.4 22.5C29.4 23.8 28.3 24.7 26.4 24.7" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round"/>
-      <rect x="17.8" y="22.1" width="7.1" height="2.8" rx="0.6" fill="${coffee}" opacity="0.9"/>
-      <path d="M17.6 39.5C18.9 38.5 19.9 38.5 21 39.5C22 40.4 23 40.4 24.1 39.4" stroke="${stroke}" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
+      <circle cx="22" cy="${22 + yOff}" r="10.7" fill="${cream}" stroke="${stroke}" stroke-width="1.4"/>
+      <rect x="16.5" y="${18.2 + yOff}" width="9.9" height="8.5" rx="1.7" fill="none" stroke="${stroke}" stroke-width="1.3"/>
+      <path d="M26.4 ${20.3 + yOff}C28.3 ${20.3 + yOff} 29.4 ${21.2 + yOff} 29.4 ${22.5 + yOff}C29.4 ${23.8 + yOff} 28.3 ${24.7 + yOff} 26.4 ${24.7 + yOff}" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round"/>
+      <rect x="17.8" y="${22.1 + yOff}" width="7.1" height="2.8" rx="0.6" fill="${coffee}" opacity="0.9"/>
+      ${!isChain ? `<path d="M17.6 39.5C18.9 38.5 19.9 38.5 21 39.5C22 40.4 23 40.4 24.1 39.4" stroke="${stroke}" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>` : ''}
       ${fav ? `<circle cx="35" cy="6" r="7" fill="white" stroke="${stroke}" stroke-width="1"/>
       <path d="M35 10 l-1-0.9c-2.5-2.2-4.1-3.7-4.1-5.5 0-1.4 1.2-2.5 2.6-2.5 0.8 0 1.6 0.3 2.2 1 0.5-0.7 1.3-1 2.2-1 1.4 0 2.6 1.1 2.6 2.5 0 1.8-1.6 3.3-4.1 5.5z" fill="#EF4444"/>` : ''}
     </svg>`;
@@ -95,6 +150,7 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
   const w = fav ? 34 : 28;
   const h = fav ? 42 : 36;
   const s = w / 28; // scale factor
+  const shapePath = isChain ? buildSquarePinPath(w, h, s) : buildPinPath(w, h, s);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">
     <defs>
@@ -102,16 +158,9 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
         <feDropShadow dx="0" dy="2" stdDeviation="1.8" flood-color="#000" flood-opacity="0.16"/>
       </filter>
     </defs>
-    <path d="M${w / 2} ${h - 2}C${w / 2} ${h - 2} ${3 * s} ${(h - 13.5 * s)}  ${3 * s} ${14 * s}C${3 * s} ${7.4 * s} ${7.9 * s} ${2 * s} ${14 * s} ${2 * s}C${20.1 * s} ${2 * s} ${25 * s} ${7.4 * s} ${25 * s} ${14 * s}C${25 * s} ${(h - 13.5 * s)} ${w / 2} ${h - 2} ${w / 2} ${h - 2}Z"
+    <path d="${shapePath}"
       fill="${fill}" stroke="${stroke}" stroke-width="1.8" filter="url(#ds)"/>
-    <ellipse cx="${10.4 * s}" cy="${7.6 * s}" rx="${2.8 * s}" ry="${1.9 * s}" fill="#FFFFFF" opacity="0.28" transform="rotate(-18 ${10.4 * s} ${7.6 * s})"/>
-    <path d="M${22.1 * s} ${5.8 * s}L${22.8 * s} ${7.3 * s}L${24.4 * s} ${8 * s}L${22.8 * s} ${8.7 * s}L${22.1 * s} ${10.2 * s}L${21.4 * s} ${8.7 * s}L${19.8 * s} ${8 * s}L${21.4 * s} ${7.3 * s}L${22.1 * s} ${5.8 * s}Z"
-      fill="${cream}" stroke="${stroke}" stroke-width="0.9" stroke-linejoin="round"/>
-    <circle cx="${14 * s}" cy="${14 * s}" r="${6.8 * s}" fill="${cream}" stroke="${stroke}" stroke-width="1.2"/>
-    <rect x="${10.5 * s}" y="${11.6 * s}" width="${6.3 * s}" height="${5.4 * s}" rx="${1.1 * s}" fill="none" stroke="${stroke}" stroke-width="1"/>
-    <path d="M${16.8 * s} ${12.9 * s}C${18 * s} ${12.9 * s} ${18.7 * s} ${13.5 * s} ${18.7 * s} ${14.3 * s}C${18.7 * s} ${15.1 * s} ${18 * s} ${15.7 * s} ${16.8 * s} ${15.7 * s}" stroke="${stroke}" stroke-width="0.9" stroke-linecap="round"/>
-    <rect x="${11.3 * s}" y="${14.1 * s}" width="${4.5 * s}" height="${1.8 * s}" rx="${0.4 * s}" fill="${coffee}" opacity="0.92"/>
-    <path d="M${11.2 * s} ${25.1 * s}C${12 * s} ${24.5 * s} ${12.7 * s} ${24.5 * s} ${13.4 * s} ${25.1 * s}C${14 * s} ${25.7 * s} ${14.7 * s} ${25.7 * s} ${15.4 * s} ${25 * s}" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>
+    ${buildInnerIcons(w, h, s, colors, isChain)}
     ${fav ? `<circle cx="${w - 8}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
     <path d="M${w - 8} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
   </svg>`;
@@ -132,17 +181,17 @@ function getCachedMarkerColors(cafe: Cafe): MarkerColors {
 // Cache SVG data URIs to avoid re-encoding on every render
 const markerCache: Record<string, string> = {};
 
-function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean): string {
-  const key = `${colors.fill}-${selected}-${fav}`;
+function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean, isChain: boolean): string {
+  const key = `${colors.fill}-${selected}-${fav}-${isChain}`;
   let uri = markerCache[key];
   if (!uri) {
-    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildMarkerSvg(colors, selected, fav))}`;
+    uri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildMarkerSvg(colors, selected, fav, isChain))}`;
     markerCache[key] = uri;
   }
   return uri;
 }
 
-const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, onSelect }: CafeMarkerProps) {
+const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, isChain, onSelect }: CafeMarkerProps) {
   const colors = getCachedMarkerColors(cafe);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
 
@@ -157,7 +206,7 @@ const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav,
       onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); onSelect(cafe); }}
       zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{
-        src: getMarkerDataUri(colors, isSelected, fav),
+        src: getMarkerDataUri(colors, isSelected, fav, isChain),
         size: { width: w, height: h },
         options: { offset: { x: w / 2, y: offsetY } },
       }}
@@ -166,7 +215,8 @@ const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav,
 }, (prev, next) =>
   prev.cafe.id === next.cafe.id &&
   prev.isSelected === next.isSelected &&
-  prev.isFavorite === next.isFavorite
+  prev.isFavorite === next.isFavorite &&
+  prev.isChain === next.isChain
 );
 
 interface MapCenter {
@@ -218,10 +268,11 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
 
-  const { selectedCafe, filteredCafes, setSelectedCafe } = useCafeStore(
+  const { selectedCafe, filteredCafes, chainCafeIds, setSelectedCafe } = useCafeStore(
     useShallow((state) => ({
       selectedCafe: state.selectedCafe,
       filteredCafes: state.filteredCafes,
+      chainCafeIds: state.chainCafeIds,
       setSelectedCafe: state.setSelectedCafe,
     })),
   );
@@ -366,6 +417,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             cafe={cafe}
             isSelected={selectedCafe?.id === cafe.id}
             isFavorite={favorites.has(cafe.id)}
+            isChain={chainCafeIds.has(cafe.id)}
             onSelect={setSelectedCafe}
           />
         ))}
