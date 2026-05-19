@@ -12,7 +12,12 @@
  */
 
 import { config } from 'dotenv';
-config({ path: '.env.local' });
+import { appendFileSync } from 'fs';
+
+// CI 환경에서는 GitHub Secrets로 env가 주입되므로 .env.local 불필요
+if (!process.env.CI) {
+  config({ path: '.env.local' });
+}
 
 // ---------------------------------------------------------------------------
 // Config
@@ -361,10 +366,35 @@ async function main() {
     };
   }
 
-  // 2a: Upsert already-known cafes (no detail fetch needed — just update basic info)
-  // These already have opening_time in DB, so we only upsert coords/name/address without wiping hours
-  // Actually skip these entirely — they're already complete in DB
-  console.log(`  Skipping ${alreadyHaveDetail.length} already-complete cafes\n`);
+  // 2a: Update last_crawled_at for already-known cafes (prevents false staleness)
+  // No detail fetch needed — just touch the timestamp so mark-stale-cafes.ts doesn't flag them
+  if (alreadyHaveDetail.length > 0) {
+    console.log(`  Updating last_crawled_at for ${alreadyHaveDetail.length} already-complete cafes...`);
+    const touchBatches = [];
+    for (let i = 0; i < alreadyHaveDetail.length; i += BATCH_UPSERT_SIZE) {
+      const chunk = alreadyHaveDetail.slice(i, i + BATCH_UPSERT_SIZE);
+      const ids = chunk.map(p => p.id);
+      touchBatches.push(ids);
+    }
+    let touched = 0;
+    for (const ids of touchBatches) {
+      const filter = ids.map(id => `kakao_place_id.eq.${id}`).join(',');
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/cafes?or=(${filter})`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({ last_crawled_at: now }),
+        },
+      );
+      if (res.ok) touched += ids.length;
+    }
+    console.log(`  Touched ${touched} existing cafes\n`);
+  }
 
   // 2b: Fetch details for new cafes
   let detailDone = 0;
@@ -407,6 +437,28 @@ async function main() {
   console.log(`Detail fetch failed: ${detailFailed}`);
   console.log(`No hours data: ${noHours}`);
   console.log(`Already in DB (skipped): ${alreadyHaveDetail.length}`);
+
+  // GitHub Actions summary 출력
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    const summary = [
+      '## 🔄 Cafe Seed Results',
+      '',
+      `| Metric | Value |`,
+      `|--------|-------|`,
+      `| Total Seoul cafes found | ${places.length} |`,
+      `| New cafes upserted | ${upserted} |`,
+      `| New earlybirds | ${earlybirds} |`,
+      `| Detail fetch failed | ${detailFailed} |`,
+      `| No hours data | ${noHours} |`,
+      `| Already in DB (skipped) | ${alreadyHaveDetail.length} |`,
+      `| Duration | ${totalTime} min |`,
+      '',
+    ].join('\n');
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+  }
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error('Seed failed:', err);
+  process.exit(1);
+});

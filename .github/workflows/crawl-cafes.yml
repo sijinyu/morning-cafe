@@ -1,0 +1,56 @@
+name: Crawl Cafes
+
+on:
+  schedule:
+    # 5일마다 KST 03:00 (UTC 18:00)
+    - cron: '0 18 */5 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: crawl-cafes
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CI: true
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Seed cafes
+        run: npx tsx scripts/seed-cafes.ts
+
+      - name: Mark stale cafes
+        run: npx tsx scripts/mark-stale-cafes.ts
+
+      - name: Send failure email
+        if: failure()
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @- <<'BODY'
+          {
+            "from": "Morning Cafe Bot <onboarding@resend.dev>",
+            "to": "sijinyudev@gmail.com",
+            "subject": "[모닝커피] 카페 크롤링 실패",
+            "html": "<p>GitHub Actions 크롤링 워크플로우가 실패했습니다.</p><p><a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>로그 확인</a></p>"
+          }
+          BODY
