@@ -28,16 +28,17 @@ export function PersistentMapPage() {
   const searchParams = useSearchParams();
   const isMapRoute = pathname === '/';
 
-  const { fetchCafes, cafes, setSelectedCafe } = useCafeStore(
+  const { fetchCafes, cafes, setSelectedCafe, userLocation, setUserLocation } = useCafeStore(
     useShallow((state) => ({
       fetchCafes: state.fetchCafes,
       cafes: state.cafes,
       setSelectedCafe: state.setSelectedCafe,
+      userLocation: state.userLocation,
+      setUserLocation: state.setUserLocation,
     })),
   );
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [listSearchQuery, setListSearchQuery] = useState('');
   const deepLinkHandledRef = useRef<string | null>(null);
 

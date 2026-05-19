@@ -32,6 +32,22 @@ import { MenuSection } from './bottom-sheet/menu-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
 
+// ---- utils ------------------------------------------------------------------
+
+/** 두 좌표 간 직선 거리 (km) */
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** 직선 거리 → 도보 예상 시간 (분). 보정계수 1.3, 도보속도 4.5km/h */
+function estimateWalkMinutes(straightKm: number): number {
+  return Math.round((straightKm * 1.3) / 4.5 * 60);
+}
+
 // ---- height states ----------------------------------------------------------
 
 type SheetState = 'peek' | 'half';
@@ -49,8 +65,8 @@ interface CafeBottomSheetProps {
 }
 
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
-  const { dayFilter, chainCafeIds } = useCafeStore(
-    useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds })),
+  const { dayFilter, chainCafeIds, userLocation } = useCafeStore(
+    useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds, userLocation: s.userLocation })),
   );
   const isChain = chainCafeIds.has(cafe.id);
   const [sheetState, setSheetState] = useState<SheetState>('half');
@@ -422,6 +438,17 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               >
                 <Navigation className="h-4 w-4" />
                 길찾기
+                {(() => {
+                  if (!userLocation) return null;
+                  const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
+                  if (km > 3) return null;
+                  const min = estimateWalkMinutes(km);
+                  return (
+                    <span className="text-xs text-muted-foreground">
+                      도보 {min}분
+                    </span>
+                  );
+                })()}
               </a>
               <button
                 onClick={() => {

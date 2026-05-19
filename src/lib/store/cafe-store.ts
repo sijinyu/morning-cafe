@@ -278,6 +278,7 @@ interface CafeState {
   cafes: Cafe[];
   chainCafeIds: Set<string>;
   selectedCafe: Cafe | null;
+  userLocation: { lat: number; lng: number } | null;
   timeFilter: TimeFilter;
   dayFilter: DayFilter;
   guFilter: string | null; // null = 전체
@@ -290,6 +291,7 @@ interface CafeState {
   availableGus: string[];
   fetchCafes: () => Promise<void>;
   setSelectedCafe: (cafe: Cafe | null) => void;
+  setUserLocation: (loc: { lat: number; lng: number } | null) => void;
   setTimeFilter: (filter: TimeFilter) => void;
   setDayFilter: (filter: DayFilter) => void;
   setGuFilter: (gu: string | null) => void;
@@ -506,6 +508,7 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   cafes: [],
   chainCafeIds: new Set<string>(),
   selectedCafe: null,
+  userLocation: null,
   timeFilter: '7to8',
   dayFilter: 'today',
   guFilter: null,
@@ -548,6 +551,10 @@ export const useCafeStore = create<CafeState>((set, get) => ({
 
   setSelectedCafe(cafe) {
     set({ selectedCafe: cafe });
+  },
+
+  setUserLocation(loc) {
+    set({ userLocation: loc });
   },
 
   setTimeFilter(filter) {
