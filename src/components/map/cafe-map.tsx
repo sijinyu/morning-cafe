@@ -19,8 +19,9 @@ const SEOUL_BOUNDS = {
   neLng: 127.269, // 동쪽 (강동구)
 };
 
-// 줌아웃 최대 레벨 (서울 전체가 보이는 정도)
-const MAX_ZOOM_LEVEL = 7;
+// 줌아웃 최대 레벨 — 모바일은 화면이 작아 더 넓게 허용
+const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+const MAX_ZOOM_LEVEL = IS_MOBILE ? 8 : 6;
 
 // Color palette — warm cafe tones per opening hour bracket
 interface MarkerColors {
