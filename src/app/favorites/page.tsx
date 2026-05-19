@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 export default function FavoritesPage() {
   const { favorites, toggleFavorite } = useFavorites();
   const cafes = useCafeStore((state) => state.cafes);
+  const chainCafeIds = useCafeStore((state) => state.chainCafeIds);
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const [mounted, setMounted] = useState(false);
@@ -51,6 +52,7 @@ export default function FavoritesPage() {
               <CafeItem
                 key={cafe.id}
                 cafe={cafe}
+                isChain={chainCafeIds.has(cafe.id)}
                 onCardClick={() => handleCardClick(cafe)}
                 onRemove={() => toggleFavorite(cafe.id)}
               />
@@ -62,7 +64,7 @@ export default function FavoritesPage() {
   );
 }
 
-function CafeItem({ cafe, onCardClick, onRemove }: { cafe: Cafe; onCardClick: () => void; onRemove: () => void }) {
+function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChain: boolean; onCardClick: () => void; onRemove: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
   const cafe24h = is24Hours(cafe);
   const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
@@ -75,6 +77,11 @@ function CafeItem({ cafe, onCardClick, onRemove }: { cafe: Cafe; onCardClick: ()
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
+          {isChain && (
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+              프랜차이즈
+            </span>
+          )}
           {cafe24h && (
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
               24시간

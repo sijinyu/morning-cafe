@@ -17,6 +17,7 @@ import {
   Star,
   Car,
 } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 // import { useNotifications } from '@/lib/hooks/use-notifications';
@@ -48,7 +49,10 @@ interface CafeBottomSheetProps {
 }
 
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
-  const dayFilter = useCafeStore((s) => s.dayFilter);
+  const { dayFilter, chainCafeIds } = useCafeStore(
+    useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds })),
+  );
+  const isChain = chainCafeIds.has(cafe.id);
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
@@ -150,6 +154,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl font-bold truncate">{cafe.name}</h2>
+            {isChain && (
+              <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 whitespace-nowrap">
+                프랜차이즈
+              </span>
+            )}
             {cafe.category && (
               <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground whitespace-nowrap">
                 {cafe.category}

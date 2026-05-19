@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 export default function RecentPage() {
   const { recentIds, clearRecent } = useRecentCafes();
   const cafes = useCafeStore((state) => state.cafes);
+  const chainCafeIds = useCafeStore((state) => state.chainCafeIds);
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const router = useRouter();
@@ -71,7 +72,7 @@ export default function RecentPage() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.18, delay: index * 0.03 }}
                 >
-                  <RecentCafeItem cafe={cafe} onSelect={() => handleSelectCafe(cafe)} />
+                  <RecentCafeItem cafe={cafe} isChain={chainCafeIds.has(cafe.id)} onSelect={() => handleSelectCafe(cafe)} />
                 </motion.li>
               ))}
             </AnimatePresence>
@@ -82,7 +83,7 @@ export default function RecentPage() {
   );
 }
 
-function RecentCafeItem({ cafe, onSelect }: { cafe: Cafe; onSelect: () => void }) {
+function RecentCafeItem({ cafe, isChain, onSelect }: { cafe: Cafe; isChain: boolean; onSelect: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
   const cafe24h = is24Hours(cafe);
   const openStatus = cafe24h ? ('open' as const) : getOpenStatus(cafe);
@@ -99,6 +100,11 @@ function RecentCafeItem({ cafe, onSelect }: { cafe: Cafe; onSelect: () => void }
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
+          {isChain && (
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+              프랜차이즈
+            </span>
+          )}
           {openStatus !== 'unknown' && (
             <span
               className={cn(
