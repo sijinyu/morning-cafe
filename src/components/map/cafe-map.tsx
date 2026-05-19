@@ -31,13 +31,13 @@ interface MarkerColors {
   coffee: string;     // coffee liquid
 }
 
-// Stone palette for franchise/chain cafes
+// Warm latte-brown palette for franchise/chain cafes
 const CHAIN_COLORS: MarkerColors = {
-  fill: '#78716C',    // stone-500
-  stroke: '#44403C',  // stone-700
-  cream: '#F5F5F4',   // stone-100
-  steam: '#A8A29E',   // stone-400
-  coffee: '#57534E',  // stone-600
+  fill: '#A0845C',    // latte brown
+  stroke: '#5C4A2E',  // dark mocha
+  cream: '#FFF5E6',   // warm cream
+  steam: '#C4A97D',   // light latte
+  coffee: '#6B4F2E',  // espresso
 };
 
 function getMarkerColors(cafe: Cafe, isChain: boolean): MarkerColors {
@@ -75,8 +75,8 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Selected marker stroke color (red-500)
-const SELECTED_STROKE = '#EF4444';
+// Selected marker stroke color (amber-700 — brand dark amber)
+const SELECTED_STROKE = '#B45309';
 const SELECTED_STROKE_WIDTH = 3;
 
 // New marker design with sparkle + coffee mug + squiggle tail

@@ -111,7 +111,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm truncate">{cafe.name}</span>
                     {isChain && (
-                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
                         프랜차이즈
                       </span>
                     )}

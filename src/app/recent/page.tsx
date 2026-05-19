@@ -101,7 +101,7 @@ function RecentCafeItem({ cafe, isChain, onSelect }: { cafe: Cafe; isChain: bool
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
           {isChain && (
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
               프랜차이즈
             </span>
           )}

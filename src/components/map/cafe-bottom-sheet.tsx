@@ -155,7 +155,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl font-bold truncate">{cafe.name}</h2>
             {isChain && (
-              <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 whitespace-nowrap">
+              <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 whitespace-nowrap">
                 프랜차이즈
               </span>
             )}
