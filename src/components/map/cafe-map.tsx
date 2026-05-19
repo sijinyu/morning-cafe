@@ -256,6 +256,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Guard: prevent feedback loops when we programmatically adjust zoom/center
   const isAdjustingRef = useRef(false);
+  // Track center at last valid zoom level (to restore when zoom limit enforced)
+  const lastValidCenterRef = useRef<kakao.maps.LatLng | null>(null);
 
   const updateBounds = useCallback((map: kakao.maps.Map) => {
     if (boundsTimerRef.current) clearTimeout(boundsTimerRef.current);
@@ -325,8 +327,15 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
       if (map.getLevel() > MAX_ZOOM_LEVEL) {
         isAdjustingRef.current = true;
         map.setLevel(MAX_ZOOM_LEVEL);
-        // 카카오 SDK가 이벤트를 동기적으로 처리하므로 microtask에서 가드 해제
+        // 핀치 줌아웃 시 SDK가 손가락 중심으로 센터를 이동시키므로
+        // 마지막 유효 센터로 복원하여 위치 점프 방지
+        if (lastValidCenterRef.current) {
+          map.setCenter(lastValidCenterRef.current);
+        }
         queueMicrotask(() => { isAdjustingRef.current = false; });
+      } else {
+        // 유효한 줌 레벨일 때 센터 저장
+        lastValidCenterRef.current = map.getCenter();
       }
       updateBounds(map);
     });
