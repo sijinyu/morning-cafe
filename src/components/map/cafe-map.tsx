@@ -321,20 +321,66 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     kakao.maps.event.addListener(map, 'click', () => {
       setSelectedCafe(null);
     });
-    // 줌 변경 시 레벨 제한 + bounds 갱신
+
+    // ── 줌아웃 차단: MAX_ZOOM_LEVEL에서 줌아웃 제스처 자체를 막음 ──
+
+    const container = map.getNode();
+
+    // 1) 마우스 휠: zoom-out 방향(deltaY > 0)만 차단
+    container.addEventListener('wheel', (e: WheelEvent) => {
+      if (e.deltaY > 0 && map.getLevel() >= MAX_ZOOM_LEVEL) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { passive: false });
+
+    // 2) 모바일 핀치: MAX_ZOOM_LEVEL 도달 시 zoomable 끄고,
+    //    zoom-in 핀치(손가락 벌림) 감지 시 다시 켬
+    let initialPinchDist = 0;
+
+    container.addEventListener('touchstart', (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialPinchDist = Math.hypot(dx, dy);
+
+        // MAX 레벨이면 일단 줌 비활성화 (줌아웃 차단)
+        if (map.getLevel() >= MAX_ZOOM_LEVEL) {
+          map.setZoomable(false);
+        }
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e: TouchEvent) => {
+      if (e.touches.length === 2 && initialPinchDist > 0) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const currentDist = Math.hypot(dx, dy);
+
+        // 손가락이 벌어짐 = zoom-in → zoomable 다시 활성화
+        if (currentDist > initialPinchDist + 10) {
+          map.setZoomable(true);
+        }
+      }
+    }, { passive: true });
+
+    container.addEventListener('touchend', () => {
+      // 핀치 종료 시 항상 zoomable 복원
+      map.setZoomable(true);
+      initialPinchDist = 0;
+    }, { passive: true });
+
+    // 줌 변경 시 bounds 갱신 (레벨 제한은 위 이벤트 차단으로 불필요하지만 안전장치)
     kakao.maps.event.addListener(map, 'zoom_changed', () => {
       if (isAdjustingRef.current) return;
       if (map.getLevel() > MAX_ZOOM_LEVEL) {
         isAdjustingRef.current = true;
         map.setLevel(MAX_ZOOM_LEVEL);
-        // 핀치 줌아웃 시 SDK가 손가락 중심으로 센터를 이동시키므로
-        // 마지막 유효 센터로 복원하여 위치 점프 방지
         if (lastValidCenterRef.current) {
           map.setCenter(lastValidCenterRef.current);
         }
         queueMicrotask(() => { isAdjustingRef.current = false; });
       } else {
-        // 유효한 줌 레벨일 때 센터 저장
         lastValidCenterRef.current = map.getCenter();
       }
       updateBounds(map);
