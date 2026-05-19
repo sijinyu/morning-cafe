@@ -254,6 +254,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   // Guard: only auto-zoom to user location on the very first GPS fix.
   const hasAutoZoomedRef = useRef(false);
   const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guard: prevent feedback loops when we programmatically adjust zoom/center
+  const isAdjustingRef = useRef(false);
 
   const updateBounds = useCallback((map: kakao.maps.Map) => {
     if (boundsTimerRef.current) clearTimeout(boundsTimerRef.current);
@@ -319,8 +321,12 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     });
     // 줌 변경 시 레벨 제한 + bounds 갱신
     kakao.maps.event.addListener(map, 'zoom_changed', () => {
+      if (isAdjustingRef.current) return;
       if (map.getLevel() > MAX_ZOOM_LEVEL) {
+        isAdjustingRef.current = true;
         map.setLevel(MAX_ZOOM_LEVEL);
+        // 카카오 SDK가 이벤트를 동기적으로 처리하므로 microtask에서 가드 해제
+        queueMicrotask(() => { isAdjustingRef.current = false; });
       }
       updateBounds(map);
     });
@@ -329,6 +335,9 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   }
 
   function handleCenterChange(map: kakao.maps.Map) {
+    // 프로그래매틱 조정 중이면 무시 (피드백 루프 방지)
+    if (isAdjustingRef.current) return;
+
     const latlng = map.getCenter();
     let lat = latlng.getLat();
     let lng = latlng.getLng();
@@ -338,9 +347,11 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     const clampedLng = Math.max(SEOUL_BOUNDS.swLng, Math.min(SEOUL_BOUNDS.neLng, lng));
 
     if (clampedLat !== lat || clampedLng !== lng) {
+      isAdjustingRef.current = true;
       map.setCenter(new kakao.maps.LatLng(clampedLat, clampedLng));
       lat = clampedLat;
       lng = clampedLng;
+      queueMicrotask(() => { isAdjustingRef.current = false; });
     }
 
     setCenter({ lat, lng });
