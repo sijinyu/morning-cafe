@@ -103,7 +103,9 @@ src/
 │           └── memo-section.tsx    # 사용자 메모 (localStorage)
 │
 ├── lib/
-│   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle)
+│   ├── types/
+│   │   └── cafe.ts                  # Cafe 인터페이스 + extractGu (서버/클라이언트 공유)
+│   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle, is24Hours, is24HoursForDay)
 │   ├── analytics.ts                # GA4 이벤트 트래킹 유틸 (trackEvent)
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
@@ -122,9 +124,18 @@ src/
 │
 scripts/
 ├── generate-stats.js               # 통계 리포트 생성 (→ docs/seoul-morning-cafe-stats.md)
-├── seed-cafes.ts                    # 카페 데이터 시딩
+├── seed-cafes.ts                    # 카페 데이터 시딩 (gu 컬럼 자동 추출)
+├── mark-stale-cafes.ts             # stale 카페 마킹 스크립트
 ├── check-db.ts                      # DB 상태 확인
+├── migrations/
+│   ├── 001-add-gu-column.sql       # cafes 테이블 gu 컬럼 추가
+│   ├── 002-gu-stats-function.sql   # 구별 통계 RPC 함수
+│   └── 003-gu-trigger.sql          # gu 자동 추출 트리거
 └── ...
+│
+.github/
+└── workflows/
+    └── crawl-cafes.yml              # 카페 데이터 자동 크롤링 CI
 │
 docs/
 ├── seoul-morning-cafe-stats.md      # 자동 생성 통계 리포트
@@ -148,14 +159,16 @@ docs/
 
 - **뷰포트 필터링**: `map.getBounds()`로 화면 안의 카페만 렌더 (~50-200개)
 - **250ms 쓰로틀**: 팬/줌 시 bounds 갱신 디바운스
-- **SVG 핀 마커**: 커피잔 아이콘, 시간대별 색상 (주황 계열), 24시간=빨강
+- **SVG 핀 마커**: 커피잔 아이콘, 시간대별 색상 (주황 계열), 24시간=빨강 (오늘 요일 기준)
 - **마커 캐싱**: `markerCache` 딕셔너리로 data URI 재사용
+- **카페명 라벨**: 줌 레벨 3 이하에서 `CustomOverlayMap`으로 마커 아래 이름 표시
+- **줌 제한**: `MAX_ZOOM_LEVEL` 모바일=8, 데스크탑=6 (줌아웃 이벤트 차단)
 
 ### 색상 체계 (마커)
 
 | 시간대 | 마커 fill | 의미 |
 |--------|----------|------|
-| 24시간 | `#DC2626` (red) | 빨간 배지와 동일 |
+| 24시간 (오늘 요일 기준) | `#DC2626` (red) | 빨간 배지와 동일 |
 | ~6시 | `#EA580C` (deep orange) | |
 | 6~7시 | `#F28B4E` (warm orange) | |
 | 7~8시 | `#FBBF24` (amber) | |
@@ -220,7 +233,7 @@ Naver pstatic 이미지 프록시. Referer 제한 우회.
 
 ## 주요 의존성
 
-- `react-kakao-maps-sdk` — `<Map>`, `<MapMarker>`, `<MarkerClusterer>`
+- `react-kakao-maps-sdk` — `<Map>`, `<MapMarker>`, `<MarkerClusterer>`, `<CustomOverlayMap>`
 - `embla-carousel-react` — 사진 캐러셀 (터치 스와이프)
 - `framer-motion` — 바텀시트 드래그, 애니메이션
 - `zustand` — 클라이언트 상태 관리
@@ -269,6 +282,11 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
 18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`.
 19. **딥링크**: `/?cafeId=xxx` → PersistentMapPage에서 cafes 로드 후 해당 카페 자동 select + panTo. `useSearchParams()` 사용 → `<Suspense>` 래핑 필수.
+20. **24시간 판정 (요일별)**: `is24Hours(cafe)`는 **모든 요일** 24시간인 경우만 true (hide24h 필터용). 마커/배지/리스트에서는 `is24HoursForDay(cafe, dayKey)`로 **오늘 요일** 기준 판정. `cafe-utils.ts`에서 export.
+21. **카페명 라벨**: 줌 레벨 3 이하(충분히 확대)에서 `CustomOverlayMap`으로 마커 아래에 카페명 표시. `zoomLevel` state로 추적. `yAnchor={-0.2}`, `pointerEvents: 'none'`.
+22. **줌 레벨 제한**: `MAX_ZOOM_LEVEL` — 모바일 8, 데스크탑 6. 카카오 맵 레벨은 클수록 축소. 휠/핀치 줌아웃 이벤트 차단 방식.
+23. **Cafe 타입 위치**: `src/lib/types/cafe.ts`에 `Cafe` 인터페이스 + `extractGu` 함수. 서버/클라이언트 양쪽에서 import.
+24. **체인 키워드**: `cafe-store.ts`의 `CHAIN_KEYWORDS` 배열 (250+개). 추가 시 배열 끝에 코멘트와 함께 추가. `isChainCafe(name)`은 `toLowerCase().includes()` 매칭.
 
 ### 커밋 메시지
 
@@ -287,11 +305,14 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 시간 필터 요일 fallback 버그 수정 — 주말 잘못된 필터링 방지
 - [x] 개별 카페 페이지 `/cafe/[id]` — SSR, OG 메타, 카카오톡/웹 공유, 딥링크
 - [x] JSON-LD 구조화 데이터 (CafeOrCoffeeShop 스키마)
-- [ ] `extractGu`, `Cafe` 타입을 `cafe-store.ts`에서 별도 공유 모듈로 분리 (서버/클라이언트 경계)
+- [x] `extractGu`, `Cafe` 타입을 `src/lib/types/cafe.ts`로 분리 (서버/클라이언트 공유)
+- [x] DB 마이그레이션 — gu 컬럼, 구별 통계 함수, 트리거 (`scripts/migrations/`)
+- [x] 카페 데이터 자동 크롤링 CI (`.github/workflows/crawl-cafes.yml`)
+- [x] 24시간 배지 요일별 판정 — 금토만 24시간인 카페 오판 수정
+- [x] 확대 시 카페명 라벨 (`CustomOverlayMap`, 줌 레벨 3 이하)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
-- [ ] 카페 데이터 자동 갱신 (크롤링 주기)
 - [x] 마케팅 문서 준비 — 지피터스, 링크드인, 인플루언서 DM, 채널 체크리스트, 카드뉴스 소재 25개 구
 - [x] Supabase 서버 쿼리 anon key fallback (SUPABASE_SERVICE_ROLE_KEY 미설정 대비)
 - [x] 도메인 `morning-cafe-phi.vercel.app`으로 전체 통일
