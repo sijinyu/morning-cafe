@@ -1,10 +1,11 @@
 'use client';
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
+import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useShallow } from 'zustand/react/shallow';
-import { useCafeStore, is24Hours, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpeningTimeForDay, type Cafe } from '@/lib/store/cafe-store';
+import { is24HoursForDay } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { trackEvent } from '@/lib/analytics';
 
@@ -41,16 +42,21 @@ const CHAIN_COLORS: MarkerColors = {
   coffee: '#6B4F2E',  // espresso
 };
 
+const DAY_KEYS_MAP = ['일', '월', '화', '수', '목', '금', '토'] as const;
+
 function getMarkerColors(cafe: Cafe, isChain: boolean): MarkerColors {
   // 프랜차이즈: stone 계열 단일 색상
   if (isChain) return CHAIN_COLORS;
 
-  // 24시간 카페: 빨간 계열 (배지 색상과 동일)
-  if (is24Hours(cafe)) {
+  const todayKey = DAY_KEYS_MAP[new Date().getDay()]!;
+
+  // 오늘 요일 기준 24시간 영업 판단
+  if (is24HoursForDay(cafe, todayKey)) {
     return { fill: '#DC2626', stroke: '#2D3748', cream: '#FFF0F0', steam: '#EF4444', coffee: '#A16207' };
   }
 
-  const openingTime = cafe.opening_time;
+  // 오늘 요일 기준 오픈 시간
+  const openingTime = getOpeningTimeForDay(cafe, 'today');
   if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#FFF8F0', steam: '#D4A574', coffee: '#A16207' };
 
   const parts = openingTime.split(':');
@@ -251,6 +257,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
 
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const [viewportBounds, setViewportBounds] = useState<ViewportBounds | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(5);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
   // Guard: only auto-zoom to user location on the very first GPS fix.
   const hasAutoZoomedRef = useRef(false);
@@ -371,10 +378,12 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
       initialPinchDist = 0;
     }, { passive: true });
 
-    // 줌 변경 시 bounds 갱신 (레벨 제한은 위 이벤트 차단으로 불필요하지만 안전장치)
+    // 줌 변경 시 bounds 갱신 + 줌 레벨 추적
     kakao.maps.event.addListener(map, 'zoom_changed', () => {
       if (isAdjustingRef.current) return;
-      if (map.getLevel() > MAX_ZOOM_LEVEL) {
+      const level = map.getLevel();
+      setZoomLevel(level);
+      if (level > MAX_ZOOM_LEVEL) {
         isAdjustingRef.current = true;
         map.setLevel(MAX_ZOOM_LEVEL);
         if (lastValidCenterRef.current) {
@@ -460,6 +469,32 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           />
         ))}
       </MarkerClusterer>
+
+      {/* 충분히 확대 시 카페명 라벨 표시 */}
+      {zoomLevel <= 3 && visibleCafes.map((cafe) => (
+        <CustomOverlayMap
+          key={`label-${cafe.id}`}
+          position={{ lat: cafe.latitude, lng: cafe.longitude }}
+          yAnchor={-0.2}
+          zIndex={selectedCafe?.id === cafe.id ? 99 : 1}
+        >
+          <span
+            style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: '#1f2937',
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              padding: '1px 5px',
+              borderRadius: '4px',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+              pointerEvents: 'none',
+            }}
+          >
+            {cafe.name}
+          </span>
+        </CustomOverlayMap>
+      ))}
 
       {/* "You are here" blue pulsing dot — rendered above cafe markers */}
       {userLocation && (

@@ -2,13 +2,32 @@
 
 import type { Cafe } from '@/lib/types/cafe';
 
-/** 24시간 영업 판단 — 서버/클라이언트 양쪽에서 사용 가능 */
+/** 24시간 영업 판단 — **모든** 요일이 24시간인 경우만 true */
 export function is24Hours(cafe: Pick<Cafe, 'opening_time' | 'closing_time' | 'hours_by_day'>): boolean {
+  // hours_by_day가 있으면 모든 요일이 00:00~24:00인지 확인
+  if (cafe.hours_by_day) {
+    const values = Object.values(cafe.hours_by_day);
+    if (values.length === 0) return false;
+    return values.every((v) => /^00:00~24:00$/.test(v));
+  }
+  // hours_by_day가 없으면 opening_time/closing_time fallback
   if (cafe.opening_time === '00:00:00' && cafe.closing_time === '24:00:00') return true;
   if (cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00') return true;
-  // hours_by_day에 "00:00~24:00" 패턴
-  const sample = Object.values(cafe.hours_by_day ?? {})[0];
-  if (sample && /^00:00~24:00$/.test(sample)) return true;
+  return false;
+}
+
+/** 특정 요일에 24시간 영업하는지 판단 */
+export function is24HoursForDay(
+  cafe: Pick<Cafe, 'opening_time' | 'closing_time' | 'hours_by_day'>,
+  dayKey: string,
+): boolean {
+  if (cafe.hours_by_day) {
+    const dayHours = cafe.hours_by_day[dayKey];
+    return dayHours ? /^00:00~24:00$/.test(dayHours) : false;
+  }
+  // hours_by_day가 없으면 opening_time/closing_time fallback
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '24:00:00') return true;
+  if (cafe.opening_time === '00:00:00' && cafe.closing_time === '00:00:00') return true;
   return false;
 }
 

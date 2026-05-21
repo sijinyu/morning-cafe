@@ -4,8 +4,8 @@ import { useMemo, useRef } from 'react';
 import { MapPin, Clock, Navigation } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
-import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
-import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
+import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -90,7 +90,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
       >
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const { cafe, distance } = sortedCafes[virtualRow.index];
-          const cafe24h = is24Hours(cafe);
+          const cafe24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
           const isChain = chainCafeIds.has(cafe.id);
           const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
 

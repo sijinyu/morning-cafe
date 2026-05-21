@@ -18,7 +18,8 @@ import {
   Car,
 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
-import { useCafeStore, getOpenStatus, is24Hours, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
+import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
+import { is24HoursForDay } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 // import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
@@ -133,7 +134,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   }
 
   const displayAddress = cafe.road_address ?? cafe.address;
-  const is24h = is24Hours(cafe);
+  const is24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const todayOpeningTime = getOpeningTimeForDay(cafe, dayFilter);
   const openingFormatted = is24h ? '24시간' : formatOpeningTime(todayOpeningTime);
   const badgeStyle = is24h ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : getOpeningBadgeStyle(todayOpeningTime);

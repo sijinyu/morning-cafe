@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Trash2 } from 'lucide-react';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
-import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
-import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
 export default function RecentPage() {
@@ -85,7 +85,7 @@ export default function RecentPage() {
 
 function RecentCafeItem({ cafe, isChain, onSelect }: { cafe: Cafe; isChain: boolean; onSelect: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
-  const cafe24h = is24Hours(cafe);
+  const cafe24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const openStatus = cafe24h ? ('open' as const) : getOpenStatus(cafe);
   const openingFormatted = cafe24h ? '24시간' : formatOpeningTime(cafe.opening_time);
   const badgeStyle = cafe24h

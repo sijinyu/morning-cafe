@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, MapPin, Clock, ExternalLink } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
-import { useCafeStore, getOpenStatus, is24Hours, type Cafe } from '@/lib/store/cafe-store';
-import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
 export default function FavoritesPage() {
@@ -66,7 +66,7 @@ export default function FavoritesPage() {
 
 function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChain: boolean; onCardClick: () => void; onRemove: () => void }) {
   const displayAddress = cafe.road_address ?? cafe.address;
-  const cafe24h = is24Hours(cafe);
+  const cafe24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
 
   return (

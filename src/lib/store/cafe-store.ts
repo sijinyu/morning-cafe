@@ -295,6 +295,17 @@ const CHAIN_KEYWORDS = [
   '퍼스트커피랩',
   '익커피',
   '심신프리',
+  '오브민',
+  '오하하커피',
+  '브알라',
+  '애니파크',
+  '파머스빈',
+  '레프트커피',
+  '메가후르츠',
+  '스쿠치커피',
+  '제로커피',
+  '사랑해베이글',
+  '커피온리',
 ] as const;
 
 const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
