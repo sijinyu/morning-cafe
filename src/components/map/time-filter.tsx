@@ -69,7 +69,15 @@ function Dropdown({ trigger, open, onToggle, children, align = 'left' }: Dropdow
 
   return (
     <div className="relative">
-      <div ref={triggerRef} onClick={onToggle} role="button" tabIndex={0} className="cursor-pointer">
+      <div
+        ref={triggerRef}
+        onClick={onToggle}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        className="cursor-pointer"
+      >
         {trigger}
       </div>
       <AnimatePresence>

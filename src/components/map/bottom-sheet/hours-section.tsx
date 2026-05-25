@@ -25,6 +25,7 @@ export function HoursSection({ hoursByDay }: HoursSectionProps) {
     <div>
       <button
         onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
         className="flex w-full items-center justify-between py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         <div className="flex items-center gap-2">

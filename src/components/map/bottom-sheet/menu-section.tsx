@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { UtensilsCrossed } from 'lucide-react';
 import type { MenuItem } from '@/app/api/place-detail/route';
 
@@ -20,10 +21,12 @@ export function MenuSection({ menu }: MenuSectionProps) {
         {menu.map((item) => (
           <div key={item.name} className="flex items-center gap-3">
             {item.photo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={item.photo}
                 alt={item.name}
+                width={40}
+                height={40}
+                unoptimized
                 referrerPolicy="no-referrer"
                 className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
               />

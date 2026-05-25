@@ -44,10 +44,21 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** 직선 거리 → 도보 예상 시간 (분). 보정계수 1.3, 도보속도 4.5km/h */
+/** 직선 거리 → 도보 예상 시간 (분) */
+const WALK_DISTANCE_FACTOR = 1.3;
+const WALK_SPEED_KMH = 4.5;
+
 function estimateWalkMinutes(straightKm: number): number {
-  return Math.round((straightKm * 1.3) / 4.5 * 60);
+  return Math.round((straightKm * WALK_DISTANCE_FACTOR) / WALK_SPEED_KMH * 60);
 }
+
+// ---- constants --------------------------------------------------------------
+
+const DRAG_VELOCITY_THRESHOLD = 300;
+const DRAG_OFFSET_DOWN_THRESHOLD = 120;
+const DRAG_OFFSET_UP_THRESHOLD = 80;
+const COPY_TOAST_DURATION_MS = 1500;
+const MAX_WALK_DISTANCE_KM = 3;
 
 // ---- height states ----------------------------------------------------------
 
@@ -101,7 +112,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     const velocity = info.velocity.y;
     const offset = info.offset.y;
 
-    if (velocity > 300 || offset > 120) {
+    if (velocity > DRAG_VELOCITY_THRESHOLD || offset > DRAG_OFFSET_DOWN_THRESHOLD) {
       if (sheetState === 'peek') {
         trackEvent('sheet_close', { cafe_name: cafe.name });
         onClose();
@@ -109,7 +120,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         trackEvent('sheet_peek', { cafe_name: cafe.name });
         setSheetState('peek');
       }
-    } else if (velocity < -300 || offset < -80) {
+    } else if (velocity < -DRAG_VELOCITY_THRESHOLD || offset < -DRAG_OFFSET_UP_THRESHOLD) {
       if (sheetState === 'peek') {
         trackEvent('sheet_expand', { cafe_name: cafe.name });
         setSheetState('half');
@@ -121,7 +132,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     const addr = cafe.road_address ?? cafe.address;
     navigator.clipboard.writeText(addr).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), COPY_TOAST_DURATION_MS);
     }).catch(() => {});
   }
 
@@ -129,7 +140,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     if (!cafe.phone) return;
     navigator.clipboard.writeText(cafe.phone).then(() => {
       setPhoneCopied(true);
-      setTimeout(() => setPhoneCopied(false), 1500);
+      setTimeout(() => setPhoneCopied(false), COPY_TOAST_DURATION_MS);
     }).catch(() => {});
   }
 
@@ -442,7 +453,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 {(() => {
                   if (!userLocation) return null;
                   const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
-                  if (km > 3) return null;
+                  if (km > MAX_WALK_DISTANCE_KM) return null;
                   const min = estimateWalkMinutes(km);
                   return (
                     <span className="text-xs text-muted-foreground">
