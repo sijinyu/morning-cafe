@@ -26,7 +26,7 @@ const EMPTY: PlaceDetailResponse = {
   strengths: [],
 };
 
-const MAX_CACHE_SIZE = 50;
+const MAX_CACHE_SIZE = 150;
 const cache = new Map<string, PlaceDetailResponse>();
 
 /** Preload the first 2 photos so the browser starts downloading before React renders <Image>. */
@@ -43,6 +43,21 @@ function preloadPhotos(photos: string[]) {
     (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
     document.head.appendChild(link);
   }
+}
+
+/** Prefetch place detail into cache (fire-and-forget, for hover/preload). */
+export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
+  if (!kakaoPlaceId || cache.has(kakaoPlaceId)) return;
+  fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
+    .then((r) => r.json())
+    .then((json: PlaceDetailResponse) => {
+      if (cache.size >= MAX_CACHE_SIZE) {
+        const oldest = cache.keys().next().value;
+        if (oldest !== undefined) cache.delete(oldest);
+      }
+      cache.set(kakaoPlaceId, json);
+    })
+    .catch(() => {});
 }
 
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {

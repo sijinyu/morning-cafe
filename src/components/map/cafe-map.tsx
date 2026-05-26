@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpeningTimeForDay, type Cafe } from '@/lib/store/cafe-store';
 import { is24HoursForDay } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
+import { prefetchPlaceDetail } from '@/lib/hooks/use-place-detail';
 import { trackEvent } from '@/lib/analytics';
 
 // Seoul City Hall coordinates — default map center
@@ -182,6 +183,7 @@ const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav,
       position={position}
       title={cafe.name}
       onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); onSelect(cafe); }}
+      onMouseOver={() => prefetchPlaceDetail(cafe.kakao_place_id)}
       zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{
         src: getMarkerDataUri(colors, isSelected, fav),

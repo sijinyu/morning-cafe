@@ -42,6 +42,7 @@ function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: bool
         unoptimized
         referrerPolicy="no-referrer"
         loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : 'auto'}
         className={`object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}

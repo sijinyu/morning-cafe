@@ -60,6 +60,10 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://t1.daumcdn.net" />
         <link rel="dns-prefetch" href="https://t1.daumcdn.net" />
+        <link rel="preconnect" href="https://img1.kakaocdn.net" />
+        <link rel="dns-prefetch" href="https://img1.kakaocdn.net" />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className="h-full bg-background text-foreground antialiased">
