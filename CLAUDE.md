@@ -266,7 +266,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 1. **Zustand 파생 상태**: `filteredCafes`, `availableGus`는 함수가 아닌 배열. 필터/데이터 변경 시 `recompute()` 호출 필수.
 2. **바텀시트 bottom**: 모바일 `bottom-14`, 데스크탑 `bottom-0`. BottomNav 높이 고려.
 3. **마커 SVG**: `buildMarkerSvg()` 수정 시 `markerCache` 키가 올바른지 확인.
-4. **사진 로딩**: pstatic 이미지는 `img1.kakaocdn.net/cthumb/` 프록시 사용 (카카오 CDN 리사이즈). 캐러셀 `C280x280.q70`, 라이트박스 `R800x0`. 캐러셀 처음 3장 `loading="eager"`, 나머지 `lazy`. photo-proxy API는 deprecated (kakaocdn으로 전환). 라이트박스는 LQIP 패턴: 캐시된 C280x280 썸네일을 `blur-lg scale-105`로 즉시 표시 → HD 로드 시 crossfade (blur 500ms fade-out + HD 300ms fade-in). `usePreloadAdjacentImages`로 현재 ±2장 HD 프리로드.
+4. **사진 로딩**: pstatic 이미지는 `img1.kakaocdn.net/cthumb/` 프록시 사용 (카카오 CDN 리사이즈). 캐러셀 `C280x280.q70`, 라이트박스 `R800x0`. 캐러셀 처음 3장 `loading="eager"`, 나머지 `lazy`. photo-proxy API는 deprecated (kakaocdn으로 전환). 라이트박스는 LQIP 패턴: 캐시된 C280x280 썸네일을 `blur-lg scale-105`로 즉시 표시 → HD 로드 시 crossfade (blur 500ms fade-out + HD 300ms fade-in). `usePreloadAdjacentImages`로 현재 ±2장 HD 프리로드. `prefetchPlaceDetail()`(마커 hover)이 API 캐시 + 사진 2장 `<link rel="preload">` 동시 수행. kakaocdn keep-alive warm-up으로 첫 이미지 로드 지연 제거.
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
