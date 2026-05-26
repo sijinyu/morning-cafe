@@ -58,11 +58,19 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
       <head>
+        {/* CDN preconnect — DNS + TCP + TLS 사전 연결 */}
         <link rel="preconnect" href="https://t1.daumcdn.net" />
-        <link rel="dns-prefetch" href="https://t1.daumcdn.net" />
+        <link rel="preconnect" href="https://dapi.kakao.com" />
+        <link rel="preconnect" href="https://map.daumcdn.net" />
         <link rel="preconnect" href="https://img1.kakaocdn.net" />
-        <link rel="dns-prefetch" href="https://img1.kakaocdn.net" />
+        <link rel="preconnect" href="https://t1.kakaocdn.net" crossOrigin="anonymous" />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
+        {/* dns-prefetch fallback (preconnect 미지원 브라우저) */}
+        <link rel="dns-prefetch" href="https://t1.daumcdn.net" />
+        <link rel="dns-prefetch" href="https://dapi.kakao.com" />
+        <link rel="dns-prefetch" href="https://map.daumcdn.net" />
+        <link rel="dns-prefetch" href="https://img1.kakaocdn.net" />
+        <link rel="dns-prefetch" href="https://t1.kakaocdn.net" />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
