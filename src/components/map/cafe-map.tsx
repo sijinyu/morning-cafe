@@ -452,7 +452,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     >
       <MarkerClusterer
         averageCenter
-        minLevel={6}
+        minLevel={4}
         gridSize={80}
         styles={[
           { width: '52px', height: '52px', background: 'rgba(245,158,11,0.75)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '13px', lineHeight: '52px' },
