@@ -45,9 +45,22 @@ function preloadPhotos(photos: string[]) {
   }
 }
 
+/** Warm up keep-alive connection to kakaocdn on first call. */
+let cdnWarmedUp = false;
+function warmUpCdn() {
+  if (cdnWarmedUp) return;
+  cdnWarmedUp = true;
+  // HEAD request establishes TCP+TLS keep-alive without downloading body
+  fetch('https://img1.kakaocdn.net/cthumb/local/C280x280.q70/?fname=warmup', {
+    method: 'HEAD',
+    mode: 'no-cors',
+  }).catch(() => {});
+}
+
 /** Prefetch place detail into cache (fire-and-forget, for hover/preload). */
 export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
   if (!kakaoPlaceId || cache.has(kakaoPlaceId)) return;
+  warmUpCdn();
   fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
     .then((r) => r.json())
     .then((json: PlaceDetailResponse) => {
@@ -56,6 +69,7 @@ export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
         if (oldest !== undefined) cache.delete(oldest);
       }
       cache.set(kakaoPlaceId, json);
+      preloadPhotos(json.photos);
     })
     .catch(() => {});
 }
