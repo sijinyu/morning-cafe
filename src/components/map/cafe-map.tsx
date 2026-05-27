@@ -13,6 +13,9 @@ import { trackEvent } from '@/lib/analytics';
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
 
+// 위경도 근접 판정 임계값 (약 10m 이내 = 같은 건물)
+const OVERLAP_THRESHOLD = 0.0001;
+
 // 서울시 경계 (팬 제한용, 약간의 여유 포함)
 const SEOUL_BOUNDS = {
   swLat: 37.413,  // 남쪽 (서초/강남 남단)
@@ -260,6 +263,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const [center, setCenter] = useState<MapCenter>(SEOUL_CITY_HALL);
   const [viewportBounds, setViewportBounds] = useState<ViewportBounds | null>(null);
   const [zoomLevel, setZoomLevel] = useState(5);
+  const [overlapPopup, setOverlapPopup] = useState<{ cafes: Cafe[]; lat: number; lng: number } | null>(null);
   const mapInstanceRef = useRef<kakao.maps.Map | null>(null);
   // Guard: only auto-zoom to user location on the very first GPS fix.
   const hasAutoZoomedRef = useRef(false);
@@ -296,6 +300,34 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     );
   }, [filteredCafes, viewportBounds]);
 
+  // 같은 위치(건물)의 카페 그룹 인덱스
+  const overlapIndex = useMemo(() => {
+    const index: Record<string, Cafe[]> = {};
+    for (const cafe of visibleCafes) {
+      // 소수점 4자리까지 반올림 → ~10m 이내 같은 키
+      const key = `${cafe.latitude.toFixed(4)},${cafe.longitude.toFixed(4)}`;
+      const group = index[key];
+      if (group) {
+        group.push(cafe);
+      } else {
+        index[key] = [cafe];
+      }
+    }
+    return index;
+  }, [visibleCafes]);
+
+  const handleMarkerSelect = useCallback((cafe: Cafe) => {
+    // 같은 위치에 카페가 2개 이상이면 목록 팝업
+    const key = `${cafe.latitude.toFixed(4)},${cafe.longitude.toFixed(4)}`;
+    const group = overlapIndex[key];
+    if (group && group.length > 1) {
+      setOverlapPopup({ cafes: group, lat: cafe.latitude, lng: cafe.longitude });
+      return;
+    }
+    setOverlapPopup(null);
+    setSelectedCafe(cafe);
+  }, [overlapIndex, setSelectedCafe]);
+
   // Auto-zoom to user location the first time a valid position arrives.
   useEffect(() => {
     if (!userLocation || hasAutoZoomedRef.current) return;
@@ -327,9 +359,10 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         map.panTo(new kakao.maps.LatLng(offsetLat, lng));
       });
     }
-    // 지도 클릭 시 바텀시트 닫기
+    // 지도 클릭 시 바텀시트 + 겹침 팝업 닫기
     kakao.maps.event.addListener(map, 'click', () => {
       setSelectedCafe(null);
+      setOverlapPopup(null);
     });
 
     // ── 줌아웃 차단: MAX_ZOOM_LEVEL에서 줌아웃 제스처 자체를 막음 ──
@@ -467,7 +500,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             isSelected={selectedCafe?.id === cafe.id}
             isFavorite={favorites.has(cafe.id)}
             isChain={chainCafeIds.has(cafe.id)}
-            onSelect={setSelectedCafe}
+            onSelect={handleMarkerSelect}
           />
         ))}
       </MarkerClusterer>
@@ -497,6 +530,61 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           </span>
         </CustomOverlayMap>
       ))}
+
+      {/* 겹친 카페 목록 팝업 */}
+      {overlapPopup && (
+        <CustomOverlayMap
+          position={{ lat: overlapPopup.lat, lng: overlapPopup.lng }}
+          yAnchor={1.15}
+          zIndex={300}
+        >
+          <div
+            style={{
+              background: 'var(--background, #fff)',
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+              padding: '8px 0',
+              minWidth: '180px',
+              maxWidth: '240px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              border: '1px solid var(--border, #e5e7eb)',
+            }}
+          >
+            <div style={{ padding: '4px 12px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--muted-foreground, #6b7280)' }}>
+              이 위치의 카페 {overlapPopup.cafes.length}개
+            </div>
+            {overlapPopup.cafes.map((cafe) => (
+              <button
+                key={cafe.id}
+                onClick={() => {
+                  trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
+                  setOverlapPopup(null);
+                  setSelectedCafe(cafe);
+                }}
+                onMouseOver={() => prefetchPlaceDetail(cafe.kakao_place_id)}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '8px 12px',
+                  textAlign: 'left',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--foreground, #1f2937)',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderTop: '1px solid var(--border, #f3f4f6)',
+                }}
+                onMouseEnter={(e) => { (e.target as HTMLElement).style.background = 'var(--muted, #f9fafb)'; }}
+                onMouseLeave={(e) => { (e.target as HTMLElement).style.background = 'transparent'; }}
+              >
+                {cafe.name}
+              </button>
+            ))}
+          </div>
+        </CustomOverlayMap>
+      )}
 
       {/* "You are here" blue pulsing dot — rendered above cafe markers */}
       {userLocation && (
