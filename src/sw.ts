@@ -32,28 +32,28 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Kakao CDN cthumb photos — cache-first (7 days, 200 entries)
+    // Kakao CDN cthumb photos — cache-first (14 days, 500 entries)
     {
       matcher: /^https:\/\/img1\.kakaocdn\.net\/cthumb\/.*/i,
       handler: new CacheFirst({
         cacheName: "cafe-photos-kakaocdn",
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 200,
-            maxAgeSeconds: 7 * 24 * 60 * 60,
+            maxEntries: 500,
+            maxAgeSeconds: 14 * 24 * 60 * 60,
           }),
         ],
       }),
     },
-    // Place-detail API — stale-while-revalidate (1 day, 50 entries)
+    // Place-detail API — stale-while-revalidate (3 days, 150 entries)
     {
       matcher: /\/api\/place-detail\?.*/i,
       handler: new StaleWhileRevalidate({
         cacheName: "place-detail-api",
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 50,
-            maxAgeSeconds: 24 * 60 * 60,
+            maxEntries: 150,
+            maxAgeSeconds: 3 * 24 * 60 * 60,
           }),
         ],
       }),

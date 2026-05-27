@@ -61,6 +61,7 @@ function LightboxImage({
         unoptimized
         referrerPolicy="no-referrer"
         loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
         className={`object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}

@@ -31,19 +31,28 @@ const EMPTY: PlaceDetailResponse = {
 const MAX_CACHE_SIZE = 150;
 const cache = new Map<string, PlaceDetailResponse>();
 
-/** Preload the first 2 photos so the browser starts downloading before React renders <Image>. */
+/** Preload photos so the browser starts downloading before React renders <Image>.
+ *  First 2: <link rel="preload"> (high priority, blocks nothing).
+ *  Remaining: new Image() (low priority background fetch → browser disk cache). */
 function preloadPhotos(photos: string[]) {
-  const urls = photos.slice(0, 2);
-  for (const url of urls) {
+  for (let i = 0; i < photos.length; i++) {
+    const url = photos[i];
     if (!url) continue;
-    // Avoid duplicate preload links
-    if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = url;
-    (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
-    document.head.appendChild(link);
+
+    if (i < 2) {
+      // High-priority preload for first 2 (visible in carousel viewport)
+      if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = url;
+      (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
+      document.head.appendChild(link);
+    } else {
+      // Background prefetch for remaining — lands in browser cache
+      const img = new globalThis.Image();
+      img.src = url;
+    }
   }
 }
 
