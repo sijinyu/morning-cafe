@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { PersistentMapPage } from '@/components/persistent-map-page';
+import { SwUpdatePrompt } from '@/components/sw-update-prompt';
 
 import './globals.css';
 
@@ -121,6 +122,7 @@ export default function RootLayout({
             </main>
           </div>
           <BottomNav />
+          <SwUpdatePrompt />
         </ThemeProvider>
       </body>
     </html>

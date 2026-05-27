@@ -15,7 +15,7 @@ declare const self: ServiceWorkerGlobalScope & {
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
-  skipWaiting: true,
+  skipWaiting: false,
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
@@ -71,6 +71,13 @@ self.addEventListener("activate", (event) => {
       caches.delete("cafe-photos-proxy"),
     ])
   );
+});
+
+// 클라이언트에서 SKIP_WAITING 메시지 받으면 즉시 활성화
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 serwist.addEventListeners();
