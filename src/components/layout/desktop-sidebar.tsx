@@ -45,6 +45,20 @@ export function DesktopSidebar() {
           );
         })}
       </nav>
+
+      {/* 후원 — Buy Me a Coffee 계정 준비 후 활성화
+      <div className="px-3 pb-4">
+        <a
+          href="https://buymeacoffee.com/sijinyu"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs text-muted-foreground hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+        >
+          <span>&#9749;</span>
+          응원하기
+        </a>
+      </div>
+      */}
     </aside>
   );
 }

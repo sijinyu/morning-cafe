@@ -88,7 +88,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   // const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
+  const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
   // const reminded = hasReminder(cafe.id);
@@ -400,7 +400,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <MemoSection cafeId={cafe.id} getMemo={getMemo} setMemo={setMemo} />
 
-            <ReviewSection reviews={reviews} placeUrl={cafe.place_url} />
+            <ReviewSection reviews={reviews} blogReviews={blogReviews} placeUrl={cafe.place_url} />
 
             <div className="h-px bg-border" />
 

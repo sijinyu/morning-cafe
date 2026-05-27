@@ -258,6 +258,20 @@ export default function ReportPage() {
           </p>
         </div>
 
+        {/* 후원 — Buy Me a Coffee 계정 준비 후 활성화
+        <div className="pb-10 text-center">
+          <a
+            href="https://buymeacoffee.com/sijinyu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-5 py-3 text-sm font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+          >
+            <span className="text-lg">&#9749;</span>
+            응원하기
+          </a>
+        </div>
+        */}
+
         {/* 제출 완료 토스트 */}
         <AnimatePresence>
           {submitted && (

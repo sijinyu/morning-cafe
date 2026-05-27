@@ -288,6 +288,37 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     }, 250);
   }, []);
 
+  // 모바일: 뷰포트 내 가장 가까운 카페 N개 place-detail 프리페치
+  // (hover가 안 되므로 zoom ≤ 4일 때 자동 프리페치)
+  const prefetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!IS_MOBILE || !viewportBounds || zoomLevel > 4) return;
+
+    if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
+    prefetchTimerRef.current = setTimeout(() => {
+      // 뷰포트 중심 기준 가장 가까운 카페 5개
+      const cLat = (viewportBounds.swLat + viewportBounds.neLat) / 2;
+      const cLng = (viewportBounds.swLng + viewportBounds.neLng) / 2;
+      const inView = filteredCafes.filter((c) =>
+        c.latitude >= viewportBounds.swLat &&
+        c.latitude <= viewportBounds.neLat &&
+        c.longitude >= viewportBounds.swLng &&
+        c.longitude <= viewportBounds.neLng
+      );
+      const nearest = inView
+        .map((c) => ({ cafe: c, dist: (c.latitude - cLat) ** 2 + (c.longitude - cLng) ** 2 }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, 5);
+      for (const { cafe } of nearest) {
+        prefetchPlaceDetail(cafe.kakao_place_id);
+      }
+    }, 800);
+
+    return () => {
+      if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
+    };
+  }, [viewportBounds, zoomLevel, filteredCafes]);
+
   // Filter cafes to only those within the current viewport
   const visibleCafes = useMemo(() => {
     if (!viewportBounds) return filteredCafes;

@@ -33,6 +33,14 @@ export interface ReviewItem {
   likeCount: number;
 }
 
+export interface BlogReviewItem {
+  title: string;
+  contents: string;
+  author: string;
+  date: string;
+  originUrl: string;
+}
+
 export interface PlaceDetailResponse {
   photos: string[];
   photosHd: string[];
@@ -42,13 +50,14 @@ export interface PlaceDetailResponse {
   facilities: string[];
   strengths: string[];
   reviews: ReviewItem[];
+  blogReviews: BlogReviewItem[];
 }
 
 export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('placeId');
   if (!placeId || !/^\d+$/.test(placeId)) {
     return NextResponse.json(
-      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       { status: 400 },
     );
   }
@@ -61,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [] } satisfies PlaceDetailResponse,
+        { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       );
     }
 
@@ -155,8 +164,27 @@ export async function GET(request: NextRequest) {
         likeCount: r.meta?.like_count ?? 0,
       }));
 
+    // Blog reviews (최대 4개)
+    const rawBlogReviews: {
+      title?: string;
+      contents?: string;
+      author?: string;
+      registered_at?: string;
+      origin_url?: string;
+    }[] = data?.blog_review?.reviews ?? [];
+    const blogReviews: BlogReviewItem[] = rawBlogReviews
+      .filter((r) => r.contents || r.title)
+      .slice(0, 4)
+      .map((r) => ({
+        title: r.title ?? '',
+        contents: r.contents ?? '',
+        author: r.author ?? '',
+        date: r.registered_at?.split(' ')[0] ?? '',
+        originUrl: r.origin_url ?? '',
+      }));
+
     return NextResponse.json(
-      { photos, photosHd, menu, rating, parking, facilities, strengths, reviews } satisfies PlaceDetailResponse,
+      { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews } satisfies PlaceDetailResponse,
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
@@ -165,7 +193,7 @@ export async function GET(request: NextRequest) {
     );
   } catch {
     return NextResponse.json(
-      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
     );
   }
 }
