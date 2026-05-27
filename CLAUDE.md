@@ -163,6 +163,7 @@ docs/
 - **마커 캐싱**: `markerCache` 딕셔너리로 data URI 재사용
 - **카페명 라벨**: 줌 레벨 3 이하에서 `CustomOverlayMap`으로 마커 아래 이름 표시
 - **줌 제한**: `MAX_ZOOM_LEVEL` 모바일=8, 데스크탑=6 (줌아웃 이벤트 차단)
+- **겹친 마커**: 같은 위치(toFixed(4) 기준) 카페 2개+ → `overlapIndex` Record → `CustomOverlayMap` 목록 팝업. kakao `Map`과 JS `Map` 충돌 → Record 사용.
 
 ### 색상 체계 (마커)
 
@@ -200,16 +201,18 @@ docs/
 ## API 엔드포인트
 
 ### GET `/api/place-detail?placeId={kakao_place_id}`
-카카오 Place API (panel3)에서 사진 + 메뉴 + 별점 + 주차 + 편의시설을 가져오는 프록시.
+카카오 Place API (panel3)에서 사진 + 메뉴 + 별점 + 주차 + 편의시설 + 리뷰를 가져오는 프록시.
 - 응답:
   ```typescript
   {
     photos: string[],
+    photosHd: string[],
     menu: { name: string, price: string, photo?: string }[],
     rating: { score: number, count: number } | null,
     parking: { available: boolean, info: string } | null,
     facilities: string[],      // e.g. ["바테이블", "놀이방"]
-    strengths: string[]         // e.g. ["커피가 맛있어요", "뷰가 좋아요"]
+    strengths: string[],        // e.g. ["커피가 맛있어요", "뷰가 좋아요"]
+    reviews: ReviewItem[]       // 카카오맵 리뷰 최신 3개 (닉네임, 별점, 본문, 날짜, 좋아요)
   }
   ```
 - 서버 키 사용: `KAKAO_REST_API_KEY`
@@ -266,7 +269,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 1. **Zustand 파생 상태**: `filteredCafes`, `availableGus`는 함수가 아닌 배열. 필터/데이터 변경 시 `recompute()` 호출 필수.
 2. **바텀시트 bottom**: 모바일 `bottom-14`, 데스크탑 `bottom-0`. BottomNav 높이 고려.
 3. **마커 SVG**: `buildMarkerSvg()` 수정 시 `markerCache` 키가 올바른지 확인.
-4. **사진 로딩**: pstatic 이미지는 `img1.kakaocdn.net/cthumb/` 프록시 사용 (카카오 CDN 리사이즈). 캐러셀 `C280x280.q70`, 라이트박스 `R800x0`. 캐러셀 처음 3장 `loading="eager"`, 나머지 `lazy`. photo-proxy API는 deprecated (kakaocdn으로 전환). 라이트박스는 LQIP 패턴: 캐시된 C280x280 썸네일을 `blur-lg scale-105`로 즉시 표시 → HD 로드 시 crossfade (blur 500ms fade-out + HD 300ms fade-in). `usePreloadAdjacentImages`로 현재 ±2장 HD 프리로드. `prefetchPlaceDetail()`(마커 hover)이 API 캐시 + 사진 2장 `<link rel="preload">` 동시 수행. kakaocdn keep-alive warm-up으로 첫 이미지 로드 지연 제거.
+4. **사진 로딩**: pstatic 이미지는 `img1.kakaocdn.net/cthumb/` 프록시 사용 (카카오 CDN 리사이즈). 캐러셀 `C280x280.q70`, 라이트박스 `R800x0`. 캐러셀 처음 3장 `loading="eager"`, 나머지 `lazy`. 모든 이미지 `decoding="async"`. photo-proxy API는 deprecated (kakaocdn으로 전환). 라이트박스는 LQIP 패턴: 캐시된 C280x280 썸네일을 `blur-lg scale-105`로 즉시 표시 → HD 로드 시 crossfade (blur 500ms fade-out + HD 300ms fade-in). `usePreloadAdjacentImages`로 현재 ±2장 HD 프리로드. `prefetchPlaceDetail()`(마커 hover)이 API 캐시 + 사진 프리로드 동시 수행: 첫 2장 `<link rel="preload">` high priority + 나머지 `new Image()` 백그라운드. kakaocdn keep-alive warm-up으로 첫 이미지 로드 지연 제거.
 5. **필터 드롭다운**: `Dropdown` 컴포넌트의 outside-click은 `setTimeout` + 별도 ref로 구현. 이벤트 버블링 주의.
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
@@ -277,7 +280,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
 14. **SEO 구별 페이지**: `/cafes/[gu]`는 Server Component (SSG + 24h ISR). `generateStaticParams()`에서 raw 한글 문자열 반환 (Next.js가 자동 인코딩). `fetchCafesByGu()`는 `isSupabaseConfigured()` 체크 필수.
-15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (7일, 200개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (1일).
+15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (14일, 500개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (3일, 150개). SW 업데이트는 `skipWaiting: false` + `SwUpdatePrompt` 컴포넌트로 유저 확인 후 교체.
 16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
 17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
 18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`.
@@ -286,7 +289,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 21. **카페명 라벨**: 줌 레벨 3 이하(충분히 확대)에서 `CustomOverlayMap`으로 마커 아래에 카페명 표시. `zoomLevel` state로 추적. `yAnchor={-0.2}`, `pointerEvents: 'none'`.
 22. **줌 레벨 제한**: `MAX_ZOOM_LEVEL` — 모바일 8, 데스크탑 6. 카카오 맵 레벨은 클수록 축소. 휠/핀치 줌아웃 이벤트 차단 방식.
 23. **Cafe 타입 위치**: `src/lib/types/cafe.ts`에 `Cafe` 인터페이스 + `extractGu` 함수. 서버/클라이언트 양쪽에서 import.
-24. **체인 키워드**: `cafe-store.ts`의 `CHAIN_KEYWORDS` 배열 (250+개). 추가 시 배열 끝에 코멘트와 함께 추가. `isChainCafe(name)`은 `toLowerCase().includes()` 매칭.
+24. **체인 키워드**: `cafe-store.ts`의 `CHAIN_KEYWORDS` 배열 (310+개). 추가 시 배열 끝에 날짜 코멘트와 함께 추가. `isChainCafe(name)`은 `toLowerCase().includes()` 매칭. 핫플/스페셜티(블루보틀, 오설록, 테라로사 등)는 유저 의도로 제외.
+25. **겹친 마커 팝업**: `overlapIndex` (Record, toFixed(4) 키)로 같은 위치 카페 그룹화. 2개+ 시 `CustomOverlayMap` 목록 팝업 (z-300). 선택 시 바텀시트. JS `Map` 대신 Record 사용 (kakao `Map` 타입 충돌 회피).
+26. **인앱 리뷰**: `ReviewItem` 타입 (nickname, contents, starRating, date, likeCount). `review-section.tsx` 컴포넌트. panel3 API에서 최신 3개만 제공 (페이지네이션 불가). 블로그 리뷰(4개)도 panel3에 있으나 미사용.
 
 ### 커밋 메시지
 
@@ -310,6 +315,10 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 카페 데이터 자동 크롤링 CI (`.github/workflows/crawl-cafes.yml`)
 - [x] 24시간 배지 요일별 판정 — 금토만 24시간인 카페 오판 수정
 - [x] 확대 시 카페명 라벨 (`CustomOverlayMap`, 줌 레벨 3 이하)
+- [x] 인앱 리뷰 섹션 (카카오맵 리뷰 최신 3개, `review-section.tsx`)
+- [x] 겹친 마커 목록 팝업 (같은 건물 카페 선택 가능)
+- [x] SW 업데이트 알림 토스트 (`SwUpdatePrompt`, 유저 확인 후 새로고침)
+- [x] 이미지 로딩 최적화 (전체 프리로드, decoding async, SW 캐시 확장)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
