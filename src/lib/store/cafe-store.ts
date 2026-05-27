@@ -320,6 +320,29 @@ const CHAIN_KEYWORDS = [
   '아이엠베이글',
   '커피살롱',
   '아재커피',
+  // 2026-05-27 추가 — 베이커리/도넛/디저트/음료 프랜차이즈
+  '파리바게뜨', '파리바게트', 'PARIS BAGUETTE',
+  '뚜레쥬르', 'TOUS LES JOURS',
+  '던킨', '던킨도너츠', 'DUNKIN',
+  '크리스피크림', 'KRISPY KREME',
+  '노티드',
+  '설빙',
+  '올드페리도넛', '올드페리',
+  '스무디킹', 'SMOOTHIE KING',
+  '나비잠',
+  '마망갸또',
+  '도쿄빵',
+  '런던베이글뮤지엄', '런던베이글',
+  '셀프카페',
+  // 중복 이름 기반 발견
+  '카페오늘',
+  '엘리커피',
+  '타이거커피',
+  // 샌드위치 카페 프랜차이즈
+  '써브웨이', 'SUBWAY',
+  '이삭토스트',
+  '에그드랍', 'EGG DROP',
+  '잇마이샌드', 'EATMYSAND',
 ] as const;
 
 const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());

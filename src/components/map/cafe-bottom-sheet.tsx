@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 import { PhotoCarousel } from './bottom-sheet/photo-carousel';
 import { MenuSection } from './bottom-sheet/menu-section';
+import { ReviewSection } from './bottom-sheet/review-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
 
@@ -87,7 +88,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   // const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photos, photosHd, menu, rating, parking, facilities, strengths, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
+  const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
   // const reminded = hasReminder(cafe.id);
@@ -399,20 +400,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <MemoSection cafeId={cafe.id} getMemo={getMemo} setMemo={setMemo} />
 
-            {/* 리뷰 링크 — place.map.kakao.com/{id} → 끝에 #comment 대신 별도 경로 */}
-            {cafe.place_url && (
-              <a
-                href={cafe.place_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name, action: 'review' })}
-                className="flex items-center gap-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Star className="h-4 w-4" />
-                <span>카카오맵 리뷰 보기</span>
-                <ExternalLink className="h-4 w-4 ml-auto" />
-              </a>
-            )}
+            <ReviewSection reviews={reviews} placeUrl={cafe.place_url} />
 
             <div className="h-px bg-border" />
 

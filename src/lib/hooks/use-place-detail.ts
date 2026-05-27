@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { MenuItem, PlaceDetailResponse, RatingInfo, ParkingInfo } from '@/app/api/place-detail/route';
+import type { MenuItem, PlaceDetailResponse, RatingInfo, ParkingInfo, ReviewItem } from '@/app/api/place-detail/route';
 
-export type { MenuItem, RatingInfo, ParkingInfo };
+export type { MenuItem, RatingInfo, ParkingInfo, ReviewItem };
 
 interface UsePlaceDetailResult {
   photos: string[];
@@ -13,6 +13,7 @@ interface UsePlaceDetailResult {
   parking: ParkingInfo | null;
   facilities: string[];
   strengths: string[];
+  reviews: ReviewItem[];
   loading: boolean;
 }
 
@@ -24,6 +25,7 @@ const EMPTY: PlaceDetailResponse = {
   parking: null,
   facilities: [],
   strengths: [],
+  reviews: [],
 };
 
 const MAX_CACHE_SIZE = 150;
@@ -130,6 +132,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
     parking: data.parking ?? null,
     facilities: data.facilities ?? [],
     strengths: data.strengths ?? [],
+    reviews: data.reviews ?? [],
     loading: cached ? false : loading,
   };
 }
