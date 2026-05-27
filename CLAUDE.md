@@ -212,7 +212,8 @@ docs/
     parking: { available: boolean, info: string } | null,
     facilities: string[],      // e.g. ["바테이블", "놀이방"]
     strengths: string[],        // e.g. ["커피가 맛있어요", "뷰가 좋아요"]
-    reviews: ReviewItem[]       // 카카오맵 리뷰 최신 3개 (닉네임, 별점, 본문, 날짜, 좋아요)
+    reviews: ReviewItem[],      // 카카오맵 리뷰 최신 3개 (닉네임, 별점, 본문, 날짜, 좋아요)
+    blogReviews: BlogReviewItem[] // 블로그 리뷰 최대 4개 (제목, 본문, 작성자, 날짜, 원문URL)
   }
   ```
 - 서버 키 사용: `KAKAO_REST_API_KEY`
@@ -291,7 +292,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 23. **Cafe 타입 위치**: `src/lib/types/cafe.ts`에 `Cafe` 인터페이스 + `extractGu` 함수. 서버/클라이언트 양쪽에서 import.
 24. **체인 키워드**: `cafe-store.ts`의 `CHAIN_KEYWORDS` 배열 (310+개). 추가 시 배열 끝에 날짜 코멘트와 함께 추가. `isChainCafe(name)`은 `toLowerCase().includes()` 매칭. 핫플/스페셜티(블루보틀, 오설록, 테라로사 등)는 유저 의도로 제외.
 25. **겹친 마커 팝업**: `overlapIndex` (Record, toFixed(4) 키)로 같은 위치 카페 그룹화. 2개+ 시 `CustomOverlayMap` 목록 팝업 (z-300). 선택 시 바텀시트. JS `Map` 대신 Record 사용 (kakao `Map` 타입 충돌 회피).
-26. **인앱 리뷰**: `ReviewItem` 타입 (nickname, contents, starRating, date, likeCount). `review-section.tsx` 컴포넌트. panel3 API에서 최신 3개만 제공 (페이지네이션 불가). 블로그 리뷰(4개)도 panel3에 있으나 미사용.
+26. **인앱 리뷰**: `ReviewItem` (카카오 3개) + `BlogReviewItem` (블로그 4개) 통합. `review-section.tsx`에서 접힌 상태=카카오 2개 프리뷰, 펼치면 카카오+블로그 전체. 블로그는 원문 링크 포함. panel3 API에서 제공 (페이지네이션 불가).
+27. **모바일 프리페치**: `IS_MOBILE && zoomLevel <= 4`일 때 뷰포트 중심 기준 가장 가까운 카페 5개 `prefetchPlaceDetail()` 자동 호출 (800ms 디바운스). 모바일은 hover 불가하므로 대체 전략.
+28. **후원 버튼**: Buy Me a Coffee 링크 (report 페이지 + desktop sidebar). 현재 주석 처리 — BMC 계정 준비 후 활성화.
 
 ### 커밋 메시지
 
@@ -319,6 +322,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 겹친 마커 목록 팝업 (같은 건물 카페 선택 가능)
 - [x] SW 업데이트 알림 토스트 (`SwUpdatePrompt`, 유저 확인 후 새로고침)
 - [x] 이미지 로딩 최적화 (전체 프리로드, decoding async, SW 캐시 확장)
+- [x] 블로그 리뷰 추출 + 리뷰 더보기 (카카오 3 + 블로그 4 통합)
+- [x] 모바일 뷰포트 자동 프리페치 (hover 대체, zoom ≤ 4, 가까운 5개)
+- [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
