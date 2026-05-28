@@ -563,7 +563,7 @@ async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
   while (true) {
     const { data, error } = await supabase
       .from('cafes_with_coords')
-      .select('id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at, created_at')
+      .select('id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at, created_at, thumbnail_url')
       .eq('is_earlybird', true)
       .range(from, from + PAGE_SIZE - 1);
 
@@ -596,7 +596,7 @@ function mapRowsToCafes(rows: Record<string, unknown>[]): Cafe[] {
     is_earlybird: row.is_earlybird as boolean,
     last_crawled_at: row.last_crawled_at as string | null,
     created_at: (row.created_at as string | null) ?? null,
-    ...(row.thumbnail_url ? { thumbnail_url: row.thumbnail_url as string } : {}),
+    thumbnail_url: (row.thumbnail_url as string | null) ?? null,
   }));
 }
 

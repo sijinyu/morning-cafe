@@ -241,19 +241,9 @@ export default function ReportPage() {
           )}
         </AnimatePresence>
 
-        {/* 만든 사람 */}
-        <div className="mt-8 border-t border-border pt-6 pb-8 text-center space-y-1.5">
-          <p className="text-xs text-muted-foreground">
-            커피를 좋아하는 사람
-          </p>
-          <p className="text-sm font-medium">유시진</p>
-          <a
-            href="mailto:sijinyudev@gmail.com"
-            className="inline-block text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            sijinyudev@gmail.com
-          </a>
-          <p className="text-[10px] text-muted-foreground/60 mt-2">
+        {/* 안내 */}
+        <div className="mt-8 border-t border-border pt-6 pb-8 text-center">
+          <p className="text-[10px] text-muted-foreground/60">
             제보해주신 내용은 관리자에게 전달됩니다
           </p>
         </div>
