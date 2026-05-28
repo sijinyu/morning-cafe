@@ -263,13 +263,13 @@ function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
     const lngOffset = (sidebarPx / mapWidth) * lngSpan * 0.5;
     const mapHeight = map.getNode().offsetHeight;
     const sheetPx = window.innerHeight * 0.55;
-    const latOffset = (sheetPx / mapHeight) * latSpan * 0.5;
+    const latOffset = (sheetPx / mapHeight) * latSpan * 0.35;
     map.panTo(new kakao.maps.LatLng(lat - latOffset, lng + lngOffset));
   } else {
     // 모바일: 바텀시트 55vh + 네비바 56px
     const mapHeight = map.getNode().offsetHeight;
     const sheetPx = window.innerHeight * 0.55 + 56;
-    const latOffset = (sheetPx / mapHeight) * latSpan * 0.5;
+    const latOffset = (sheetPx / mapHeight) * latSpan * 0.35;
     map.panTo(new kakao.maps.LatLng(lat - latOffset, lng));
   }
 }
