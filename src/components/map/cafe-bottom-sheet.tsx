@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   X,
@@ -16,6 +16,7 @@ import {
   // BellOff,
   Star,
   Car,
+  Sparkles,
 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
@@ -105,6 +106,41 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   //   scheduleReminder(cafe.id, cafe.name, cafe.opening_time!);
   // }
 
+  const [cardLoading, setCardLoading] = useState(false);
+
+  const handleStoryCard = useCallback(async () => {
+    if (cardLoading) return;
+    setCardLoading(true);
+    trackEvent('story_card', { cafe_name: cafe.name, cafe_id: cafe.id });
+
+    try {
+      const res = await fetch(`/api/story-card?id=${cafe.id}`);
+      if (!res.ok) throw new Error('Failed to generate card');
+      const blob = await res.blob();
+      const file = new File([blob], `morning-cafe-${cafe.name}.png`, { type: 'image/png' });
+
+      // 1. Web Share API with file
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${cafe.name} — 모닝커피`,
+        });
+      } else {
+        // 2. Download fallback
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `morning-cafe-${cafe.name}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      // user cancelled share or fetch failed — ignore
+    } finally {
+      setCardLoading(false);
+    }
+  }, [cafe.id, cafe.name, cardLoading]);
+
   useEffect(() => {
     setSheetState('half');
     addRecent(cafe.id);
@@ -161,12 +197,13 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     <motion.div
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={0.1}
+      dragElastic={0.05}
+      dragTransition={{ bounceStiffness: 600, bounceDamping: 60 }}
       onDragEnd={handleDragEnd}
       initial={{ y: '100%' }}
       animate={{ y: 0, height: SHEET_HEIGHTS[sheetState] }}
       exit={{ y: '100%' }}
-      transition={{ type: 'tween', duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ type: 'tween', duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
         'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)] dark:shadow-none dark:border-t dark:border-border',
@@ -459,6 +496,20 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   );
                 })()}
               </a>
+              <button
+                onClick={handleStoryCard}
+                disabled={cardLoading}
+                className={cn(
+                  'flex items-center justify-center rounded-2xl',
+                  'border border-border py-3.5 px-4',
+                  'text-sm font-medium text-foreground',
+                  'hover:bg-muted transition-colors',
+                  cardLoading && 'opacity-50',
+                )}
+                aria-label="감성 카드"
+              >
+                <Sparkles className={cn('h-4 w-4', cardLoading && 'animate-pulse')} />
+              </button>
               <button
                 onClick={() => {
                   trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
