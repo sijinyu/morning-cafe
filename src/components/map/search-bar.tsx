@@ -65,6 +65,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
       if (query.trim().length >= 2) addSearch(query.trim());
       setSelectedCafe(cafe);
       onSelectCafe(cafe.latitude, cafe.longitude);
+      setFocused(false);
       setQuery('');
       inputRef.current?.blur();
     },
