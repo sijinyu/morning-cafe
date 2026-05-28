@@ -311,11 +311,15 @@ function FeatureCard({ cafe, onSelect, badge, badgeColor, userLocation, showDist
       onClick={() => onSelect(cafe)}
       className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background overflow-hidden text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
     >
-      {cafe.thumbnail_url && (
-        <div className="h-20 w-full bg-muted">
+      <div className="h-20 w-full bg-muted">
+        {cafe.thumbnail_url ? (
           <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-        </div>
-      )}
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <MapPin className="h-5 w-5 text-muted-foreground/40" />
+          </div>
+        )}
+      </div>
       <div className="p-3">
       <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
         {badge && (
