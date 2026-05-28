@@ -98,20 +98,23 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
       facilities: facilities.join(','),
     });
 
-    // Pick nearest 50 cafes within 5km, or first 50 if no GPS
+    // Pick nearest 50 cafes — filteredCafes fallback to cafes (전체) if empty
+    const pool = filteredCafes.length > 0 ? filteredCafes : cafes;
     let cafesForApi: Cafe[];
     if (userLocation) {
-      cafesForApi = filteredCafes
+      const withDist = pool
         .map((c) => ({
           cafe: c,
           dist: haversineKm(userLocation.lat, userLocation.lng, c.latitude, c.longitude),
         }))
-        .filter(({ dist }) => dist <= 5)
-        .sort((a, b) => a.dist - b.dist)
+        .sort((a, b) => a.dist - b.dist);
+      const within5km = withDist.filter(({ dist }) => dist <= 5);
+      // 5km 내 카페가 있으면 그중 50개, 없으면 가까운 순 50개
+      cafesForApi = (within5km.length > 0 ? within5km : withDist)
         .slice(0, 50)
         .map(({ cafe }) => cafe);
     } else {
-      cafesForApi = filteredCafes.slice(0, 50);
+      cafesForApi = pool.slice(0, 50);
     }
 
     try {
@@ -150,7 +153,7 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
       setState('error');
       trackEvent('ai_taste_finder_error', {});
     }
-  }, [canSubmit, state, purpose, mood, facilities, filteredCafes, userLocation]);
+  }, [canSubmit, state, purpose, mood, facilities, filteredCafes, cafes, userLocation]);
 
   const handleSelectCafe = useCallback(
     (cafe: Cafe) => {

@@ -51,13 +51,12 @@ function preloadPhotos(photos: string[], photosHd?: string[]) {
     if (!url) continue;
 
     if (i < 2) {
-      // High-priority preload for first 2 (visible in carousel viewport)
-      if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
+      // Low-priority prefetch for first 2 (avoids "preloaded but not used" console warning)
+      if (document.querySelector(`link[rel="prefetch"][href="${CSS.escape(url)}"]`)) continue;
       const link = document.createElement('link');
-      link.rel = 'preload';
+      link.rel = 'prefetch';
       link.as = 'image';
       link.href = url;
-      (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
       document.head.appendChild(link);
     } else {
       // Background prefetch for remaining carousel images
@@ -149,11 +148,9 @@ export function warmupConnections(firstCafeKakaoId?: string | null) {
   if (warmedUp) return;
   warmedUp = true;
 
-  // 1. kakaocdn TCP keep-alive — 실제 이미지 요청으로 커넥션 확보
-  //    존재하는 작은 이미지 URL로 요청 (q1 = 최저품질, 수백 바이트)
-  const cdnWarmUrl = 'https://img1.kakaocdn.net/cthumb/local/C50x50.q1/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fplace%2Flogo%2Fdefault.png';
-  const img = new globalThis.Image();
-  img.src = cdnWarmUrl;
+  // 1. kakaocdn TCP keep-alive — HEAD 요청으로 커넥션 확보
+  //    default.png는 cthumb 리사이즈 시 403 반환하므로 no-cors HEAD로 TCP+TLS만 워밍업
+  fetch('https://img1.kakaocdn.net', { mode: 'no-cors', method: 'HEAD' }).catch(() => {});
 
   // 2. place-detail API 콜드스타트 워밍업 — 첫 번째 카페로 실제 요청
   if (firstCafeKakaoId) {
