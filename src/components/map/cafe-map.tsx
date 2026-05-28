@@ -619,7 +619,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             <CustomOverlayMap
               key={`photo-${cafe.id}`}
               position={{ lat: cafe.latitude, lng: cafe.longitude }}
-              yAnchor={0.65}
+              xAnchor={0.5}
+              yAnchor={0.5}
               zIndex={isSelected ? 99 : 2}
             >
               {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
