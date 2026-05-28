@@ -163,6 +163,13 @@ export function warmupConnections(firstCafeKakaoId?: string | null) {
   }
 }
 
+/** Get first cached thumbnail photo URL for a cafe (marker use). Returns null if not cached. */
+export function getCachedFirstPhoto(kakaoPlaceId: string | null): string | null {
+  if (!kakaoPlaceId) return null;
+  const cached = cache.get(kakaoPlaceId);
+  return cached?.photos?.[0] ?? null;
+}
+
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
   const [fetchedData, setFetchedData] = useState<PlaceDetailResponse>(EMPTY);
   const [loading, setLoading] = useState(false);

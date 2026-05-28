@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpeningTimeForDay, type Cafe } from '@/lib/store/cafe-store';
 import { is24HoursForDay } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
-import { prefetchPlaceDetail } from '@/lib/hooks/use-place-detail';
+import { prefetchPlaceDetail, getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { trackEvent } from '@/lib/analytics';
 import { isNativeApp } from '@/lib/capacitor';
 
@@ -576,31 +576,114 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         );
       })()}
 
-      {/* 충분히 확대 시 카페명 라벨 표시 */}
-      {zoomLevel <= 3 && visibleCafes.map((cafe) => (
-        <CustomOverlayMap
-          key={`label-${cafe.id}`}
-          position={{ lat: cafe.latitude, lng: cafe.longitude }}
-          yAnchor={-0.2}
-          zIndex={selectedCafe?.id === cafe.id ? 99 : 1}
-        >
-          <span
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              color: '#1f2937',
-              backgroundColor: 'rgba(255,255,255,0.92)',
-              padding: '1px 5px',
-              borderRadius: '4px',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-              pointerEvents: 'none',
-            }}
+      {/* 충분히 확대 시: 캐시된 사진이 있으면 원형 사진 마커 + 이름, 없으면 이름만 */}
+      {zoomLevel <= 3 && visibleCafes.map((cafe) => {
+        const photo = getCachedFirstPhoto(cafe.kakao_place_id);
+        const isSelected = selectedCafe?.id === cafe.id;
+        const size = isSelected ? 52 : 42;
+
+        if (photo) {
+          return (
+            <CustomOverlayMap
+              key={`photo-${cafe.id}`}
+              position={{ lat: cafe.latitude, lng: cafe.longitude }}
+              yAnchor={1.3}
+              zIndex={isSelected ? 99 : 2}
+            >
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  trackEvent('select_cafe', { cafe_name: cafe.name, source: 'photo_marker' });
+                  handleMarkerSelect(cafe);
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '2px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    borderRadius: '50%',
+                    border: isSelected ? '3px solid #B45309' : '2.5px solid #fff',
+                    boxShadow: isSelected
+                      ? '0 2px 8px rgba(180,83,9,0.4)'
+                      : '0 2px 6px rgba(0,0,0,0.2)',
+                    overflow: 'hidden',
+                    background: '#f5f5f4',
+                    transition: 'transform 0.15s ease',
+                    transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                  }}
+                >
+                  <img
+                    src={photo}
+                    alt={cafe.name}
+                    width={size}
+                    height={size}
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: '#1f2937',
+                    backgroundColor: 'rgba(255,255,255,0.92)',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                    pointerEvents: 'none',
+                    maxWidth: '100px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {cafe.name}
+                </span>
+              </div>
+            </CustomOverlayMap>
+          );
+        }
+
+        // 사진 없는 카페: 이름 라벨만
+        return (
+          <CustomOverlayMap
+            key={`label-${cafe.id}`}
+            position={{ lat: cafe.latitude, lng: cafe.longitude }}
+            yAnchor={-0.2}
+            zIndex={isSelected ? 99 : 1}
           >
-            {cafe.name}
-          </span>
-        </CustomOverlayMap>
-      ))}
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#1f2937',
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                pointerEvents: 'none',
+              }}
+            >
+              {cafe.name}
+            </span>
+          </CustomOverlayMap>
+        );
+      })}
 
       {/* 겹친 카페 목록 팝업 */}
       {overlapPopup && (
