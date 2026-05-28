@@ -168,8 +168,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 32, stiffness: 320 }}
       className={cn(
-        'fixed left-0 right-0 z-40',
-        'bottom-[var(--bottom-nav-height)] md:bottom-0',
+        'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)]',
         'flex flex-col overflow-hidden',
       )}
