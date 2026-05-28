@@ -38,7 +38,7 @@ function LightboxImage({
 
   return (
     <>
-      {/* LQIP: tiny thumbnail (C80x80) as blur placeholder */}
+      {/* LQIP: carousel thumbnail (C280x280) as blur placeholder */}
       {thumbnailUrl && (
         <img
           src={thumbnailUrl}

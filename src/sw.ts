@@ -32,24 +32,11 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Kakao CDN tiny (C80x80) — LQIP placeholders, cache-first (30 days, 1000 entries)
+    // Kakao CDN carousel (C280x280) — carousel + lightbox LQIP, cache-first (14 days, 500 entries)
     {
-      matcher: /^https:\/\/img1\.kakaocdn\.net\/cthumb\/local\/C80x80\./i,
+      matcher: /^https:\/\/img1\.kakaocdn\.net\/cthumb\/local\/C280x280\./i,
       handler: new CacheFirst({
-        cacheName: "cafe-photos-tiny",
-        plugins: [
-          new ExpirationPlugin({
-            maxEntries: 1000,
-            maxAgeSeconds: 30 * 24 * 60 * 60,
-          }),
-        ],
-      }),
-    },
-    // Kakao CDN thumb (C160x160) — carousel, cache-first (14 days, 500 entries)
-    {
-      matcher: /^https:\/\/img1\.kakaocdn\.net\/cthumb\/local\/C160x160\./i,
-      handler: new CacheFirst({
-        cacheName: "cafe-photos-thumb",
+        cacheName: "cafe-photos-carousel",
         plugins: [
           new ExpirationPlugin({
             maxEntries: 500,
@@ -108,7 +95,9 @@ self.addEventListener("activate", (event) => {
     Promise.all([
       caches.delete("place-detail-api"),
       caches.delete("cafe-photos-proxy"),
-      caches.delete("cafe-photos-kakaocdn"), // 옛 단일 캐시 → 3-tier 분리
+      caches.delete("cafe-photos-kakaocdn"),
+      caches.delete("cafe-photos-tiny"),  // C80x80 제거 (2-tier 전환)
+      caches.delete("cafe-photos-thumb"), // C160x160 → C280x280 전환
     ])
   );
 });

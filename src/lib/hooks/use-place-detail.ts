@@ -6,7 +6,6 @@ import type { MenuItem, PlaceDetailResponse, RatingInfo, ParkingInfo, ReviewItem
 export type { MenuItem, RatingInfo, ParkingInfo, ReviewItem, BlogReviewItem };
 
 interface UsePlaceDetailResult {
-  photosTiny: string[];
   photos: string[];
   photosHd: string[];
   menu: MenuItem[];
@@ -20,7 +19,6 @@ interface UsePlaceDetailResult {
 }
 
 const EMPTY: PlaceDetailResponse = {
-  photosTiny: [],
   photos: [],
   photosHd: [],
   menu: [],
@@ -81,22 +79,10 @@ function preloadPhotos(photos: string[], photosHd?: string[]) {
   }
 }
 
-/** Warm up keep-alive connection to kakaocdn on first call. */
-let cdnWarmedUp = false;
-function warmUpCdn() {
-  if (cdnWarmedUp) return;
-  cdnWarmedUp = true;
-  // HEAD request establishes TCP+TLS keep-alive without downloading body
-  fetch('https://img1.kakaocdn.net/cthumb/local/C160x160.q70/?fname=warmup', {
-    method: 'HEAD',
-    mode: 'no-cors',
-  }).catch(() => {});
-}
-
-/** Prefetch place detail into cache (fire-and-forget, for hover/preload). */
+/** Prefetch place detail into cache (fire-and-forget, for hover/preload).
+ *  CDN preconnect is handled by <link rel="preconnect"> in layout.tsx. */
 export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
   if (!kakaoPlaceId || cache.has(kakaoPlaceId)) return;
-  warmUpCdn();
   fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
     .then((r) => r.json())
     .then((json: PlaceDetailResponse) => {
@@ -159,7 +145,6 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
   const data = cached ?? fetchedData;
 
   return {
-    photosTiny: data.photosTiny ?? [],
     photos: data.photos,
     photosHd: data.photosHd ?? [],
     menu: data.menu,

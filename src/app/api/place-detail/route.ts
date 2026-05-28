@@ -42,7 +42,6 @@ export interface BlogReviewItem {
 }
 
 export interface PlaceDetailResponse {
-  photosTiny: string[];
   photos: string[];
   photosHd: string[];
   menu: MenuItem[];
@@ -58,7 +57,7 @@ export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('placeId');
   if (!placeId || !/^\d+$/.test(placeId)) {
     return NextResponse.json(
-      { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       { status: 400 },
     );
   }
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+        { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       );
     }
 
@@ -84,27 +83,17 @@ export async function GET(request: NextRequest) {
       .map((p) => p.url?.replace('http://', 'https://'))
       .filter(Boolean) as string[];
 
-    // 3-tier image URLs via kakaocdn cthumb proxy
-    const photosTiny = httpsUrls.map((url) => {
-      if (url.includes('pstatic.net')) {
-        return `https://img1.kakaocdn.net/cthumb/local/C80x80.q50/?fname=${encodeURIComponent(url)}`;
-      }
-      return url;
-    });
+    // 2-tier image URLs via kakaocdn cthumb resizer
+    // C280x280: 캐러셀(Retina 대응) + 라이트박스 LQIP 겸용 (~16KB)
+    // R800x0: 라이트박스 HD (~70KB)
+    // 모든 원본(pstatic, daumcdn 등)을 cthumb으로 변환 — 원본은 수 MB일 수 있음
+    const photos = httpsUrls.map((url) =>
+      `https://img1.kakaocdn.net/cthumb/local/C280x280.q70/?fname=${encodeURIComponent(url)}`,
+    );
 
-    const photos = httpsUrls.map((url) => {
-      if (url.includes('pstatic.net')) {
-        return `https://img1.kakaocdn.net/cthumb/local/C160x160.q70/?fname=${encodeURIComponent(url)}`;
-      }
-      return url;
-    });
-
-    const photosHd = httpsUrls.map((url) => {
-      if (url.includes('pstatic.net')) {
-        return `https://img1.kakaocdn.net/cthumb/local/R800x0/?fname=${encodeURIComponent(url)}`;
-      }
-      return url;
-    });
+    const photosHd = httpsUrls.map((url) =>
+      `https://img1.kakaocdn.net/cthumb/local/R800x0/?fname=${encodeURIComponent(url)}`,
+    );
 
     // Menu — yogiyo_menus (배달메뉴) or yogiyo_pickup_menus (픽업메뉴)
     const menuData = data?.menu ?? {};
@@ -192,7 +181,7 @@ export async function GET(request: NextRequest) {
       }));
 
     return NextResponse.json(
-      { photosTiny, photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews } satisfies PlaceDetailResponse,
+      { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews } satisfies PlaceDetailResponse,
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
@@ -201,7 +190,7 @@ export async function GET(request: NextRequest) {
     );
   } catch {
     return NextResponse.json(
-      { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
     );
   }
 }
