@@ -596,6 +596,7 @@ function mapRowsToCafes(rows: Record<string, unknown>[]): Cafe[] {
     is_earlybird: row.is_earlybird as boolean,
     last_crawled_at: row.last_crawled_at as string | null,
     created_at: (row.created_at as string | null) ?? null,
+    ...(row.thumbnail_url ? { thumbnail_url: row.thumbnail_url as string } : {}),
   }));
 }
 

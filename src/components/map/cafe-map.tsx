@@ -555,7 +555,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
       >
         {visibleCafes.map((cafe) => {
           const isChain = chainCafeIds.has(cafe.id);
-          const photo = isChain ? null : getCachedFirstPhoto(cafe.kakao_place_id);
+          // DB thumbnail_url 우선, 없으면 place-detail 캐시 fallback
+          const photo = isChain ? null : (cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id));
           // 줌 ≤ 3 + 개인카페 + 사진 있음 → 사진 마커가 대신 표시되므로 SVG 숨김
           const hideIcon = zoomLevel <= 3 && !!photo;
           return (
@@ -607,7 +608,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
       {/* 충분히 확대 시: 개인카페 + 사진 → 원형 사진 마커, 체인은 SVG 마커 유지 */}
       {zoomLevel <= 3 && visibleCafes.map((cafe) => {
         const isChain = chainCafeIds.has(cafe.id);
-        const photo = isChain ? null : getCachedFirstPhoto(cafe.kakao_place_id);
+        const photo = isChain ? null : (cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id));
         const isSelected = selectedCafe?.id === cafe.id;
         const size = isSelected ? 52 : 42;
 

@@ -4,6 +4,7 @@ import { type Cafe } from '@/lib/types/cafe';
 const PAGE_SIZE = 1000;
 
 // Cafe 타입에 필요한 컬럼만 선택 (select('*') 대신 사용)
+// thumbnail_url은 DB 마이그레이션 후 여기에 추가
 const CAFE_COLUMNS = 'id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at, created_at';
 
 function isSupabaseConfigured(): boolean {
@@ -193,5 +194,6 @@ function mapRowToCafe(row: Record<string, unknown>): Cafe {
     is_earlybird: row.is_earlybird as boolean,
     last_crawled_at: row.last_crawled_at as string | null,
     created_at: (row.created_at as string | null) ?? null,
+    ...(row.thumbnail_url ? { thumbnail_url: row.thumbnail_url as string } : {}),
   };
 }

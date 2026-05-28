@@ -16,6 +16,7 @@ export interface Cafe {
   is_earlybird: boolean;
   last_crawled_at: string | null;
   created_at: string | null;
+  thumbnail_url?: string | null;
 }
 
 /** 주소에서 구 이름 추출 */
