@@ -157,7 +157,10 @@ export function PersistentMapPage() {
             }}
             onQueryChange={setListSearchQuery}
           />
-          <TimeFilter />
+          <TimeFilter onPanToGu={(lat, lng) => {
+            if (viewMode === 'list') setViewMode('map');
+            setTimeout(() => panToRef.current?.(lat, lng), viewMode === 'list' ? 150 : 0);
+          }} />
         </>
       )}
 
