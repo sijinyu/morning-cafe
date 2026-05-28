@@ -124,13 +124,13 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
 
   return (
     <>
-      {/* 룰렛 버튼 */}
+      {/* 룰렛 버튼 — 리스트 버튼 위 */}
       <motion.button
         onClick={handleSpin}
         disabled={spinning}
         whileTap={{ scale: 0.92 }}
         className={[
-          'absolute md:bottom-[5.5rem] right-4 z-10 flex h-12 items-center gap-1.5 px-4',
+          'absolute md:bottom-[5.5rem] left-4 z-10 flex h-12 items-center gap-1.5 px-4',
           'rounded-full bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
           'text-sm font-semibold text-foreground',
           'transition-opacity disabled:opacity-60',
