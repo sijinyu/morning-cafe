@@ -109,25 +109,27 @@ export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) 
 
   return (
     <>
-      {/* 룰렛 버튼 — 현위치 버튼 위에 배치 */}
+      {/* 룰렛 버튼 — 현위치 버튼 위에 pill 형태 */}
       <motion.button
         onClick={handleSpin}
         disabled={spinning}
         whileTap={{ scale: 0.92 }}
         className={[
-          'absolute md:bottom-[5.5rem] right-4 z-10 flex h-12 w-12 items-center justify-center',
+          'absolute md:bottom-[5.5rem] right-4 z-10 flex h-12 items-center gap-1.5 px-4',
           'rounded-full bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
+          'text-sm font-semibold text-foreground',
           'transition-opacity disabled:opacity-60',
         ].join(' ')}
         style={{ bottom: 'calc(var(--bottom-nav-height) + 4.5rem)' }}
-        aria-label="근처 카페 룰렛"
+        aria-label="근처 카페 랜덤 추천"
       >
         <Dices
           className={[
-            'h-5 w-5 text-foreground',
+            'h-4 w-4',
             spinning ? 'animate-spin' : '',
           ].join(' ')}
         />
+        랜덤
       </motion.button>
 
       {/* 토스트: 위치 없음 */}
