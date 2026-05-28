@@ -17,7 +17,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border/50 md:bg-background/80 md:backdrop-blur-md md:z-30">
+    <aside className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border/50 md:bg-background md:opacity-90">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5 px-5 py-5 hover:opacity-80 transition-opacity">
         <Image src="/icons/icon-96.png" alt="모닝커피" width={28} height={28} className="rounded-lg" />

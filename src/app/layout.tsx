@@ -124,7 +124,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex h-full">
             <DesktopSidebar />
-            <main className="relative flex-1 overflow-hidden pb-14 md:pb-0 md:-ml-56">
+            <main className="relative flex-1 overflow-hidden pb-14 md:pb-0">
               <Suspense><PersistentMapPage /></Suspense>
               {children}
             </main>
