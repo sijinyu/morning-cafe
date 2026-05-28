@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { warmupConnections } from '@/lib/hooks/use-place-detail';
+import { isNewCafe } from '@/lib/cafe-utils';
 import { CafeMap } from '@/components/map/cafe-map';
 import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
@@ -32,10 +33,11 @@ export function PersistentMapPage() {
   const searchParams = useSearchParams();
   const isMapRoute = pathname === '/';
 
-  const { fetchCafes, cafes, setSelectedCafe, userLocation, setUserLocation } = useCafeStore(
+  const { fetchCafes, cafes, filteredCafes, setSelectedCafe, userLocation, setUserLocation } = useCafeStore(
     useShallow((state) => ({
       fetchCafes: state.fetchCafes,
       cafes: state.cafes,
+      filteredCafes: state.filteredCafes,
       setSelectedCafe: state.setSelectedCafe,
       userLocation: state.userLocation,
       setUserLocation: state.setUserLocation,
@@ -47,6 +49,7 @@ export function PersistentMapPage() {
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 37.5665, lng: 126.978 });
   const deepLinkHandledRef = useRef<string | null>(null);
   const [listSeen, setListSeen] = useState(true); // SSR safe default
+  const newCafeCount = useMemo(() => filteredCafes.filter(isNewCafe).length, [filteredCafes]);
 
   useEffect(() => {
     fetchCafes();
@@ -206,13 +209,19 @@ export function PersistentMapPage() {
             onClick={handleToggleView}
             whileTap={{ scale: 0.92 }}
             className={cn(
-              'flex h-12 items-center gap-2 rounded-full px-4',
+              'relative flex h-12 items-center gap-2 rounded-full px-4',
               'bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
               'text-sm font-semibold text-foreground',
               'transition-colors hover:bg-foreground/5',
               !listSeen && 'ring-2 ring-foreground/20 ring-offset-2 ring-offset-background animate-pulse',
             )}
           >
+            {/* 신규카페 뱃지 — 지도 모드에서만 표시 */}
+            {viewMode === 'map' && newCafeCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[10px] font-bold text-white shadow-sm">
+                {newCafeCount > 9 ? '9+' : newCafeCount}
+              </span>
+            )}
             {viewMode === 'map' ? (
               <>
                 <List className="h-4 w-4" />

@@ -38,6 +38,14 @@ export const metadata: Metadata = {
     title: '모닝커피 — 서울 아침 카페 지도',
     description: '서울에서 아침 일찍 여는 카페를 한눈에!',
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? undefined,
+    other: {
+      ...(process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION
+        ? { 'naver-site-verification': process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION }
+        : {}),
+    },
+  },
   robots: {
     index: true,
     follow: true,

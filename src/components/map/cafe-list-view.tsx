@@ -8,7 +8,7 @@ import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Ca
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
-/** 웹에서 마우스 드래그 가로 스크롤 지원 */
+/** 웹에서 마우스 드래그 가로 스크롤 지원 — moved flag로 드래그 후 클릭 차단 */
 function useDragScroll() {
   const ref = useRef<HTMLDivElement>(null);
   const state = useRef({ isDown: false, startX: 0, scrollLeft: 0, moved: false });
@@ -35,7 +35,10 @@ function useDragScroll() {
     ref.current.style.cursor = 'grab';
   }, []);
 
-  return { ref, onMouseDown, onMouseMove, onMouseUp, onMouseLeave: onMouseUp };
+  /** 드래그 중이었으면 true 반환 → 클릭 핸들러에서 무시용 */
+  const wasDragging = useCallback(() => state.current.moved, []);
+
+  return { ref, onMouseDown, onMouseMove, onMouseUp, onMouseLeave: onMouseUp, wasDragging };
 }
 
 function formatDistance(km: number): string {
@@ -149,6 +152,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     key={cafe.id}
                     cafe={cafe}
                     onSelect={onSelectCafe}
+                    wasDragging={newDrag.wasDragging}
                     badge="NEW"
                     badgeColor="bg-emerald-500 text-white"
                     userLocation={userLocation}
@@ -178,6 +182,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     key={cafe.id}
                     cafe={cafe}
                     onSelect={onSelectCafe}
+                    wasDragging={nearbyDrag.wasDragging}
                     userLocation={userLocation}
                     showDistance
                   />
@@ -295,20 +300,21 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
 interface FeatureCardProps {
   cafe: Cafe;
   onSelect: (cafe: Cafe) => void;
+  wasDragging?: () => boolean;
   badge?: string;
   badgeColor?: string;
   userLocation?: { lat: number; lng: number } | null;
   showDistance?: boolean;
 }
 
-function FeatureCard({ cafe, onSelect, badge, badgeColor, userLocation, showDistance }: FeatureCardProps) {
+function FeatureCard({ cafe, onSelect, wasDragging, badge, badgeColor, userLocation, showDistance }: FeatureCardProps) {
   const distance = userLocation
     ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
     : null;
 
   return (
     <button
-      onClick={() => onSelect(cafe)}
+      onClick={() => { if (wasDragging?.()) return; onSelect(cafe); }}
       className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background overflow-hidden text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
     >
       <div className="h-20 w-full bg-muted">
