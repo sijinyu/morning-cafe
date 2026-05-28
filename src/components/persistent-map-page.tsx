@@ -13,7 +13,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { cn } from '@/lib/utils';
-import { SplashScreen } from '@/components/splash-screen';
+
 import { trackEvent } from '@/lib/analytics';
 import dynamic from 'next/dynamic';
 
@@ -123,7 +123,7 @@ export function PersistentMapPage() {
       className={cn('relative h-full w-full', !isMapRoute && 'invisible absolute inset-0 pointer-events-none')}
       aria-hidden={!isMapRoute}
     >
-      <SplashScreen ready={cafes.length > 0} />
+
       {viewMode === 'map' ? (
         <>
           <CafeMap

@@ -576,14 +576,14 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         ))}
       </MarkerClusterer>
 
-      {/* 선택된 마커 ripple 파동 효과 */}
+      {/* 선택된 마커 ripple 파동 효과 — 마커 원형 중심에서 무한 반복 */}
       {selectedCafe && (() => {
         const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
         return (
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}
             position={{ lat: selectedCafe.latitude, lng: selectedCafe.longitude }}
-            yAnchor={0.5}
+            yAnchor={0.75}
             xAnchor={0.5}
             zIndex={0}
           >
@@ -591,18 +591,18 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
               width="120"
               height="120"
               viewBox="0 0 120 120"
-              style={{ pointerEvents: 'none', transform: 'translate(-50%, -50%) translateY(-16px)' }}
+              style={{ pointerEvents: 'none' }}
             >
               <style>{`
                 @keyframes cafe-ripple {
-                  0% { r: 8; opacity: 0.5; stroke-width: 2.5; }
+                  0% { r: 8; opacity: 0.45; stroke-width: 2.5; }
                   100% { r: 50; opacity: 0; stroke-width: 0.5; }
                 }
-                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out forwards; }
+                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out infinite; }
               `}</style>
               <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '0ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '400ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '800ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '600ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '1200ms' }} />
             </svg>
           </CustomOverlayMap>
         );
