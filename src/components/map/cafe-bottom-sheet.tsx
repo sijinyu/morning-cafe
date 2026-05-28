@@ -17,6 +17,7 @@ import {
   Star,
   Car,
   Sparkles,
+  Award,
 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
@@ -26,7 +27,9 @@ import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
-import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { useStamps } from '@/lib/hooks/use-stamps';
+import { extractGu } from '@/lib/types/cafe';
+import { formatOpeningTime, getOpeningBadgeStyle, haversineKm } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 import { isNativeApp } from '@/lib/capacitor';
@@ -35,17 +38,6 @@ import { MenuSection } from './bottom-sheet/menu-section';
 import { ReviewSection } from './bottom-sheet/review-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
-
-// ---- utils ------------------------------------------------------------------
-
-/** 두 좌표 간 직선 거리 (km) */
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 /** 직선 거리 → 도보 예상 시간 (분) */
 const WALK_DISTANCE_FACTOR = 1.3;
@@ -92,7 +84,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { addRecent } = useRecentCafes();
   const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
+  const { addStamp, hasCheckedInToday } = useStamps();
   const favorited = isFavorite(cafe.id);
+  const checkedIn = hasCheckedInToday(cafe.id);
   // const reminded = hasReminder(cafe.id);
   // const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
 
@@ -140,6 +134,21 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       setCardLoading(false);
     }
   }, [cafe.id, cafe.name, cardLoading]);
+
+  const CHECKIN_RADIUS_KM = 0.1; // 100m
+
+  const handleCheckin = useCallback(() => {
+    if (checkedIn || !userLocation) return;
+    const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
+    if (km > CHECKIN_RADIUS_KM) return;
+    const gu = extractGu(cafe.address) ?? '';
+    addStamp(cafe.id, cafe.name, gu);
+  }, [checkedIn, userLocation, cafe, addStamp]);
+
+  // 체크인 가능 여부: GPS 있고, 100m 이내이고, 오늘 미체크인
+  const canCheckin = userLocation
+    ? !checkedIn && haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude) <= CHECKIN_RADIUS_KM
+    : false;
 
   useEffect(() => {
     setSheetState('half');
@@ -496,6 +505,26 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   );
                 })()}
               </a>
+              {/* Checkin button — GPS 100m 이내일 때 활성 */}
+              <button
+                onClick={handleCheckin}
+                disabled={!canCheckin && !checkedIn}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-2xl',
+                  'py-3.5 px-4 text-sm font-medium transition-colors',
+                  checkedIn
+                    ? 'bg-amber-500 text-white'
+                    : canCheckin
+                      ? 'border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                      : 'border border-border text-muted-foreground opacity-50',
+                )}
+                aria-label={checkedIn ? '체크인 완료' : '체크인'}
+              >
+                <Award className="h-4 w-4" />
+                {checkedIn ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : null}
+              </button>
               <button
                 onClick={handleStoryCard}
                 disabled={cardLoading}

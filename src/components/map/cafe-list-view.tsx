@@ -5,17 +5,9 @@ import { MapPin, Clock, Navigation, Sparkles, Heart } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
-import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
+import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { cn } from '@/lib/utils';
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
 
 function formatDistance(km: number): string {
   if (km < 1) return `${Math.round(km * 1000)}m`;

@@ -2,6 +2,15 @@
 
 import type { Cafe } from '@/lib/types/cafe';
 
+/** 두 좌표 간 직선 거리 (km) — haversine 공식 */
+export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 /** 24시간 영업 판단 — **모든** 요일이 24시간인 경우만 true */
 export function is24Hours(cafe: Pick<Cafe, 'opening_time' | 'closing_time' | 'hours_by_day'>): boolean {
   // hours_by_day가 있으면 모든 요일이 00:00~24:00인지 확인
