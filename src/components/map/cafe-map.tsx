@@ -84,6 +84,7 @@ interface CafeMarkerProps {
   isSelected: boolean;
   isFavorite: boolean;
   isChain: boolean;
+  hideIcon: boolean; // 사진 마커가 대신 보이는 경우 SVG 숨김
   onSelect: (cafe: Cafe) => void;
 }
 
@@ -143,9 +144,26 @@ function getMarkerDataUri(colors: MarkerColors, selected: boolean, fav: boolean)
   return uri;
 }
 
-const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, isChain, onSelect }: CafeMarkerProps) {
+// 1x1 투명 PNG — 사진 마커가 대신 보일 때 MapMarker를 숨기되 클러스터 카운트 유지
+const TRANSPARENT_1PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQABNjN9GQAAAABJRElEQkSuQmCC';
+
+const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav, isChain, hideIcon, onSelect }: CafeMarkerProps) {
   const colors = getCachedMarkerColors(cafe, isChain);
   const position = { lat: cafe.latitude, lng: cafe.longitude };
+
+  // 사진 마커가 보이는 경우 SVG 마커 숨김 (1x1 투명, 클러스터는 유지)
+  if (hideIcon) {
+    return (
+      <MapMarker
+        position={position}
+        title={cafe.name}
+        onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); prefetchPlaceDetail(cafe.kakao_place_id); onSelect(cafe); }}
+        onMouseOver={() => prefetchPlaceDetail(cafe.kakao_place_id)}
+        zIndex={0}
+        image={{ src: TRANSPARENT_1PX, size: { width: 1, height: 1 } }}
+      />
+    );
+  }
 
   // 원형 마커 — 가로세로 동일, 중심 오프셋
   const sz = isSelected ? 44 : (fav ? 36 : 30);
@@ -168,7 +186,8 @@ const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav,
   prev.cafe.id === next.cafe.id &&
   prev.isSelected === next.isSelected &&
   prev.isFavorite === next.isFavorite &&
-  prev.isChain === next.isChain
+  prev.isChain === next.isChain &&
+  prev.hideIcon === next.hideIcon
 );
 
 interface MapCenter {
@@ -534,16 +553,23 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           { width: '66px', height: '66px', background: 'rgba(180,83,9,0.85)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '15px', lineHeight: '66px' },
         ]}
       >
-        {visibleCafes.map((cafe) => (
-          <CafeMarker
-            key={cafe.id}
-            cafe={cafe}
-            isSelected={selectedCafe?.id === cafe.id}
-            isFavorite={favorites.has(cafe.id)}
-            isChain={chainCafeIds.has(cafe.id)}
-            onSelect={handleMarkerSelect}
-          />
-        ))}
+        {visibleCafes.map((cafe) => {
+          const isChain = chainCafeIds.has(cafe.id);
+          const photo = isChain ? null : getCachedFirstPhoto(cafe.kakao_place_id);
+          // 줌 ≤ 3 + 개인카페 + 사진 있음 → 사진 마커가 대신 표시되므로 SVG 숨김
+          const hideIcon = zoomLevel <= 3 && !!photo;
+          return (
+            <CafeMarker
+              key={cafe.id}
+              cafe={cafe}
+              isSelected={selectedCafe?.id === cafe.id}
+              isFavorite={favorites.has(cafe.id)}
+              isChain={isChain}
+              hideIcon={hideIcon}
+              onSelect={handleMarkerSelect}
+            />
+          );
+        })}
       </MarkerClusterer>
 
       {/* 선택된 마커 ripple 파동 효과 — 마커 원형 중심에서 무한 반복 */}
@@ -578,7 +604,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         );
       })()}
 
-      {/* 충분히 확대 시: 개인카페 + 캐시된 사진 → 원형 사진 마커, 체인은 SVG 마커 유지 */}
+      {/* 충분히 확대 시: 개인카페 + 사진 → 원형 사진 마커, 체인은 SVG 마커 유지 */}
       {zoomLevel <= 3 && visibleCafes.map((cafe) => {
         const isChain = chainCafeIds.has(cafe.id);
         const photo = isChain ? null : getCachedFirstPhoto(cafe.kakao_place_id);

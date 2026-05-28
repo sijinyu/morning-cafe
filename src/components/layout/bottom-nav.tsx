@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Bookmark, Send, Clock, Award } from 'lucide-react';
+import { Map, Bookmark, Send, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { href: '/', label: '지도', icon: Map },
   { href: '/favorites', label: '찜', icon: Bookmark },
-  { href: '/stamp', label: '스탬프', icon: Award },
+  // { href: '/stamp', label: '스탬프', icon: Award },
   { href: '/recent', label: '최근', icon: Clock },
   { href: '/report', label: '제보', icon: Send },
 ] as const;

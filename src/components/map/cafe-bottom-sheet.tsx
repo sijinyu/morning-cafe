@@ -27,7 +27,7 @@ import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
-import { useStamps } from '@/lib/hooks/use-stamps';
+// import { useStamps } from '@/lib/hooks/use-stamps';
 import { extractGu } from '@/lib/types/cafe';
 import { formatOpeningTime, getOpeningBadgeStyle, haversineKm } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
@@ -84,9 +84,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { addRecent } = useRecentCafes();
   const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
-  const { addStamp, hasCheckedInToday } = useStamps();
+  // const { addStamp, hasCheckedInToday } = useStamps();
   const favorited = isFavorite(cafe.id);
-  const checkedIn = hasCheckedInToday(cafe.id);
+  // const checkedIn = hasCheckedInToday(cafe.id);
   // const reminded = hasReminder(cafe.id);
   // const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
 
@@ -135,20 +135,17 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     }
   }, [cafe.id, cafe.name, cardLoading]);
 
-  const CHECKIN_RADIUS_KM = 0.1; // 100m
-
-  const handleCheckin = useCallback(() => {
-    if (checkedIn || !userLocation) return;
-    const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
-    if (km > CHECKIN_RADIUS_KM) return;
-    const gu = extractGu(cafe.address) ?? '';
-    addStamp(cafe.id, cafe.name, gu);
-  }, [checkedIn, userLocation, cafe, addStamp]);
-
-  // 체크인 가능 여부: GPS 있고, 100m 이내이고, 오늘 미체크인
-  const canCheckin = userLocation
-    ? !checkedIn && haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude) <= CHECKIN_RADIUS_KM
-    : false;
+  // const CHECKIN_RADIUS_KM = 0.1; // 100m
+  // const handleCheckin = useCallback(() => {
+  //   if (checkedIn || !userLocation) return;
+  //   const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
+  //   if (km > CHECKIN_RADIUS_KM) return;
+  //   const gu = extractGu(cafe.address) ?? '';
+  //   addStamp(cafe.id, cafe.name, gu);
+  // }, [checkedIn, userLocation, cafe, addStamp]);
+  // const canCheckin = userLocation
+  //   ? !checkedIn && haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude) <= CHECKIN_RADIUS_KM
+  //   : false;
 
   useEffect(() => {
     setSheetState('half');
@@ -470,12 +467,12 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   className={cn(
                     'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
                     'bg-foreground text-background py-3.5',
-                    'text-sm font-semibold',
+                    'text-sm font-semibold whitespace-nowrap',
                     'hover:opacity-90 transition-opacity'
                   )}
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  카카오맵에서 보기
+                  <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                  카카오맵
                 </a>
               )}
               <a
@@ -505,8 +502,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   );
                 })()}
               </a>
-              {/* Checkin button — GPS 100m 이내일 때 활성 */}
-              <button
+              {/* Checkin button — 비활성 (스탬프 시스템 보류) */}
+              {/* <button
                 onClick={handleCheckin}
                 disabled={!canCheckin && !checkedIn}
                 className={cn(
@@ -524,7 +521,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 {checkedIn ? (
                   <Check className="h-3.5 w-3.5" />
                 ) : null}
-              </button>
+              </button> */}
               <button
                 onClick={handleStoryCard}
                 disabled={cardLoading}
