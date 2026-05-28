@@ -150,7 +150,7 @@ export function TimeFilter() {
   }
 
   return (
-    <div className="absolute left-3 right-3 z-10 flex items-center justify-center gap-1.5" style={{ top: 'calc(4rem + var(--safe-area-top))' }}>
+    <div className="absolute left-4 right-4 z-10 flex flex-wrap items-center justify-center gap-1.5 py-1" style={{ top: 'calc(4rem + var(--safe-area-top))' }}>
       {/* 시간 & 요일 드롭다운 */}
       <Dropdown
         open={openDropdown === 'time'}

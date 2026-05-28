@@ -166,7 +166,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       initial={{ y: '100%' }}
       animate={{ y: 0, height: SHEET_HEIGHTS[sheetState] }}
       exit={{ y: '100%' }}
-      transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+      transition={{ type: 'tween', duration: 0.25, ease: 'easeOut' }}
       className={cn(
         'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)] dark:shadow-none dark:border-t dark:border-border',
