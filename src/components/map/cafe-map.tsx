@@ -289,17 +289,18 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     }, 250);
   }, []);
 
-  // 모바일: 뷰포트 내 가장 가까운 카페 N개 place-detail 프리페치
-  // (hover가 안 되므로 zoom ≤ 4일 때 자동 프리페치)
+  // 뷰포트 내 가까운 카페 place-detail 프리페치
+  // 마커 클릭 시 API 응답이 이미 캐시에 있으면 이미지 즉시 로드
   const prefetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userLoc = useCafeStore((s) => s.userLocation);
   useEffect(() => {
-    if (!IS_MOBILE || !viewportBounds || zoomLevel > 4) return;
+    if (!viewportBounds || zoomLevel > 5) return;
 
     if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
     prefetchTimerRef.current = setTimeout(() => {
-      // 뷰포트 중심 기준 가장 가까운 카페 5개
-      const cLat = (viewportBounds.swLat + viewportBounds.neLat) / 2;
-      const cLng = (viewportBounds.swLng + viewportBounds.neLng) / 2;
+      // 기준점: GPS 있으면 유저 위치, 없으면 뷰포트 중심
+      const refLat = userLoc?.lat ?? (viewportBounds.swLat + viewportBounds.neLat) / 2;
+      const refLng = userLoc?.lng ?? (viewportBounds.swLng + viewportBounds.neLng) / 2;
       const inView = filteredCafes.filter((c) =>
         c.latitude >= viewportBounds.swLat &&
         c.latitude <= viewportBounds.neLat &&
@@ -307,18 +308,18 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         c.longitude <= viewportBounds.neLng
       );
       const nearest = inView
-        .map((c) => ({ cafe: c, dist: (c.latitude - cLat) ** 2 + (c.longitude - cLng) ** 2 }))
+        .map((c) => ({ cafe: c, dist: (c.latitude - refLat) ** 2 + (c.longitude - refLng) ** 2 }))
         .sort((a, b) => a.dist - b.dist)
-        .slice(0, 5);
+        .slice(0, 10);
       for (const { cafe } of nearest) {
         prefetchPlaceDetail(cafe.kakao_place_id);
       }
-    }, 800);
+    }, 400);
 
     return () => {
       if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
     };
-  }, [viewportBounds, zoomLevel, filteredCafes]);
+  }, [viewportBounds, zoomLevel, filteredCafes, userLoc]);
 
   // Filter cafes to only those within the current viewport
   const visibleCafes = useMemo(() => {
