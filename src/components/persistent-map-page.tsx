@@ -13,6 +13,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { CafeRoulette } from '@/components/map/cafe-roulette';
+import { AiSearch } from '@/components/map/ai-search';
 import { MorningPick } from '@/components/morning-pick';
 import { cn } from '@/lib/utils';
 
@@ -43,7 +44,7 @@ export function PersistentMapPage() {
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [listSearchQuery, setListSearchQuery] = useState('');
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 37.5665, lng: 126.978 });
   const deepLinkHandledRef = useRef<string | null>(null);
   const [listSeen, setListSeen] = useState(true); // SSR safe default
 
@@ -153,6 +154,13 @@ export function PersistentMapPage() {
           <CafeRoulette
             userLocation={userLocation}
             mapCenter={mapCenter}
+            onSelectCafe={(cafe) => {
+              setSelectedCafe(cafe);
+              setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
+            }}
+          />
+          <AiSearch
+            userLocation={userLocation}
             onSelectCafe={(cafe) => {
               setSelectedCafe(cafe);
               setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);

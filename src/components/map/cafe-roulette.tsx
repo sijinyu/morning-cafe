@@ -9,7 +9,7 @@ import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
 import { trackEvent } from '@/lib/analytics';
 import { type Cafe } from '@/lib/types/cafe';
 
-const NEARBY_RADIUS_KM = 2;
+const NEARBY_RADIUS_KM = 3;
 const SPIN_DURATION = 2000;
 const SLOT_INTERVAL = 80;
 
@@ -17,13 +17,13 @@ type RouletteMode = 'gps' | 'map';
 
 interface CafeRouletteProps {
   userLocation: { lat: number; lng: number } | null;
-  mapCenter: { lat: number; lng: number } | null;
+  mapCenter: { lat: number; lng: number };
   onSelectCafe: (cafe: Cafe) => void;
 }
 
 export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRouletteProps) {
-  const { filteredCafes } = useCafeStore(
-    useShallow((s) => ({ filteredCafes: s.filteredCafes })),
+  const { cafes } = useCafeStore(
+    useShallow((s) => ({ cafes: s.cafes })),
   );
 
   const [mode, setMode] = useState<RouletteMode>('gps');
@@ -48,11 +48,11 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
   const getNearbyCafes = useCallback(() => {
     const center = getCenter();
     if (!center) return [];
-    return filteredCafes.filter((cafe) => {
+    return cafes.filter((cafe) => {
       const dist = haversineKm(center.lat, center.lng, cafe.latitude, cafe.longitude);
       return dist <= NEARBY_RADIUS_KM;
     });
-  }, [filteredCafes, getCenter]);
+  }, [cafes, getCenter]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -70,7 +70,7 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
 
     const nearby = getNearbyCafes();
     if (nearby.length === 0) {
-      showToast('반경 2km 내 카페가 없어요');
+      showToast('반경 3km 내 카페가 없어요');
       return;
     }
 

@@ -25,6 +25,7 @@
 | Map | react-kakao-maps-sdk + Kakao Maps JS SDK |
 | DB | Supabase (PostgreSQL) |
 | Carousel | embla-carousel-react |
+| AI | Google Gemini Flash (무료 티어) |
 | PWA | Serwist (서비스 워커) |
 | Package | npm |
 
@@ -39,6 +40,7 @@ SUPABASE_SERVICE_ROLE_KEY=       # Supabase service role key (서버 API)
 KAKAO_REST_API_KEY=              # 카카오 REST API 키 (place-detail API)
 RESEND_API_KEY=                  # Resend 이메일 API 키 (제보 알림)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=   # Google Analytics 4 측정 ID (G-XXXXXXX)
+GOOGLE_GEMINI_API_KEY=           # Google Gemini API 키 (AI 카페 추천)
 ```
 
 카카오 Maps JS SDK 키는 `src/lib/hooks/use-kakao-loader.ts`에서 로드.
@@ -100,12 +102,14 @@ src/
 │           ├── photo-lightbox.tsx  # 사진 라이트박스 (LQIP 블러 + HD crossfade + 인접 프리로드)
 │           ├── menu-section.tsx    # 메뉴 목록
 │           ├── hours-section.tsx   # 요일별 영업시간
-│           └── memo-section.tsx    # 사용자 메모 (localStorage)
+│           ├── memo-section.tsx    # 사용자 메모 (localStorage)
+│           └── quiet-score-badge.tsx # 조용한 아침 지수 배지
 │
 ├── lib/
 │   ├── types/
 │   │   └── cafe.ts                  # Cafe 인터페이스 + extractGu (서버/클라이언트 공유)
 │   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle, is24Hours, is24HoursForDay)
+│   ├── quiet-score.ts              # 조용한 아침 지수 계산 (0~5 스케일)
 │   ├── analytics.ts                # GA4 이벤트 트래킹 유틸 (trackEvent)
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
@@ -302,6 +306,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 33. **검색 기록**: `use-search-history.ts` 훅. localStorage 최대 10개, 최소 2글자. 검색바 포커스 + 빈 쿼리 시 "최근 검색" 드롭다운.
 34. **CDN warmup**: `warmupConnections()` — 앱 초기화 시 kakaocdn TCP keep-alive + 첫 카페 place-detail API 사전 호출.
 35. **탭 이동 시 UI 숨김**: SearchBar, TimeFilter, ViewToggle, Copyright는 `{isMapRoute && (...)}` 조건부 렌더링.
+36. **마커 ripple (사진)**: 사진 마커 내부 `position: relative` 컨테이너에 absolute SVG 삽입. `r=26→90`, `top:50% left:50% translate(-50%,-50%)` 정중앙. 줌 ≤ 3에서만.
+37. **마커 ripple (SVG 핀)**: 줌 > 3에서만 별도 `CustomOverlayMap`. `r=22→80`, `yAnchor=0.5`.
+38. **찜 마커 배지**: 사진 마커 우상단 `absolute top:-2 right:-2` 18px 원형 + 북마크 SVG (amber).
+39. **조용한 아침 지수**: `src/lib/quiet-score.ts` → `QuietScoreBadge` (`bottom-sheet/quiet-score-badge.tsx`). strengths+facilities+reviews 키워드 매칭. 0~5 스케일. "정보 부족/없음"이면 숨김.
+40. **데스크탑 사이드바 반투명**: `bg-background/80 backdrop-blur-md z-30`. `layout.tsx`에서 main에 `md:-ml-56`으로 지도가 사이드바 아래로 확장.
+41. **AI 카페 추천**: Gemini Flash 무료 티어 (15RPM, 1500/일). `/api/ai-recommend` 엔드포인트. `GOOGLE_GEMINI_API_KEY` env. Supabase에 응답 캐시 (30분~1시간). Rate limit 429 시 캐시 fallback.
 
 ### 커밋 메시지
 
@@ -337,6 +347,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 즐겨찾기 일괄 공유 (Kakao ListFeed)
 - [x] 리스트뷰 신규/인기 카페 피처 섹션
 - [x] panTo 바텀시트 오프셋 보정
+- [x] 파동 사진 마커 내부 삽입 (정중앙, r=26→90)
+- [x] 찜 마커 배지 (사진 마커 우상단 북마크)
+- [x] 조용한 아침 지수 (`quiet-score.ts` → `QuietScoreBadge`)
+- [x] 데스크탑 사이드바 반투명 (backdrop-blur-md)
+- [ ] AI 카페 추천/비교 (Gemini Flash)
+- [ ] AI 출근길 경로 추천 (집→카페→회사 최적 경로)
 - [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
