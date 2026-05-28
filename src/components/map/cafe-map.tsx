@@ -577,7 +577,10 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           yAnchor={1.15}
           zIndex={300}
         >
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
           <div
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
             style={{
               background: 'var(--background, #fff)',
               borderRadius: '12px',
@@ -587,6 +590,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
               maxWidth: '240px',
               maxHeight: '200px',
               overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
               border: '1px solid var(--border, #e5e7eb)',
             }}
           >
