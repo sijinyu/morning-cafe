@@ -581,6 +581,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           <div
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
             style={{
               background: 'var(--background, #fff)',
               borderRadius: '12px',
@@ -592,6 +594,8 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
               overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
               border: '1px solid var(--border, #e5e7eb)',
+              position: 'relative',
+              zIndex: 9999,
             }}
           >
             <div style={{ padding: '4px 12px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--muted-foreground, #6b7280)' }}>
@@ -600,7 +604,16 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             {overlapPopup.cafes.map((cafe) => (
               <button
                 key={cafe.id}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
+                  setOverlapPopup(null);
+                  setSelectedCafe(cafe);
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
                   trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
                   setOverlapPopup(null);
                   setSelectedCafe(cafe);
@@ -618,6 +631,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
                   border: 'none',
                   cursor: 'pointer',
                   borderTop: '1px solid var(--border, #f3f4f6)',
+                  WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
                 }}
                 onMouseEnter={(e) => { (e.target as HTMLElement).style.background = 'var(--muted, #f9fafb)'; }}
                 onMouseLeave={(e) => { (e.target as HTMLElement).style.background = 'transparent'; }}
