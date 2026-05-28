@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
@@ -39,30 +38,25 @@ function LightboxImage({
 
   return (
     <>
-      {/* LQIP: cached carousel thumbnail as blur placeholder (Instagram/Facebook pattern) */}
+      {/* LQIP: tiny thumbnail (C80x80) as blur placeholder */}
       {thumbnailUrl && (
-        <Image
+        <img
           src={thumbnailUrl}
           alt=""
-          fill
-          sizes="100vw"
-          unoptimized
           referrerPolicy="no-referrer"
-          className={`object-contain blur-lg scale-105 transition-opacity duration-500 ${loaded ? 'opacity-0' : 'opacity-100'}`}
-          aria-hidden
+          className={`absolute inset-0 h-full w-full object-contain blur-lg scale-105 transition-opacity duration-500 ${loaded ? 'opacity-0' : 'opacity-100'}`}
+          aria-hidden="true"
         />
       )}
       {/* HD image — crossfades in over the blur placeholder */}
-      <Image
+      <img
         src={url}
         alt={alt}
-        fill
-        sizes="100vw"
-        unoptimized
         referrerPolicy="no-referrer"
         loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : 'low'}
         decoding="async"
-        className={`object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
       />
@@ -70,25 +64,41 @@ function LightboxImage({
   );
 }
 
-/** Preload HD images for adjacent slides so swipe feels instant */
+/** Preload HD images for adjacent slides so swipe feels instant.
+ *  ±1: high priority, ±2: low priority. */
 function usePreloadAdjacentImages(photos: readonly string[], currentIndex: number) {
   useEffect(() => {
-    const preloadOffsets = [-1, 1, -2, 2];
     const len = photos.length;
     if (len <= 1) return;
 
+    const links: HTMLLinkElement[] = [];
     const images: HTMLImageElement[] = [];
-    for (const offset of preloadOffsets) {
+
+    for (const offset of [-1, 1]) {
       const idx = ((currentIndex + offset) % len + len) % len;
+      const url = photos[idx];
+      if (!url || document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = url;
+      (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
+      document.head.appendChild(link);
+      links.push(link);
+    }
+
+    for (const offset of [-2, 2]) {
+      const idx = ((currentIndex + offset) % len + len) % len;
+      const url = photos[idx];
+      if (!url) continue;
       const img = new globalThis.Image();
-      img.src = photos[idx];
+      img.src = url;
       images.push(img);
     }
 
     return () => {
-      for (const img of images) {
-        img.src = '';
-      }
+      for (const link of links) link.remove();
+      for (const img of images) img.src = '';
     };
   }, [photos, currentIndex]);
 }

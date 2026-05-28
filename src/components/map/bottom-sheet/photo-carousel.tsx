@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ImageIcon, ImageOff } from 'lucide-react';
 import { PhotoLightbox } from './photo-lightbox';
@@ -9,6 +8,7 @@ import { PhotoLightbox } from './photo-lightbox';
 interface PhotoCarouselProps {
   photos: string[];
   photosHd: string[];
+  photosTiny: string[];
   loading: boolean;
   cafeName: string;
   placeUrl: string | null;
@@ -34,17 +34,14 @@ function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: bool
           <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent" />
         </div>
       )}
-      <Image
+      <img
         src={url}
         alt={alt}
-        fill
-        sizes="144px"
-        unoptimized
         referrerPolicy="no-referrer"
         loading={eager ? 'eager' : 'lazy'}
         fetchPriority={eager ? 'high' : 'auto'}
         decoding="async"
-        className={`object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
       />
@@ -70,7 +67,7 @@ function SkeletonCards() {
   );
 }
 
-export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }: PhotoCarouselProps) {
+export function PhotoCarousel({ photos, photosHd, photosTiny, loading, cafeName, placeUrl }: PhotoCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     dragFree: true,
     align: 'start',
@@ -147,7 +144,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
       {lightboxIndex !== null && (
         <PhotoLightbox
           photos={photosHd.length > 0 ? photosHd : photos}
-          thumbnails={photos}
+          thumbnails={photosTiny.length > 0 ? photosTiny : photos}
           initialIndex={lightboxIndex}
           cafeName={cafeName}
           onClose={() => setLightboxIndex(null)}

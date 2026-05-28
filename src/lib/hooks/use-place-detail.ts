@@ -6,6 +6,7 @@ import type { MenuItem, PlaceDetailResponse, RatingInfo, ParkingInfo, ReviewItem
 export type { MenuItem, RatingInfo, ParkingInfo, ReviewItem, BlogReviewItem };
 
 interface UsePlaceDetailResult {
+  photosTiny: string[];
   photos: string[];
   photosHd: string[];
   menu: MenuItem[];
@@ -19,6 +20,7 @@ interface UsePlaceDetailResult {
 }
 
 const EMPTY: PlaceDetailResponse = {
+  photosTiny: [],
   photos: [],
   photosHd: [],
   menu: [],
@@ -33,10 +35,17 @@ const EMPTY: PlaceDetailResponse = {
 const MAX_CACHE_SIZE = 150;
 const cache = new Map<string, PlaceDetailResponse>();
 
-/** Preload photos so the browser starts downloading before React renders <Image>.
- *  First 2: <link rel="preload"> (high priority, blocks nothing).
- *  Remaining: new Image() (low priority background fetch → browser disk cache). */
-function preloadPhotos(photos: string[]) {
+/** Schedule work via requestIdleCallback (fallback: setTimeout 50ms) */
+const scheduleIdle: (cb: () => void) => void =
+  typeof requestIdleCallback !== 'undefined'
+    ? (cb) => requestIdleCallback(cb)
+    : (cb) => setTimeout(cb, 50);
+
+/** Preload photos so the browser starts downloading before React renders <img>.
+ *  Carousel first 2: <link rel="preload"> high priority.
+ *  Carousel remaining: requestIdleCallback + new Image().
+ *  HD first 3: requestIdleCallback background prefetch. */
+function preloadPhotos(photos: string[], photosHd?: string[]) {
   for (let i = 0; i < photos.length; i++) {
     const url = photos[i];
     if (!url) continue;
@@ -51,9 +60,23 @@ function preloadPhotos(photos: string[]) {
       (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
       document.head.appendChild(link);
     } else {
-      // Background prefetch for remaining — lands in browser cache
-      const img = new globalThis.Image();
-      img.src = url;
+      // Background prefetch for remaining carousel images
+      scheduleIdle(() => {
+        const img = new globalThis.Image();
+        img.src = url;
+      });
+    }
+  }
+
+  // HD first 3: background prefetch for instant lightbox
+  if (photosHd) {
+    for (let i = 0; i < Math.min(3, photosHd.length); i++) {
+      const url = photosHd[i];
+      if (!url) continue;
+      scheduleIdle(() => {
+        const img = new globalThis.Image();
+        img.src = url;
+      });
     }
   }
 }
@@ -64,7 +87,7 @@ function warmUpCdn() {
   if (cdnWarmedUp) return;
   cdnWarmedUp = true;
   // HEAD request establishes TCP+TLS keep-alive without downloading body
-  fetch('https://img1.kakaocdn.net/cthumb/local/C280x280.q70/?fname=warmup', {
+  fetch('https://img1.kakaocdn.net/cthumb/local/C160x160.q70/?fname=warmup', {
     method: 'HEAD',
     mode: 'no-cors',
   }).catch(() => {});
@@ -82,7 +105,7 @@ export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
         if (oldest !== undefined) cache.delete(oldest);
       }
       cache.set(kakaoPlaceId, json);
-      preloadPhotos(json.photos);
+      preloadPhotos(json.photos, json.photosHd);
     })
     .catch(() => {});
 }
@@ -118,7 +141,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
           if (oldest !== undefined) cache.delete(oldest);
         }
         cache.set(kakaoPlaceId, json);
-        preloadPhotos(json.photos);
+        preloadPhotos(json.photos, json.photosHd);
         setFetchedData(json);
       })
       .catch(() => {
@@ -136,6 +159,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
   const data = cached ?? fetchedData;
 
   return {
+    photosTiny: data.photosTiny ?? [],
     photos: data.photos,
     photosHd: data.photosHd ?? [],
     menu: data.menu,

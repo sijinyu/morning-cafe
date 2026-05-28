@@ -42,6 +42,7 @@ export interface BlogReviewItem {
 }
 
 export interface PlaceDetailResponse {
+  photosTiny: string[];
   photos: string[];
   photosHd: string[];
   menu: MenuItem[];
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('placeId');
   if (!placeId || !/^\d+$/.test(placeId)) {
     return NextResponse.json(
-      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+      { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       { status: 400 },
     );
   }
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     if (!res.ok) {
       return NextResponse.json(
-        { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+        { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
       );
     }
 
@@ -83,10 +84,17 @@ export async function GET(request: NextRequest) {
       .map((p) => p.url?.replace('http://', 'https://'))
       .filter(Boolean) as string[];
 
-    // Use kakaocdn cthumb proxy for pstatic images — no need for our own photo-proxy
+    // 3-tier image URLs via kakaocdn cthumb proxy
+    const photosTiny = httpsUrls.map((url) => {
+      if (url.includes('pstatic.net')) {
+        return `https://img1.kakaocdn.net/cthumb/local/C80x80.q50/?fname=${encodeURIComponent(url)}`;
+      }
+      return url;
+    });
+
     const photos = httpsUrls.map((url) => {
       if (url.includes('pstatic.net')) {
-        return `https://img1.kakaocdn.net/cthumb/local/C280x280.q70/?fname=${encodeURIComponent(url)}`;
+        return `https://img1.kakaocdn.net/cthumb/local/C160x160.q70/?fname=${encodeURIComponent(url)}`;
       }
       return url;
     });
@@ -184,7 +192,7 @@ export async function GET(request: NextRequest) {
       }));
 
     return NextResponse.json(
-      { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews } satisfies PlaceDetailResponse,
+      { photosTiny, photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews } satisfies PlaceDetailResponse,
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
@@ -193,7 +201,7 @@ export async function GET(request: NextRequest) {
     );
   } catch {
     return NextResponse.json(
-      { photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
+      { photosTiny: [], photos: [], photosHd: [], menu: [], rating: null, parking: null, facilities: [], strengths: [], reviews: [], blogReviews: [] } satisfies PlaceDetailResponse,
     );
   }
 }
