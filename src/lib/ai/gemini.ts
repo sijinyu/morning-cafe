@@ -14,6 +14,7 @@ export const geminiModel = genAI.getGenerativeModel({
     maxOutputTokens: 1024,
     temperature: 0.7,
     topP: 0.9,
+    responseMimeType: 'application/json',
   },
 });
 
@@ -33,19 +34,36 @@ export function extractJson(text: string): string {
   return json;
 }
 
-/** Safely parse JSON from Gemini — attempts repair if truncated. */
+/** Safely parse JSON from Gemini — attempts repair if truncated or malformed. */
 export function safeParseJson<T>(jsonStr: string): T {
+  // First try: direct parse
   try {
     return JSON.parse(jsonStr);
-  } catch {
-    // Truncated JSON — attempt to repair by closing open strings/arrays/objects
-    let repaired = jsonStr;
-    const quoteCount = (repaired.match(/"/g) ?? []).length;
-    if (quoteCount % 2 !== 0) repaired += '"';
-    if (!repaired.includes(']}')) repaired += ']}';
-    if (!repaired.endsWith('}')) repaired += '}';
-    return JSON.parse(repaired);
+  } catch { /* continue to repair */ }
+
+  // Second try: extract outermost {...} and re-parse
+  const start = jsonStr.indexOf('{');
+  const end = jsonStr.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    try {
+      return JSON.parse(jsonStr.slice(start, end + 1));
+    } catch { /* continue to repair */ }
   }
+
+  // Third try: aggressive repair for truncated output
+  let repaired = start !== -1 && end > start ? jsonStr.slice(start, end + 1) : jsonStr;
+  // Close unterminated strings
+  const quoteCount = (repaired.match(/"/g) ?? []).length;
+  if (quoteCount % 2 !== 0) repaired += '"';
+  // Balance brackets
+  const openBrackets = (repaired.match(/\[/g) ?? []).length;
+  const closeBrackets = (repaired.match(/]/g) ?? []).length;
+  for (let i = 0; i < openBrackets - closeBrackets; i++) repaired += ']';
+  const openBraces = (repaired.match(/\{/g) ?? []).length;
+  const closeBraces = (repaired.match(/}/g) ?? []).length;
+  for (let i = 0; i < openBraces - closeBraces; i++) repaired += '}';
+
+  return JSON.parse(repaired);
 }
 
 /** Returns true when the Gemini API key is configured. */
