@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               <strong className="text-foreground">사용 데이터</strong>: Google Analytics 4를 통해 앱 사용 패턴(페이지 조회, 기능 사용 빈도)을 익명으로 수집합니다. 개인을 식별할 수 없는 통계 데이터입니다.
             </li>
             <li>
-              <strong className="text-foreground">로컬 저장 데이터</strong>: 즐겨찾기, 최근 본 카페, 메모는 기기의 localStorage에만 저장되며 서버로 전송되지 않습니다.
+              <strong className="text-foreground">로컬 저장 데이터</strong>: 찜, 최근 본 카페, 메모는 기기의 localStorage에만 저장되며 서버로 전송되지 않습니다.
             </li>
           </ul>
         </section>
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-foreground">5. 데이터 보관 및 삭제</h2>
           <p>
-            로컬 저장 데이터(즐겨찾기, 메모 등)는 브라우저 또는 앱 데이터 삭제 시 영구 제거됩니다. 서버에 저장되는 데이터는 없습니다(카페 제보 제외).
+            로컬 저장 데이터(찜, 메모 등)는 브라우저 또는 앱 데이터 삭제 시 영구 제거됩니다. 서버에 저장되는 데이터는 없습니다(카페 제보 제외).
           </p>
         </section>
 

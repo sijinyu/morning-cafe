@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, MapPin, Clock, ExternalLink, Share2, Check } from 'lucide-react';
+import { Bookmark, MapPin, Clock, ExternalLink, Share2, Check } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
@@ -46,7 +46,7 @@ export default function FavoritesPage() {
       const time = c.opening_time ? formatOpeningTime(c.opening_time) : '';
       return `☕ ${c.name}${time ? ` (${time} 오픈)` : ''}`;
     }).join('\n');
-    const shareText = `나의 모닝카페 즐겨찾기 ${favoriteCafes.length}곳\n\n${textList}`;
+    const shareText = `나의 모닝카페 찜 ${favoriteCafes.length}곳\n\n${textList}`;
     const shareUrl = `${BASE_URL}/favorites`;
 
     // 1. Kakao ListFeed
@@ -55,7 +55,7 @@ export default function FavoritesPage() {
         const Kakao = (window as any).Kakao;
         Kakao.Share.sendDefault({
           objectType: 'list',
-          headerTitle: `나의 모닝카페 즐겨찾기 ${cafesToShare.length}곳`,
+          headerTitle: `나의 모닝카페 찜 ${cafesToShare.length}곳`,
           headerLink: { mobileWebUrl: shareUrl, webUrl: shareUrl },
           contents: cafesToShare.map((c) => ({
             title: c.name,
@@ -78,7 +78,7 @@ export default function FavoritesPage() {
     if (isNativeApp()) {
       try {
         const { Share } = await import('@capacitor/share');
-        await Share.share({ title: '나의 모닝카페 즐겨찾기', text: shareText, url: shareUrl });
+        await Share.share({ title: '나의 모닝카페 찜', text: shareText, url: shareUrl });
         return;
       } catch { /* fallback */ }
     }
@@ -86,7 +86,7 @@ export default function FavoritesPage() {
     // 3. Web Share API
     if (navigator.share) {
       try {
-        await navigator.share({ title: '나의 모닝카페 즐겨찾기', text: shareText, url: shareUrl });
+        await navigator.share({ title: '나의 모닝카페 찜', text: shareText, url: shareUrl });
         return;
       } catch { /* fallback */ }
     }
@@ -102,15 +102,15 @@ export default function FavoritesPage() {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-border px-5 py-4">
-        <Heart className="h-5 w-5 text-red-500" />
-        <h1 className="text-lg font-bold">즐겨찾기</h1>
+        <Bookmark className="h-5 w-5 text-amber-500" />
+        <h1 className="text-lg font-bold">찜</h1>
         <span className="text-sm text-muted-foreground">({favoriteCafes.length})</span>
         <div className="flex-1" />
         {favoriteCafes.length > 0 && (
           <button
             onClick={handleShareAll}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
-            aria-label="즐겨찾기 공유"
+            aria-label="찜 공유"
           >
             {shareCopied ? (
               <Check className="h-4 w-4 text-green-500" />
@@ -124,9 +124,9 @@ export default function FavoritesPage() {
       <div className="flex-1 overflow-y-auto">
         {favoriteCafes.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
-            <Heart className="h-10 w-10 stroke-1" />
-            <p className="text-sm">즐겨찾기한 카페가 없습니다</p>
-            <p className="text-xs">지도에서 하트를 눌러 추가하세요</p>
+            <Bookmark className="h-10 w-10 stroke-1" />
+            <p className="text-sm">찜한 카페가 없습니다</p>
+            <p className="text-xs">지도에서 북마크를 눌러 추가하세요</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -217,9 +217,9 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
       <button
         onClick={(e) => { e.stopPropagation(); onRemove(); }}
         className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-colors"
-        aria-label="즐겨찾기 제거"
+        aria-label="찜 해제"
       >
-        <Heart className="h-4 w-4 fill-red-500 stroke-red-500" />
+        <Bookmark className="h-4 w-4 fill-amber-500 stroke-amber-500" />
       </button>
     </li>
   );

@@ -117,7 +117,7 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
       <rect x="17.8" y="22.1" width="7.1" height="2.8" rx="0.6" fill="${coffee}" opacity="0.9"/>
       <path d="M17.6 39.5C18.9 38.5 19.9 38.5 21 39.5C22 40.4 23 40.4 24.1 39.4" stroke="${stroke}" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>
       ${fav ? `<circle cx="35" cy="6" r="7" fill="white" stroke="${stroke}" stroke-width="1"/>
-      <path d="M35 10 l-1-0.9c-2.5-2.2-4.1-3.7-4.1-5.5 0-1.4 1.2-2.5 2.6-2.5 0.8 0 1.6 0.3 2.2 1 0.5-0.7 1.3-1 2.2-1 1.4 0 2.6 1.1 2.6 2.5 0 1.8-1.6 3.3-4.1 5.5z" fill="#EF4444"/>` : ''}
+      <path d="M32 2.5h6v7.5l-3-2-3 2z" fill="#F59E0B" stroke="#D97706" stroke-width="0.6"/>` : ''}
     </svg>`;
   }
 
@@ -143,7 +143,7 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
     <rect x="${11.3 * s}" y="${14.1 * s}" width="${4.5 * s}" height="${1.8 * s}" rx="${0.4 * s}" fill="${coffee}" opacity="0.92"/>
     <path d="M${11.2 * s} ${25.1 * s}C${12 * s} ${24.5 * s} ${12.7 * s} ${24.5 * s} ${13.4 * s} ${25.1 * s}C${14 * s} ${25.7 * s} ${14.7 * s} ${25.7 * s} ${15.4 * s} ${25 * s}" stroke="${stroke}" stroke-width="1.1" stroke-linecap="round" opacity="0.9"/>
     ${fav ? `<circle cx="${w - 8}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
-    <path d="M${w - 8} 8 l-0.7-0.6c-1.8-1.6-3-2.8-3-4.2 0-1.1 0.9-1.9 2-1.9 0.6 0 1.2 0.3 1.6 0.7 0.4-0.4 1-0.7 1.6-0.7 1.1 0 2 0.8 2 1.9 0 1.4-1.2 2.6-3 4.2z" fill="#EF4444"/>` : ''}
+    <path d="M${w - 8 - 2.5} 1.5h5v6l-2.5-1.5-2.5 1.5z" fill="#F59E0B" stroke="#D97706" stroke-width="0.5"/>` : ''}
   </svg>`;
 }
 
@@ -543,6 +543,38 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           />
         ))}
       </MarkerClusterer>
+
+      {/* 선택된 마커 ripple 파동 효과 */}
+      {selectedCafe && (() => {
+        const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
+        return (
+          <CustomOverlayMap
+            key={`ripple-${selectedCafe.id}`}
+            position={{ lat: selectedCafe.latitude, lng: selectedCafe.longitude }}
+            yAnchor={0.5}
+            xAnchor={0.5}
+            zIndex={0}
+          >
+            <svg
+              width="120"
+              height="120"
+              viewBox="0 0 120 120"
+              style={{ pointerEvents: 'none', transform: 'translate(-50%, -50%) translateY(-16px)' }}
+            >
+              <style>{`
+                @keyframes cafe-ripple {
+                  0% { r: 8; opacity: 0.5; stroke-width: 2.5; }
+                  100% { r: 50; opacity: 0; stroke-width: 0.5; }
+                }
+                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out forwards; }
+              `}</style>
+              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '0ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '400ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '800ms' }} />
+            </svg>
+          </CustomOverlayMap>
+        );
+      })()}
 
       {/* 충분히 확대 시 카페명 라벨 표시 */}
       {zoomLevel <= 3 && visibleCafes.map((cafe) => (

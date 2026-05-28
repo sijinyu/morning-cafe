@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
-import { MapPin, Clock, Navigation, Sparkles, Heart } from 'lucide-react';
+import { MapPin, Clock, Navigation, Sparkles, Bookmark } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
@@ -131,8 +131,8 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
           {favoriteCafes.length > 0 && (
             <section>
               <div className="flex items-center gap-1.5 mb-2">
-                <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
-                <h3 className="text-xs font-semibold text-foreground">내 즐겨찾기</h3>
+                <Bookmark className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <h3 className="text-xs font-semibold text-foreground">내 찜</h3>
               </div>
               <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                 {favoriteCafes.map((cafe) => (

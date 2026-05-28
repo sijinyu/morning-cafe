@@ -9,7 +9,7 @@ import {
   ExternalLink,
   Copy,
   Check,
-  Heart,
+  Bookmark,
   Share2,
   Navigation,
   // Bell,
@@ -301,12 +301,12 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
-            aria-label={favorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
+            aria-label={favorited ? '찜 해제' : '찜 추가'}
           >
-            <Heart
+            <Bookmark
               className={cn(
                 'h-[18px] w-[18px] transition-colors',
-                favorited ? 'fill-red-500 stroke-red-500' : 'stroke-muted-foreground'
+                favorited ? 'fill-amber-500 stroke-amber-500' : 'stroke-muted-foreground'
               )}
             />
           </motion.button>

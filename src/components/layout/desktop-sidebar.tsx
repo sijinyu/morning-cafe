@@ -3,12 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Heart, Send, Clock } from 'lucide-react';
+import { Map, Bookmark, Send, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { href: '/', label: '지도', icon: Map },
-  { href: '/favorites', label: '즐겨찾기', icon: Heart },
+  { href: '/favorites', label: '찜', icon: Bookmark },
   { href: '/recent', label: '최근 본 카페', icon: Clock },
   { href: '/report', label: '제보하기', icon: Send },
 ] as const;
