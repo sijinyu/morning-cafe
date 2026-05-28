@@ -80,6 +80,21 @@ export function PersistentMapPage() {
     }
   }, [searchParams, cafes, setSelectedCafe]);
 
+  // selectedCafe 변경 시 (찜/최근/외부에서 set) → 자동 panTo
+  const selectedCafe = useCafeStore((s) => s.selectedCafe);
+  const prevSelectedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedCafe) { prevSelectedRef.current = null; return; }
+    // 같은 카페 재선택 무시 (마커 클릭은 CafeMap 내부에서 직접 panTo)
+    if (prevSelectedRef.current === selectedCafe.id) return;
+    prevSelectedRef.current = selectedCafe.id;
+    // 지도가 아닌 다른 탭에서 왔을 수 있으므로 약간의 딜레이
+    const timer = setTimeout(() => {
+      panToRef.current?.(selectedCafe.latitude, selectedCafe.longitude);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [selectedCafe]);
+
   // First-visit list button pulse
   useEffect(() => {
     const seen = localStorage.getItem('morning-cafe-list-seen');
