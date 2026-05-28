@@ -44,6 +44,7 @@ export function PersistentMapPage() {
     })),
   );
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
+  const plainPanToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 37.5665, lng: 126.978 });
@@ -137,7 +138,7 @@ export function PersistentMapPage() {
 
   function handleLocationUpdate(lat: number, lng: number) {
     setUserLocation({ lat, lng });
-    panToRef.current?.(lat, lng);
+    plainPanToRef.current?.(lat, lng);
   }
 
   return (
@@ -150,6 +151,7 @@ export function PersistentMapPage() {
         <>
           <CafeMap
             onPanToReady={(fn) => { panToRef.current = fn; }}
+            onPlainPanToReady={(fn) => { plainPanToRef.current = fn; }}
             userLocation={userLocation}
             onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
           />

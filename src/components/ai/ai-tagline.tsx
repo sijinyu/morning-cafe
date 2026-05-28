@@ -95,6 +95,8 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
       .filter((c): c is string => !!c && c.length > 10)
       .slice(0, 3);
 
+    // Delay 1.5s to avoid burning RPM quota on rapid cafe browsing
+    const timer = setTimeout(() => {
     fetch('/api/ai-tagline', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,8 +123,9 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
           setLoading(false);
         }
       });
+    }, 1500);
 
-    return () => controller.abort();
+    return () => { clearTimeout(timer); controller.abort(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cafeId, cafeName, strengthsKey, facilitiesKey, ratingKey, hasData]);
 

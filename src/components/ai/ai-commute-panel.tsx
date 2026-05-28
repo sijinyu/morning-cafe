@@ -205,7 +205,7 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
               type="text"
               value={workAddress}
               onChange={(e) => setWorkAddress(e.target.value)}
-              placeholder="예: 광화문, 판교역"
+              placeholder="예: 광화문역, 강남역"
               className={cn(
                 'w-full rounded-xl border border-border/60 bg-background px-4 py-3',
                 'text-[14px] text-foreground placeholder:text-muted-foreground/40',

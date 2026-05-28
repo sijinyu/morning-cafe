@@ -227,10 +227,12 @@ const USER_DOT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="${USER_DOT_
 export interface CafeMapProps {
   /**
    * Called once the underlying kakao.maps.Map is ready.
-   * Receives a panTo helper so the parent can move the map
-   * without depending on the kakao types directly.
+   * Receives a panTo helper (with bottom-sheet offset) so the parent
+   * can move the map without depending on the kakao types directly.
    */
   onPanToReady?: (panTo: (lat: number, lng: number) => void) => void;
+  /** Plain panTo without bottom-sheet offset — for GPS "현위치" button. */
+  onPlainPanToReady?: (panTo: (lat: number, lng: number) => void) => void;
   /** Current GPS coordinates of the user. Renders a blue dot marker when set. */
   userLocation?: { lat: number; lng: number } | null;
   /** Called when the map center changes (pan/zoom). */
@@ -276,7 +278,7 @@ function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
   }
 }
 
-export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapProps) {
+export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCenterChange }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
 
@@ -419,6 +421,12 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
     if (onPanToReady) {
       onPanToReady((lat, lng) => {
         panToWithOffset(map, lat, lng);
+      });
+    }
+    if (onPlainPanToReady) {
+      onPlainPanToReady((lat, lng) => {
+        map.setLevel(4);
+        map.panTo(new kakao.maps.LatLng(lat, lng));
       });
     }
     // 지도 클릭 시 바텀시트 + 겹침 팝업 닫기
@@ -802,14 +810,6 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
               <button
                 key={cafe.id}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
-                  setOverlapPopup(null);
-                  setSelectedCafe(cafe);
-                  if (mapInstanceRef.current) panToWithOffset(mapInstanceRef.current, cafe.latitude, cafe.longitude);
-                }}
-                onTouchEnd={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
