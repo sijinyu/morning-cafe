@@ -13,6 +13,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { CafeRoulette } from '@/components/map/cafe-roulette';
+import { MorningPick } from '@/components/morning-pick';
 import { cn } from '@/lib/utils';
 
 import { trackEvent } from '@/lib/analytics';
@@ -225,6 +226,18 @@ export function PersistentMapPage() {
             ⓒ 2026. 유시진 All rights reserved.
           </a>
         </div>
+      )}
+
+      {/* 오늘의 아침 카페 — 1일 1추천 */}
+      {isMapRoute && (
+        <MorningPick
+          userLocation={userLocation}
+          cafesReady={cafesReady}
+          onSelectCafe={(cafe) => {
+            setSelectedCafe(cafe);
+            setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
+          }}
+        />
       )}
     </div>
   );
