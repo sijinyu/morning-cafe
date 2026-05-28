@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { X, Sparkles, Send, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore } from '@/lib/store/cafe-store';
@@ -151,11 +151,12 @@ function ResultCard({ cafe, result, onSelect }: ResultCardProps) {
 export function AiSearch({ userLocation, onSelectCafe }: AiSearchProps) {
   const filteredCafes = useCafeStore((state) => state.filteredCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
-  const cafesById = useCafeStore((state) => {
+  const cafes = useCafeStore((state) => state.cafes);
+  const cafesById = useMemo(() => {
     const map = new Map<string, Cafe>();
-    for (const c of state.cafes) map.set(c.id, c);
+    for (const c of cafes) map.set(c.id, c);
     return map;
-  });
+  }, [cafes]);
 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
