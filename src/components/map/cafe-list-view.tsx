@@ -5,6 +5,7 @@ import { MapPin, Clock, Navigation, Sparkles } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
+import { getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
@@ -220,15 +221,18 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                 onClick={() => onSelectCafe(cafe)}
                 className="flex w-full items-start gap-3 px-5 py-4 hover:bg-foreground/[0.03] active:bg-foreground/[0.05] transition-colors text-left border-b border-border/50"
               >
-                {cafe.thumbnail_url ? (
-                  <div className="flex-shrink-0 h-11 w-11 rounded-full overflow-hidden bg-muted">
-                    <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                  </div>
-                ) : (
-                  <div className="flex-shrink-0 h-11 w-11 rounded-full bg-muted flex items-center justify-center">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                )}
+                {(() => {
+                  const photo = cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id);
+                  return photo ? (
+                    <div className="flex-shrink-0 h-11 w-11 rounded-full overflow-hidden bg-muted">
+                      <img src={photo} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                    </div>
+                  ) : (
+                    <div className="flex-shrink-0 h-11 w-11 rounded-full bg-muted flex items-center justify-center">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  );
+                })()}
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-sm truncate">{cafe.name}</span>
@@ -318,13 +322,16 @@ function FeatureCard({ cafe, onSelect, wasDragging, badge, badgeColor, userLocat
       className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background overflow-hidden text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
     >
       <div className="h-20 w-full bg-muted">
-        {cafe.thumbnail_url ? (
-          <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <MapPin className="h-5 w-5 text-muted-foreground/40" />
-          </div>
-        )}
+        {(() => {
+          const photo = cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id);
+          return photo ? (
+            <img src={photo} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center">
+              <MapPin className="h-5 w-5 text-muted-foreground/40" />
+            </div>
+          );
+        })()}
       </div>
       <div className="p-3">
       <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">

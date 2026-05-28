@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { geminiModel, extractJson, isGeminiConfigured } from '@/lib/ai/gemini';
+import { geminiModel, extractJson, safeParseJson, isGeminiConfigured } from '@/lib/ai/gemini';
 
 export const runtime = 'nodejs';
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     const result = await geminiModel.generateContent(prompt);
     const raw = result.response.text();
     const jsonStr = extractJson(raw);
-    const parsed: GeminiTaglineResponse = JSON.parse(jsonStr);
+    const parsed: GeminiTaglineResponse = safeParseJson(jsonStr);
 
     if (typeof parsed.tagline !== 'string') {
       throw new Error('Unexpected response shape');
