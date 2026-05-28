@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { Heart, MapPin, Clock, ExternalLink, Share2, Check } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
+import { isNativeApp } from '@/lib/capacitor';
+import { trackEvent } from '@/lib/analytics';
 
 export default function FavoritesPage() {
   const { favorites, toggleFavorite } = useFavorites();
@@ -15,6 +17,7 @@ export default function FavoritesPage() {
   const fetchCafes = useCafeStore((state) => state.fetchCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
   const [mounted, setMounted] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,12 +34,91 @@ export default function FavoritesPage() {
     router.push('/');
   }
 
+  async function handleShareAll() {
+    if (favoriteCafes.length === 0) return;
+    trackEvent('share_favorites', { count: favoriteCafes.length });
+
+    const BASE_URL = 'https://morning-cafe-phi.vercel.app';
+    const cafesToShare = favoriteCafes.slice(0, 5);
+
+    // Build text list
+    const textList = favoriteCafes.map((c) => {
+      const time = c.opening_time ? formatOpeningTime(c.opening_time) : '';
+      return `☕ ${c.name}${time ? ` (${time} 오픈)` : ''}`;
+    }).join('\n');
+    const shareText = `나의 모닝카페 즐겨찾기 ${favoriteCafes.length}곳\n\n${textList}`;
+    const shareUrl = `${BASE_URL}/favorites`;
+
+    // 1. Kakao ListFeed
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown> & { Kakao?: { isInitialized: () => boolean; Share: { sendDefault: (opts: unknown) => void } } }).Kakao?.isInitialized()) {
+      try {
+        const Kakao = (window as any).Kakao;
+        Kakao.Share.sendDefault({
+          objectType: 'list',
+          headerTitle: `나의 모닝카페 즐겨찾기 ${cafesToShare.length}곳`,
+          headerLink: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+          contents: cafesToShare.map((c) => ({
+            title: c.name,
+            description: c.opening_time
+              ? `${formatOpeningTime(c.opening_time)} 오픈 · ${(c.road_address ?? c.address).replace(/서울\S*\s+/, '')}`
+              : (c.road_address ?? c.address).replace(/서울\S*\s+/, ''),
+            imageUrl: `${BASE_URL}/icons/icon-512x512.png`,
+            link: {
+              mobileWebUrl: `${BASE_URL}/cafe/${c.id}`,
+              webUrl: `${BASE_URL}/cafe/${c.id}`,
+            },
+          })),
+          buttons: [{ title: '모닝커피에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+        });
+        return;
+      } catch { /* fallback */ }
+    }
+
+    // 2. Native share (Capacitor)
+    if (isNativeApp()) {
+      try {
+        const { Share } = await import('@capacitor/share');
+        await Share.share({ title: '나의 모닝카페 즐겨찾기', text: shareText, url: shareUrl });
+        return;
+      } catch { /* fallback */ }
+    }
+
+    // 3. Web Share API
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: '나의 모닝카페 즐겨찾기', text: shareText, url: shareUrl });
+        return;
+      } catch { /* fallback */ }
+    }
+
+    // 4. Clipboard fallback
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch { /* silent fail */ }
+  }
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-border px-5 py-4">
         <Heart className="h-5 w-5 text-red-500" />
         <h1 className="text-lg font-bold">즐겨찾기</h1>
         <span className="text-sm text-muted-foreground">({favoriteCafes.length})</span>
+        <div className="flex-1" />
+        {favoriteCafes.length > 0 && (
+          <button
+            onClick={handleShareAll}
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            aria-label="즐겨찾기 공유"
+          >
+            {shareCopied ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Share2 className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
+        )}
       </header>
 
       <div className="flex-1 overflow-y-auto">

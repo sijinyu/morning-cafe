@@ -394,7 +394,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         // 마커가 시트 위 상단 1/3 영역에 보이도록 조정
         const bounds = map.getBounds();
         const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
-        const offsetLat = lat - latSpan * 0.28;
+        const offsetLat = lat - latSpan * 0.38;
         map.panTo(new kakao.maps.LatLng(offsetLat, lng));
       });
     }

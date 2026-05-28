@@ -251,7 +251,7 @@ export function TimeFilter() {
         className={hideChains ? CHIP_ACTIVE : CHIP_INACTIVE}
       >
         <Store className="h-3 w-3" />
-        {hideChains ? '개인만' : '전체'}
+        {hideChains ? '개인' : '전체'}
       </button>
 
       {/* 24시간 토글 */}
@@ -282,7 +282,6 @@ export function TimeFilter() {
           className={`${CHIP_BASE} bg-background/90 text-foreground backdrop-blur-xl border border-border/60 hover:bg-foreground/5`}
         >
           <RotateCcw className="h-3 w-3" />
-          초기화
         </button>
       )}
     </div>

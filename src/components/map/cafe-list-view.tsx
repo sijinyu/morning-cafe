@@ -1,12 +1,18 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
-import { MapPin, Clock, Navigation } from 'lucide-react';
+import { MapPin, Clock, Navigation, Sparkles } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
+
+function parseMinutes(time: string | null): number | null {
+  if (!time) return null;
+  const parts = time.split(':');
+  return parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
+}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -66,6 +72,23 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
       .toSorted((a, b) => a.distance - b.distance);
   }, [searchFilteredCafes, userLocation]);
 
+  // 신규 카페 (7일 이내 created_at)
+  const newCafes = useMemo(() => {
+    return filteredCafes.filter((c) => isNewCafe(c)).slice(0, 10);
+  }, [filteredCafes]);
+
+  // 인기 카페 (가장 일찍 여는 카페 TOP 8)
+  const popularCafes = useMemo(() => {
+    return [...filteredCafes]
+      .filter((c) => c.opening_time)
+      .sort((a, b) => {
+        const aMin = parseMinutes(a.opening_time);
+        const bMin = parseMinutes(b.opening_time);
+        return (aMin ?? 999) - (bMin ?? 999);
+      })
+      .slice(0, 8);
+  }, [filteredCafes]);
+
   const virtualizer = useVirtualizer({
     count: sortedCafes.length,
     getScrollElement: () => scrollRef.current,
@@ -84,6 +107,56 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
 
   return (
     <div ref={scrollRef} className="h-full overflow-y-auto">
+      {/* Featured sections — only when not searching */}
+      {!searchQuery.trim() && (
+        <div className="px-4 pb-2 space-y-4 pt-3">
+          {/* 신규 카페 */}
+          {newCafes.length > 0 && (
+            <section>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                <h3 className="text-xs font-semibold text-foreground">신규 카페</h3>
+                <span className="text-[10px] text-muted-foreground">최근 7일</span>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+                {newCafes.map((cafe) => (
+                  <FeatureCard
+                    key={cafe.id}
+                    cafe={cafe}
+                    onSelect={onSelectCafe}
+                    badge="NEW"
+                    badgeColor="bg-emerald-500 text-white"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* 인기 카페 — 가장 일찍 여는 카페 */}
+          {popularCafes.length > 0 && (
+            <section>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Clock className="h-3.5 w-3.5 text-amber-500" />
+                <h3 className="text-xs font-semibold text-foreground">얼리버드 TOP</h3>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+                {popularCafes.map((cafe) => (
+                  <FeatureCard
+                    key={cafe.id}
+                    cafe={cafe}
+                    onSelect={onSelectCafe}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(newCafes.length > 0 || popularCafes.length > 0) && (
+            <div className="h-px bg-border" />
+          )}
+        </div>
+      )}
+
       <div
         className="relative w-full"
         style={{ height: `${virtualizer.getTotalSize()}px` }}
@@ -172,5 +245,43 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
         })}
       </div>
     </div>
+  );
+}
+
+interface FeatureCardProps {
+  cafe: Cafe;
+  onSelect: (cafe: Cafe) => void;
+  badge?: string;
+  badgeColor?: string;
+}
+
+function FeatureCard({ cafe, onSelect, badge, badgeColor }: FeatureCardProps) {
+  return (
+    <button
+      onClick={() => onSelect(cafe)}
+      className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background p-3 text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
+    >
+      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+        {badge && (
+          <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', badgeColor)}>
+            {badge}
+          </span>
+        )}
+        {cafe.opening_time && (
+          <span
+            className={cn(
+              'rounded-full px-1.5 py-0.5 text-[9px] font-semibold',
+              getOpeningBadgeStyle(cafe.opening_time),
+            )}
+          >
+            {formatOpeningTime(cafe.opening_time)}
+          </span>
+        )}
+      </div>
+      <p className="font-bold text-xs truncate">{cafe.name}</p>
+      <p className="mt-0.5 text-[10px] text-muted-foreground truncate">
+        {(cafe.road_address ?? cafe.address).replace(/서울\S*\s+\S+구\s*/, '')}
+      </p>
+    </button>
   );
 }
