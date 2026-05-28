@@ -186,7 +186,7 @@ const CafeMarker = memo(function CafeMarker({ cafe, isSelected, isFavorite: fav,
     <MapMarker
       position={position}
       title={cafe.name}
-      onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); onSelect(cafe); }}
+      onClick={() => { trackEvent('select_cafe', { cafe_name: cafe.name }); prefetchPlaceDetail(cafe.kakao_place_id); onSelect(cafe); }}
       onMouseOver={() => prefetchPlaceDetail(cafe.kakao_place_id)}
       zIndex={isSelected ? 100 : (fav ? 50 : 0)}
       image={{

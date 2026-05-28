@@ -32,6 +32,8 @@ const EMPTY: PlaceDetailResponse = {
 
 const MAX_CACHE_SIZE = 150;
 const cache = new Map<string, PlaceDetailResponse>();
+/** In-flight fetch promises — prevents duplicate requests for the same placeId */
+const inflight = new Map<string, Promise<PlaceDetailResponse>>();
 
 /** Schedule work via requestIdleCallback (fallback: setTimeout 50ms) */
 const scheduleIdle: (cb: () => void) => void =
@@ -79,11 +81,38 @@ function preloadPhotos(photos: string[], photosHd?: string[]) {
   }
 }
 
-/** Prefetch place detail into cache (fire-and-forget, for hover/preload).
- *  CDN preconnect is handled by <link rel="preconnect"> in layout.tsx. */
-export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
-  if (!kakaoPlaceId || cache.has(kakaoPlaceId)) return;
-  fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
+/** Start image preloading from SW cache in parallel with network fetch.
+ *  If the SW has a cached API response, we can begin downloading images immediately
+ *  without waiting for the network round-trip. */
+function earlyPreloadFromCache(kakaoPlaceId: string) {
+  if ('caches' in globalThis) {
+    caches.open('place-detail-api').then((c) => {
+      c.match(`/api/place-detail?placeId=${kakaoPlaceId}`).then((res) => {
+        if (!res) return;
+        res.json().then((json: PlaceDetailResponse) => {
+          preloadPhotos(json.photos, json.photosHd);
+        }).catch(() => {});
+      });
+    }).catch(() => {});
+  }
+}
+
+/** Shared fetch — deduplicates concurrent requests for the same placeId.
+ *  Returns cached data immediately, or joins an in-flight request, or starts a new one. */
+function fetchPlaceDetail(kakaoPlaceId: string): Promise<PlaceDetailResponse> {
+  // Already cached
+  const cached = cache.get(kakaoPlaceId);
+  if (cached) return Promise.resolve(cached);
+
+  // Already in-flight — join existing request
+  const existing = inflight.get(kakaoPlaceId);
+  if (existing) return existing;
+
+  // Start preloading images from SW cache in parallel
+  earlyPreloadFromCache(kakaoPlaceId);
+
+  // New fetch
+  const promise = fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
     .then((r) => r.json())
     .then((json: PlaceDetailResponse) => {
       if (cache.size >= MAX_CACHE_SIZE) {
@@ -92,8 +121,21 @@ export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
       }
       cache.set(kakaoPlaceId, json);
       preloadPhotos(json.photos, json.photosHd);
+      return json;
     })
-    .catch(() => {});
+    .finally(() => {
+      inflight.delete(kakaoPlaceId);
+    });
+
+  inflight.set(kakaoPlaceId, promise);
+  return promise;
+}
+
+/** Prefetch place detail into cache (fire-and-forget, for hover/preload).
+ *  CDN preconnect is handled by <link rel="preconnect"> in layout.tsx. */
+export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
+  if (!kakaoPlaceId) return;
+  fetchPlaceDetail(kakaoPlaceId).catch(() => {});
 }
 
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
@@ -118,16 +160,11 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
     let cancelled = false;
     setLoading(true);
 
-    fetch(`/api/place-detail?placeId=${kakaoPlaceId}`)
-      .then((r) => r.json())
-      .then((json: PlaceDetailResponse) => {
+    // Uses shared fetch — if prefetchPlaceDetail() already started the request,
+    // we join the same promise instead of making a duplicate request
+    fetchPlaceDetail(kakaoPlaceId)
+      .then((json) => {
         if (cancelled) return;
-        if (cache.size >= MAX_CACHE_SIZE) {
-          const oldest = cache.keys().next().value;
-          if (oldest !== undefined) cache.delete(oldest);
-        }
-        cache.set(kakaoPlaceId, json);
-        preloadPhotos(json.photos, json.photosHd);
         setFetchedData(json);
       })
       .catch(() => {

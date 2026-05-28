@@ -173,7 +173,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)]',
         'flex flex-col overflow-hidden',
       )}
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'none', willChange: 'transform, height', contain: 'layout style' }}
     >
       {/* Drag handle */}
       <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
@@ -272,17 +272,20 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
       {/* Scrollable detail content */}
       {sheetState !== 'peek' && (
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 overflow-y-auto overscroll-contain" style={{ contain: 'content' }}>
           <div className="px-5 pb-6 space-y-3">
             <div className="h-px bg-border" />
 
-            <PhotoCarousel
-              photos={photos}
-              photosHd={photosHd}
-              loading={photosLoading}
-              cafeName={cafe.name}
-              placeUrl={cafe.place_url}
-            />
+            {/* Photo carousel — fixed min-height to prevent CLS */}
+            <div className="min-h-[10rem]">
+              <PhotoCarousel
+                photos={photos}
+                photosHd={photosHd}
+                loading={photosLoading}
+                cafeName={cafe.name}
+                placeUrl={cafe.place_url}
+              />
+            </div>
 
             {/* All detail rows — compact spacing, items-start for multiline */}
             <div className="space-y-0">
