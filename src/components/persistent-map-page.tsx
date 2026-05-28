@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -42,6 +42,7 @@ export function PersistentMapPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [listSearchQuery, setListSearchQuery] = useState('');
   const deepLinkHandledRef = useRef<string | null>(null);
+  const [listSeen, setListSeen] = useState(true); // SSR safe default
 
   useEffect(() => {
     fetchCafes();
@@ -78,6 +79,22 @@ export function PersistentMapPage() {
       setTimeout(tryPanTo, 200);
     }
   }, [searchParams, cafes, setSelectedCafe]);
+
+  // First-visit list button pulse
+  useEffect(() => {
+    const seen = localStorage.getItem('morning-cafe-list-seen');
+    if (!seen) setListSeen(false);
+  }, []);
+
+  const handleToggleView = useCallback(() => {
+    const next = viewMode === 'map' ? 'list' : 'map';
+    trackEvent('toggle_view', { mode: next });
+    if (!listSeen) {
+      localStorage.setItem('morning-cafe-list-seen', '1');
+      setListSeen(true);
+    }
+    setViewMode(next);
+  }, [viewMode, listSeen]);
 
   // Auto-request GPS on first load so the map can zoom to the user's location.
   useEffect(() => {
@@ -148,13 +165,14 @@ export function PersistentMapPage() {
       {isMapRoute && (
         <div className="absolute md:bottom-6 left-4 z-10" style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}>
           <motion.button
-            onClick={() => { const next = viewMode === 'map' ? 'list' : 'map'; trackEvent('toggle_view', { mode: next }); setViewMode(next); }}
+            onClick={handleToggleView}
             whileTap={{ scale: 0.92 }}
             className={cn(
               'flex h-12 items-center gap-2 rounded-full px-4',
               'bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
               'text-sm font-semibold text-foreground',
               'transition-colors hover:bg-foreground/5',
+              !listSeen && 'ring-2 ring-foreground/20 ring-offset-2 ring-offset-background animate-pulse',
             )}
           >
             {viewMode === 'map' ? (

@@ -1,18 +1,13 @@
 'use client';
 
 import { useMemo, useRef } from 'react';
-import { MapPin, Clock, Navigation, Sparkles } from 'lucide-react';
+import { MapPin, Clock, Navigation, Sparkles, Heart } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
+import { useFavorites } from '@/lib/hooks/use-favorites';
 import { cn } from '@/lib/utils';
-
-function parseMinutes(time: string | null): number | null {
-  if (!time) return null;
-  const parts = time.split(':');
-  return parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
-}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -47,6 +42,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
     })),
   );
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { favorites } = useFavorites();
 
   // 1단계: 검색 필터 (검색 쿼리 변경 시에만 재계산)
   const searchFilteredCafes = useMemo(() => {
@@ -77,17 +73,21 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
     return filteredCafes.filter((c) => isNewCafe(c)).slice(0, 10);
   }, [filteredCafes]);
 
-  // 인기 카페 (가장 일찍 여는 카페 TOP 8)
-  const popularCafes = useMemo(() => {
+  // 내 즐겨찾기 (현재 필터 기준 교차)
+  const favoriteCafes = useMemo(() => {
+    if (favorites.size === 0) return [];
+    return filteredCafes.filter((c) => favorites.has(c.id)).slice(0, 10);
+  }, [filteredCafes, favorites]);
+
+  // 내 근처 카페 (GPS 있을 때만, 가까운 순 5개)
+  const nearbyCafes = useMemo(() => {
+    if (!userLocation) return [];
     return [...filteredCafes]
-      .filter((c) => c.opening_time)
-      .sort((a, b) => {
-        const aMin = parseMinutes(a.opening_time);
-        const bMin = parseMinutes(b.opening_time);
-        return (aMin ?? 999) - (bMin ?? 999);
-      })
-      .slice(0, 8);
-  }, [filteredCafes]);
+      .map((c) => ({ cafe: c, dist: haversineKm(userLocation.lat, userLocation.lng, c.latitude, c.longitude) }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 5)
+      .map(({ cafe }) => cafe);
+  }, [filteredCafes, userLocation]);
 
   const virtualizer = useVirtualizer({
     count: sortedCafes.length,
@@ -95,6 +95,8 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
     estimateSize: () => 88,
     overscan: 5,
   });
+
+  const hasFeatures = newCafes.length > 0 || favoriteCafes.length > 0 || nearbyCafes.length > 0;
 
   if (sortedCafes.length === 0) {
     return (
@@ -126,32 +128,55 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     onSelect={onSelectCafe}
                     badge="NEW"
                     badgeColor="bg-emerald-500 text-white"
+                    userLocation={userLocation}
                   />
                 ))}
               </div>
             </section>
           )}
 
-          {/* 인기 카페 — 가장 일찍 여는 카페 */}
-          {popularCafes.length > 0 && (
+          {/* 내 즐겨찾기 */}
+          {favoriteCafes.length > 0 && (
             <section>
               <div className="flex items-center gap-1.5 mb-2">
-                <Clock className="h-3.5 w-3.5 text-amber-500" />
-                <h3 className="text-xs font-semibold text-foreground">얼리버드 TOP</h3>
+                <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" />
+                <h3 className="text-xs font-semibold text-foreground">내 즐겨찾기</h3>
               </div>
               <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
-                {popularCafes.map((cafe) => (
+                {favoriteCafes.map((cafe) => (
                   <FeatureCard
                     key={cafe.id}
                     cafe={cafe}
                     onSelect={onSelectCafe}
+                    userLocation={userLocation}
                   />
                 ))}
               </div>
             </section>
           )}
 
-          {(newCafes.length > 0 || popularCafes.length > 0) && (
+          {/* 내 근처 */}
+          {nearbyCafes.length > 0 && (
+            <section>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Navigation className="h-3.5 w-3.5 text-blue-500" />
+                <h3 className="text-xs font-semibold text-foreground">내 근처</h3>
+              </div>
+              <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+                {nearbyCafes.map((cafe) => (
+                  <FeatureCard
+                    key={cafe.id}
+                    cafe={cafe}
+                    onSelect={onSelectCafe}
+                    userLocation={userLocation}
+                    showDistance
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {hasFeatures && (
             <div className="h-px bg-border" />
           )}
         </div>
@@ -253,9 +278,15 @@ interface FeatureCardProps {
   onSelect: (cafe: Cafe) => void;
   badge?: string;
   badgeColor?: string;
+  userLocation?: { lat: number; lng: number } | null;
+  showDistance?: boolean;
 }
 
-function FeatureCard({ cafe, onSelect, badge, badgeColor }: FeatureCardProps) {
+function FeatureCard({ cafe, onSelect, badge, badgeColor, userLocation, showDistance }: FeatureCardProps) {
+  const distance = userLocation
+    ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
+    : null;
+
   return (
     <button
       onClick={() => onSelect(cafe)}
@@ -265,6 +296,11 @@ function FeatureCard({ cafe, onSelect, badge, badgeColor }: FeatureCardProps) {
         {badge && (
           <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', badgeColor)}>
             {badge}
+          </span>
+        )}
+        {showDistance && distance !== null && (
+          <span className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
+            {formatDistance(distance)}
           </span>
         )}
         {cafe.opening_time && (
