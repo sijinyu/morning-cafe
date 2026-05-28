@@ -246,9 +246,9 @@ export interface CafeMapProps {
  */
 /** 줌 레벨 3 이하로 확대 후, 바텀시트/사이드바 보정 panTo */
 function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
-  // 줌이 축소되어 있으면 먼저 확대
-  if (map.getLevel() > 3) {
-    map.setLevel(3);
+  // 줌이 축소되어 있으면 먼저 확대 (레벨 2 = 더 가까이)
+  if (map.getLevel() > 2) {
+    map.setLevel(2);
   }
 
   // setLevel 후 bounds가 바뀌므로 새 bounds 기준으로 오프셋 계산
@@ -576,9 +576,13 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
         })}
       </MarkerClusterer>
 
-      {/* SVG 핀 마커용 ripple — 줌 > 3 (사진 마커 안 보일 때)에서만 표시 */}
-      {selectedCafe && zoomLevel > 3 && (() => {
-        const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
+      {/* SVG 핀 마커용 ripple — 사진 마커 내부 ripple이 없는 경우에만 표시 */}
+      {selectedCafe && (() => {
+        const isChainCafe = chainCafeIds.has(selectedCafe.id);
+        const hasPhoto = !isChainCafe && !!(selectedCafe.thumbnail_url || getCachedFirstPhoto(selectedCafe.kakao_place_id));
+        // 사진 마커가 보이는 상황(zoom ≤ 3 + photo)이면 사진 내부 ripple이 담당 → 여기서는 스킵
+        if (zoomLevel <= 3 && hasPhoto) return null;
+        const colors = getCachedMarkerColors(selectedCafe, isChainCafe);
         return (
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}

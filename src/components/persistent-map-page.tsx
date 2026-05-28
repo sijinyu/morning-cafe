@@ -203,9 +203,12 @@ export function PersistentMapPage() {
             whileTap={{ scale: 0.92 }}
             className={cn(
               'relative flex h-12 items-center gap-2 rounded-full px-4',
-              'bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
-              'text-sm font-semibold text-foreground',
-              'transition-colors hover:bg-foreground/5',
+              'shadow-sm border border-border/60',
+              'text-sm font-semibold',
+              'transition-all',
+              viewMode === 'list'
+                ? 'bg-foreground text-background hover:opacity-90'
+                : 'bg-background/95 backdrop-blur-xl text-foreground hover:bg-foreground/5',
               !listSeen && 'ring-2 ring-foreground/20 ring-offset-2 ring-offset-background animate-pulse',
             )}
           >

@@ -1,18 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Search, GitCompareArrows, Zap, MessageSquareQuote, Sparkles } from 'lucide-react';
+import { X, Search, GitCompareArrows, Zap, Train, MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { AiTasteFinder } from './ai-taste-finder';
 import { AiComparePanel } from './ai-compare-panel';
 import { AiDailyPick } from './ai-daily-pick';
+import { AiCommutePanel } from './ai-commute-panel';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type AiFeature = 'hub' | 'taste-finder' | 'compare' | 'daily-pick';
+type AiFeature = 'hub' | 'taste-finder' | 'compare' | 'daily-pick' | 'commute';
 
 interface AiHubModalProps {
   open: boolean;
@@ -45,6 +46,13 @@ const FEATURES = [
     description: '원클릭 — 지금 가기 좋은 카페 1곳',
     color: 'text-emerald-500',
   },
+  {
+    id: 'commute' as const,
+    icon: Train,
+    title: '출근길 카페',
+    description: '집→카페→직장 최적 경로 추천',
+    color: 'text-violet-500',
+  },
 ] as const;
 
 function getFeatureTitle(feature: AiFeature): string {
@@ -57,6 +65,8 @@ function getFeatureTitle(feature: AiFeature): string {
       return '카페 비교';
     case 'daily-pick':
       return '오늘의 추천';
+    case 'commute':
+      return '출근길 카페';
   }
 }
 
@@ -223,6 +233,10 @@ export function AiHubModal({ open, onClose }: AiHubModalProps) {
 
               {activeFeature === 'daily-pick' && (
                 <AiDailyPick onClose={handleClose} />
+              )}
+
+              {activeFeature === 'commute' && (
+                <AiCommutePanel onClose={handleClose} />
               )}
             </div>
           </motion.div>

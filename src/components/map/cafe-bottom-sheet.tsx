@@ -10,6 +10,7 @@ import {
   Copy,
   Check,
   Bookmark,
+  GitCompareArrows,
   Share2,
   Navigation,
   // Bell,
@@ -74,10 +75,12 @@ interface CafeBottomSheetProps {
 }
 
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
-  const { dayFilter, chainCafeIds, userLocation } = useCafeStore(
-    useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds, userLocation: s.userLocation })),
+  const { dayFilter, chainCafeIds, userLocation, compareSlots, addToCompare } = useCafeStore(
+    useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds, userLocation: s.userLocation, compareSlots: s.compareSlots, addToCompare: s.addToCompare })),
   );
   const isChain = chainCafeIds.has(cafe.id);
+  const isInCompare = compareSlots.some((c) => c.id === cafe.id);
+  const canAddToCompare = compareSlots.length < 3 && !isInCompare;
   const [sheetState, setSheetState] = useState<SheetState>('half');
   const [copied, setCopied] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
@@ -284,6 +287,30 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
         </div>
 
         <div className="flex items-center -mr-2 flex-shrink-0">
+          {/* 비교함 담기 버튼 */}
+          <motion.button
+            onClick={() => {
+              if (canAddToCompare) {
+                addToCompare(cafe);
+                trackEvent('add_to_compare', { cafe_name: cafe.name });
+              }
+            }}
+            whileTap={{ scale: 0.85 }}
+            transition={{ duration: 0.25 }}
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors',
+              isInCompare && 'opacity-40',
+            )}
+            aria-label={isInCompare ? '비교함에 추가됨' : '비교함 담기'}
+            disabled={!canAddToCompare && !isInCompare}
+          >
+            <GitCompareArrows
+              className={cn(
+                'h-[18px] w-[18px] transition-colors',
+                isInCompare ? 'text-blue-500' : 'stroke-muted-foreground'
+              )}
+            />
+          </motion.button>
           {/* TODO: 알림 기능 추후 활성화
           {canRemind && (
             <motion.button

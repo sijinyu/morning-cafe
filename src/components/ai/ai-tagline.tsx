@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -57,27 +57,38 @@ function setCachedTagline(cafeId: string, tagline: string): void {
 export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, reviews }: AiTaglineProps) {
   const [tagline, setTagline] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
+  const fetchedRef = useRef<string | null>(null);
+
+  // Stabilize array/object dependencies by serializing to strings.
+  // This prevents re-fetching when parent re-renders with new array references
+  // that contain the same data.
+  const strengthsKey = useMemo(() => strengths.join(','), [strengths]);
+  const facilitiesKey = useMemo(() => facilities.join(','), [facilities]);
+  const ratingKey = rating ? `${rating.score}:${rating.count}` : '';
+  const hasData = strengths.length > 0 || facilities.length > 0 || !!rating;
 
   useEffect(() => {
     // Check localStorage cache first
     const cached = getCachedTagline(cafeId);
     if (cached) {
       setTagline(cached);
+      setLoading(false);
       return;
     }
 
     // No data to generate a meaningful tagline from
-    if (strengths.length === 0 && facilities.length === 0 && !rating) {
-      setTagline(null);
+    if (!hasData) {
+      // Don't clear existing tagline or loading — data may still be loading from parent
       return;
     }
 
-    abortRef.current?.abort();
+    // Prevent duplicate fetches for the same cafe+data combo
+    const fetchKey = `${cafeId}:${strengthsKey}:${facilitiesKey}:${ratingKey}`;
+    if (fetchedRef.current === fetchKey) return;
+    fetchedRef.current = fetchKey;
+
     const controller = new AbortController();
-    abortRef.current = controller;
     setLoading(true);
-    setTagline(null);
 
     const reviewSnippets = reviews
       .map((r) => r.contents)
@@ -112,7 +123,15 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
       });
 
     return () => controller.abort();
-  }, [cafeId, cafeName, strengths, facilities, rating, reviews]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cafeId, cafeName, strengthsKey, facilitiesKey, ratingKey, hasData]);
+
+  // Reset state when cafeId changes
+  useEffect(() => {
+    setTagline(null);
+    setLoading(false);
+    fetchedRef.current = null;
+  }, [cafeId]);
 
   if (!loading && !tagline) return null;
 
