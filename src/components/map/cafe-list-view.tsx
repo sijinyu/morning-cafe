@@ -84,7 +84,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
   const virtualizer = useVirtualizer({
     count: sortedCafes.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 88,
+    estimateSize: () => 96,
     overscan: 5,
   });
 
@@ -197,6 +197,15 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                 onClick={() => onSelectCafe(cafe)}
                 className="flex w-full items-start gap-3 px-5 py-4 hover:bg-foreground/[0.03] active:bg-foreground/[0.05] transition-colors text-left border-b border-border/50"
               >
+                {cafe.thumbnail_url ? (
+                  <div className="flex-shrink-0 h-11 w-11 rounded-full overflow-hidden bg-muted">
+                    <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  </div>
+                ) : (
+                  <div className="flex-shrink-0 h-11 w-11 rounded-full bg-muted flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-sm truncate">{cafe.name}</span>
@@ -282,8 +291,14 @@ function FeatureCard({ cafe, onSelect, badge, badgeColor, userLocation, showDist
   return (
     <button
       onClick={() => onSelect(cafe)}
-      className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background p-3 text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
+      className="flex-shrink-0 w-36 rounded-2xl border border-border/60 bg-background overflow-hidden text-left transition-colors hover:bg-foreground/[0.03] active:bg-foreground/[0.05]"
     >
+      {cafe.thumbnail_url && (
+        <div className="h-20 w-full bg-muted">
+          <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+        </div>
+      )}
+      <div className="p-3">
       <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
         {badge && (
           <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-bold', badgeColor)}>
@@ -310,6 +325,7 @@ function FeatureCard({ cafe, onSelect, badge, badgeColor, userLocation, showDist
       <p className="mt-0.5 text-[10px] text-muted-foreground truncate">
         {(cafe.road_address ?? cafe.address).replace(/서울\S*\s+\S+구\s*/, '')}
       </p>
+      </div>
     </button>
   );
 }

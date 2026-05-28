@@ -581,7 +581,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}
             position={{ lat: selectedCafe.latitude, lng: selectedCafe.longitude }}
-            yAnchor={0.5}
+            yAnchor={0.45}
             xAnchor={0.5}
             zIndex={0}
           >
@@ -596,11 +596,11 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
                   0% { r: 22; opacity: 0.5; stroke-width: 3.5; }
                   100% { r: 55; opacity: 0; stroke-width: 1; }
                 }
-                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out infinite; }
+                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 2.5s ease-out infinite; }
               `}</style>
               <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '0ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '600ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '1200ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '800ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '1600ms' }} />
             </svg>
           </CustomOverlayMap>
         );
