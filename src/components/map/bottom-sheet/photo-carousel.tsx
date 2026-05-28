@@ -51,7 +51,7 @@ function SlideImage({ url, alt, eager }: { url: string; alt: string; eager: bool
 function SkeletonCards() {
   return (
     <div className="flex gap-2 px-1">
-      {Array.from({ length: 3 }, (_, i) => (
+      {Array.from({ length: 5 }, (_, i) => (
         <div
           key={i}
           className="h-40 w-36 flex-shrink-0 animate-pulse rounded-xl bg-muted"

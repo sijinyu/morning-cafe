@@ -248,6 +248,39 @@ export interface CafeMapProps {
   userLocation?: { lat: number; lng: number } | null;
 }
 
+/**
+ * 바텀시트/사이드바를 고려하여 마커가 "보이는 지도 영역" 중앙에 오도록
+ * 오프셋된 좌표를 반환한다.
+ *
+ * 모바일: 바텀시트 55vh가 하단을 덮음 → 남쪽 오프셋 (위도 감소)
+ * 데스크탑: 사이드바 w-56(224px) 왼쪽 → 동쪽 오프셋 (경도 증가)
+ */
+function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
+  const bounds = map.getBounds();
+  const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
+  const lngSpan = bounds.getNorthEast().getLng() - bounds.getSouthWest().getLng();
+
+  const isMd = typeof window !== 'undefined' && window.innerWidth >= 768;
+
+  if (isMd) {
+    // 데스크탑: 사이드바 224px 왼쪽. 지도 전체 너비 중 사이드바 비율만큼 오른쪽으로 오프셋
+    const mapWidth = map.getNode().offsetWidth;
+    const sidebarPx = 224;
+    const lngOffset = (sidebarPx / mapWidth) * lngSpan * 0.5;
+    // 바텀시트는 bottom-0에서 55vh → 하단 오프셋
+    const mapHeight = map.getNode().offsetHeight;
+    const sheetPx = window.innerHeight * 0.55;
+    const latOffset = (sheetPx / mapHeight) * latSpan * 0.5;
+    map.panTo(new kakao.maps.LatLng(lat - latOffset, lng + lngOffset));
+  } else {
+    // 모바일: 바텀시트 55vh + 네비바 56px
+    const mapHeight = map.getNode().offsetHeight;
+    const sheetPx = window.innerHeight * 0.55 + 56;
+    const latOffset = (sheetPx / mapHeight) * latSpan * 0.5;
+    map.panTo(new kakao.maps.LatLng(lat - latOffset, lng));
+  }
+}
+
 export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
@@ -365,6 +398,10 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
     }
     setOverlapPopup(null);
     setSelectedCafe(cafe);
+    // 바텀시트/사이드바를 고려하여 마커가 보이는 영역 중앙에 오도록 panTo
+    if (mapInstanceRef.current) {
+      panToWithOffset(mapInstanceRef.current, cafe.latitude, cafe.longitude);
+    }
   }, [overlapIndex, setSelectedCafe]);
 
   // Auto-zoom to user location the first time a valid position arrives.
@@ -390,12 +427,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         if (map.getLevel() > 3) {
           map.setLevel(3);
         }
-        // 바텀시트(55vh)가 하단을 덮으므로, 지도 중심을 남쪽으로 오프셋하여
-        // 마커가 시트 위 상단 1/3 영역에 보이도록 조정
-        const bounds = map.getBounds();
-        const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
-        const offsetLat = lat - latSpan * 0.38;
-        map.panTo(new kakao.maps.LatLng(offsetLat, lng));
+        panToWithOffset(map, lat, lng);
       });
     }
     // 지도 클릭 시 바텀시트 + 겹침 팝업 닫기
@@ -725,6 +757,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
                   trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
                   setOverlapPopup(null);
                   setSelectedCafe(cafe);
+                  if (mapInstanceRef.current) panToWithOffset(mapInstanceRef.current, cafe.latitude, cafe.longitude);
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
@@ -732,6 +765,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
                   trackEvent('select_cafe', { cafe_name: cafe.name, source: 'overlap_popup' });
                   setOverlapPopup(null);
                   setSelectedCafe(cafe);
+                  if (mapInstanceRef.current) panToWithOffset(mapInstanceRef.current, cafe.latitude, cafe.longitude);
                 }}
                 onMouseOver={() => prefetchPlaceDetail(cafe.kakao_place_id)}
                 style={{
