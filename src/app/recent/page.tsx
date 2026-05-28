@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Trash2, CheckCircle2, Circle, X } from 'lucide-react';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
+import { getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
@@ -237,16 +238,19 @@ function RecentCafeItem({
         </div>
       )}
 
-      {/* Thumbnail */}
-      {cafe.thumbnail_url ? (
-        <div className="flex-shrink-0 h-11 w-11 rounded-full overflow-hidden bg-muted">
-          <img src={cafe.thumbnail_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-        </div>
-      ) : (
-        <div className="flex-shrink-0 h-11 w-11 rounded-full bg-muted flex items-center justify-center">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-        </div>
-      )}
+      {/* Thumbnail — DB 우선, place-detail 캐시 fallback */}
+      {(() => {
+        const photo = cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id);
+        return photo ? (
+          <div className="flex-shrink-0 h-11 w-11 rounded-full overflow-hidden bg-muted">
+            <img src={photo} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          </div>
+        ) : (
+          <div className="flex-shrink-0 h-11 w-11 rounded-full bg-muted flex items-center justify-center">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </div>
+        );
+      })()}
 
       {/* Info */}
       <div className="flex-1 min-w-0 space-y-1.5">
