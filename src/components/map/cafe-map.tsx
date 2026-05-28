@@ -573,9 +573,11 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
         })}
       </MarkerClusterer>
 
-      {/* 선택된 마커 ripple 파동 효과 — 마커 원형 중심에서 무한 반복 */}
+      {/* 선택된 마커 ripple 파동 효과 — 마커 border에서 시작, 2배까지 확장 */}
       {selectedCafe && (() => {
         const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
+        // 마커 직경: selected=44px → 반지름 22px. 파동은 22px에서 시작 → 44px(2배)까지
+        // SVG 100x100 viewBox, 중심 50,50. 시작 r=22, 끝 r=44
         return (
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}
@@ -585,21 +587,21 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             zIndex={0}
           >
             <svg
-              width="120"
-              height="120"
-              viewBox="0 0 120 120"
+              width="88"
+              height="88"
+              viewBox="0 0 88 88"
               style={{ pointerEvents: 'none' }}
             >
               <style>{`
                 @keyframes cafe-ripple {
-                  0% { r: 8; opacity: 0.45; stroke-width: 2.5; }
-                  100% { r: 50; opacity: 0; stroke-width: 0.5; }
+                  0% { r: 22; opacity: 0.4; stroke-width: 2; }
+                  100% { r: 44; opacity: 0; stroke-width: 0.5; }
                 }
                 .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out infinite; }
               `}</style>
-              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '0ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '600ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="8" style={{ animationDelay: '1200ms' }} />
+              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '0ms' }} />
+              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '600ms' }} />
+              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '1200ms' }} />
             </svg>
           </CustomOverlayMap>
         );
