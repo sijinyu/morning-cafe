@@ -39,6 +39,7 @@ import { ReviewSection } from './bottom-sheet/review-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
 import { QuietScoreBadge } from './bottom-sheet/quiet-score-badge';
+import { AiTagline } from '@/components/ai/ai-tagline';
 
 /** 직선 거리 → 도보 예상 시간 (분) */
 const WALK_DISTANCE_FACTOR = 1.3;
@@ -210,7 +211,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       initial={{ y: '100%' }}
       animate={{ y: 0, height: SHEET_HEIGHTS[sheetState] }}
       exit={{ y: '100%' }}
-      transition={{ type: 'tween', duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+      transition={{ type: 'tween', duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
         'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)] dark:shadow-none dark:border-t dark:border-border',
@@ -272,6 +273,14 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </span>
             )}
           </div>
+          <AiTagline
+            cafeId={cafe.id}
+            cafeName={cafe.name}
+            strengths={strengths}
+            facilities={facilities}
+            rating={rating}
+            reviews={reviews}
+          />
         </div>
 
         <div className="flex items-center -mr-2 flex-shrink-0">

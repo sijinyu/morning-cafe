@@ -419,6 +419,10 @@ interface CafeState {
   setHideChains: (hide: boolean) => void;
   setHide24h: (hide: boolean) => void;
   resetFilters: () => void;
+  compareSlots: Cafe[];
+  addToCompare: (cafe: Cafe) => void;
+  removeFromCompare: (id: string) => void;
+  clearCompare: () => void;
 }
 
 function parseOpeningMinutes(openingTime: string | null): number | null {
@@ -709,5 +713,21 @@ export const useCafeStore = create<CafeState>((set, get) => ({
   resetFilters() {
     set({ timeFilter: 'all', dayFilter: 'today', guFilter: null, hideChains: true, hide24h: false });
     recompute(get, set);
+  },
+
+  compareSlots: [],
+
+  addToCompare(cafe) {
+    const slots = get().compareSlots;
+    if (slots.length >= 3 || slots.some((c) => c.id === cafe.id)) return;
+    set({ compareSlots: [...slots, cafe] });
+  },
+
+  removeFromCompare(id) {
+    set({ compareSlots: get().compareSlots.filter((c) => c.id !== id) });
+  },
+
+  clearCompare() {
+    set({ compareSlots: [] });
   },
 }));

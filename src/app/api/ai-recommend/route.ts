@@ -19,7 +19,11 @@ interface CafeInput {
 }
 
 interface RecommendBody {
-  query: string;
+  query?: string;
+  mode?: 'taste-finder';
+  purpose?: string;
+  mood?: string;
+  facilities?: string[];
   userLat?: number;
   userLng?: number;
   cafes: CafeInput[];
@@ -141,10 +145,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 });
   }
 
-  const { query, userLat, userLng, cafes } = body;
+  const { userLat, userLng, cafes } = body;
 
-  if (!query?.trim()) {
-    return NextResponse.json({ error: '검색어를 입력해 주세요.' }, { status: 400 });
+  // Build query from taste-finder mode or use raw query
+  let query: string;
+  if (body.mode === 'taste-finder') {
+    if (!body.purpose || !body.mood) {
+      return NextResponse.json({ error: '목적과 분위기를 선택해 주세요.' }, { status: 400 });
+    }
+    const facilityStr = body.facilities?.length ? `, 필수시설: ${body.facilities.join(', ')}` : '';
+    query = `목적: ${body.purpose}, 분위기: ${body.mood}${facilityStr}`;
+  } else {
+    if (!body.query?.trim()) {
+      return NextResponse.json({ error: '검색어를 입력해 주세요.' }, { status: 400 });
+    }
+    query = body.query.trim();
   }
 
   if (!Array.isArray(cafes) || cafes.length === 0) {
@@ -155,14 +170,14 @@ export async function POST(request: NextRequest) {
   const cafeSlice = cafes.slice(0, 50);
 
   // Check cache
-  const cacheKey = hashQuery(query.trim(), cafeSlice.length);
+  const cacheKey = hashQuery(query, cafeSlice.length);
   const cached = getCached(cacheKey);
   if (cached) {
     return NextResponse.json(cached);
   }
 
   try {
-    const prompt = buildPrompt(query.trim(), cafeSlice, userLat, userLng);
+    const prompt = buildPrompt(query, cafeSlice, userLat, userLng);
     const result = await geminiModel.generateContent(prompt);
     const raw = result.response.text();
     const jsonStr = extractJson(raw);

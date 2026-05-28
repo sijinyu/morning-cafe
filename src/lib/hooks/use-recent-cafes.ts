@@ -64,6 +64,22 @@ function clearRecentFromStorage(): void {
   window.dispatchEvent(new Event('recent-cafes-changed'));
 }
 
+function removeRecentFromStorage(cafeId: string): void {
+  const current = getSnapshot();
+  const next = current.filter((id) => id !== cafeId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  cachedList = null;
+  window.dispatchEvent(new Event('recent-cafes-changed'));
+}
+
+function removeMultipleFromStorage(cafeIds: Set<string>): void {
+  const current = getSnapshot();
+  const next = current.filter((id) => !cafeIds.has(id));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  cachedList = null;
+  window.dispatchEvent(new Event('recent-cafes-changed'));
+}
+
 export function useRecentCafes() {
   const recentIds = useSyncExternalStore(subscribe, getStableSnapshot, getServerSnapshot);
 
@@ -75,5 +91,13 @@ export function useRecentCafes() {
     clearRecentFromStorage();
   }, []);
 
-  return { recentIds, addRecent, clearRecent };
+  const removeRecent = useCallback((cafeId: string) => {
+    removeRecentFromStorage(cafeId);
+  }, []);
+
+  const removeMultiple = useCallback((cafeIds: Set<string>) => {
+    removeMultipleFromStorage(cafeIds);
+  }, []);
+
+  return { recentIds, addRecent, clearRecent, removeRecent, removeMultiple };
 }

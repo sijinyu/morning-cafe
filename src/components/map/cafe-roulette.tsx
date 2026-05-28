@@ -19,8 +19,8 @@ interface CafeRouletteProps {
 }
 
 export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
-  const { cafes } = useCafeStore(
-    useShallow((s) => ({ cafes: s.cafes })),
+  const { filteredCafes } = useCafeStore(
+    useShallow((s) => ({ filteredCafes: s.filteredCafes })),
   );
 
   const [spinning, setSpinning] = useState(false);
@@ -37,11 +37,11 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
   }, []);
 
   const getNearbyCafes = useCallback(() => {
-    return cafes.filter((cafe) => {
+    return filteredCafes.filter((cafe) => {
       const dist = haversineKm(mapCenter.lat, mapCenter.lng, cafe.latitude, cafe.longitude);
       return dist <= NEARBY_RADIUS_KM;
     });
-  }, [cafes, mapCenter]);
+  }, [filteredCafes, mapCenter]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -123,6 +123,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
           ].join(' ')}
         />
         랜덤
+        <span className="text-[10px] text-muted-foreground font-normal">3km</span>
       </motion.button>
 
       {/* 토스트 */}

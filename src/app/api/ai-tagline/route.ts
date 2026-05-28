@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { geminiModel, extractJson, isGeminiConfigured } from '@/lib/ai/gemini';
+
+export const runtime = 'nodejs';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface TaglineBody {
+  cafeId: string;
+  name: string;
+  strengths?: string[];
+  facilities?: string[];
+  rating?: { score: number; count: number } | null;
+  reviewSnippets?: string[];
+}
+
+interface GeminiTaglineResponse {
+  tagline: string;
+}
+
+// ---------------------------------------------------------------------------
+// In-memory response cache (7 days — taglines rarely change)
+// ---------------------------------------------------------------------------
+
+interface CacheEntry {
+  data: GeminiTaglineResponse;
+  expiresAt: number;
+}
+
+const responseCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function getCached(key: string): GeminiTaglineResponse | null {
+  const entry = responseCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    responseCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key: string, data: GeminiTaglineResponse): void {
+  responseCache.set(key, { data, expiresAt: Date.now() + CACHE_TTL_MS });
+}
+
+// ---------------------------------------------------------------------------
+// Prompt builder
+// ---------------------------------------------------------------------------
+
+function buildPrompt(body: TaglineBody): string {
+  const details: string[] = [];
+  if (body.strengths?.length) details.push(`장점: ${body.strengths.join(', ')}`);
+  if (body.facilities?.length) details.push(`편의시설: ${body.facilities.join(', ')}`);
+  if (body.rating) details.push(`별점: ${body.rating.score.toFixed(1)} (${body.rating.count}개 리뷰)`);
+  if (body.reviewSnippets?.length) details.push(`리뷰 발췌: ${body.reviewSnippets.join(' / ')}`);
+
+  return `당신은 서울 카페 한줄 카피라이터입니다.
+
+카페: ${body.name}
+${details.length > 0 ? details.join('\n') : '추가 정보 없음'}
+
+이 카페를 한줄로 표현하세요 (15~25자).
+
+응답 형식은 반드시 아래 JSON만 출력하세요:
+{
+  "tagline": "한줄 태그라인"
+}
+
+규칙:
+- 15~25자 이내 (한국어)
+- 카페의 핵심 매력을 담을 것
+- 형용사+명사 조합 (예: "조용하고 커피 맛있는 아침 작업 카페")
+- 반드시 한국어로 응답`;
+}
+
+// ---------------------------------------------------------------------------
+// Route handler
+// ---------------------------------------------------------------------------
+
+export async function POST(request: NextRequest) {
+  if (!isGeminiConfigured()) {
+    return NextResponse.json({ tagline: '' }, { status: 503 });
+  }
+
+  let body: TaglineBody;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 });
+  }
+
+  if (!body.name?.trim()) {
+    return NextResponse.json({ error: '카페 이름이 필요합니다.' }, { status: 400 });
+  }
+
+  // Check cache
+  const cacheKey = `tag:${body.cafeId}`;
+  const cached = getCached(cacheKey);
+  if (cached) {
+    return NextResponse.json(cached);
+  }
+
+  try {
+    const prompt = buildPrompt(body);
+    const result = await geminiModel.generateContent(prompt);
+    const raw = result.response.text();
+    const jsonStr = extractJson(raw);
+    const parsed: GeminiTaglineResponse = JSON.parse(jsonStr);
+
+    if (typeof parsed.tagline !== 'string') {
+      throw new Error('Unexpected response shape');
+    }
+
+    const normalised: GeminiTaglineResponse = {
+      tagline: parsed.tagline.slice(0, 40), // safety limit
+    };
+
+    setCache(cacheKey, normalised);
+    return NextResponse.json(normalised);
+  } catch (err: unknown) {
+    // Handle Gemini rate limit (429)
+    const status = (err as { status?: number })?.status;
+    if (status === 429) {
+      return NextResponse.json({ tagline: '' });
+    }
+
+    return NextResponse.json({ tagline: '', error: 'AI 분석 중 오류 발생' }, { status: 500 });
+  }
+}

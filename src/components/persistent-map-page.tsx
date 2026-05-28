@@ -14,7 +14,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { CafeRoulette } from '@/components/map/cafe-roulette';
-import { AiSearch } from '@/components/map/ai-search';
+import { AiHubButton } from '@/components/ai/ai-hub-button';
 import { MorningPick } from '@/components/morning-pick';
 import { cn } from '@/lib/utils';
 
@@ -161,13 +161,7 @@ export function PersistentMapPage() {
               setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
             }}
           />
-          <AiSearch
-            userLocation={userLocation}
-            onSelectCafe={(cafe) => {
-              setSelectedCafe(cafe);
-              setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
-            }}
-          />
+          <AiHubButton />
           <CafeBottomSheetWrapper />
         </>
       ) : (
