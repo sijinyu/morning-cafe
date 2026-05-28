@@ -43,6 +43,7 @@ export function PersistentMapPage() {
   const panToRef = useRef<((lat: number, lng: number) => void) | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('map');
   const [listSearchQuery, setListSearchQuery] = useState('');
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const deepLinkHandledRef = useRef<string | null>(null);
   const [listSeen, setListSeen] = useState(true); // SSR safe default
 
@@ -146,10 +147,12 @@ export function PersistentMapPage() {
           <CafeMap
             onPanToReady={(fn) => { panToRef.current = fn; }}
             userLocation={userLocation}
+            onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
           />
           <MyLocationButton onLocation={handleLocationUpdate} />
           <CafeRoulette
             userLocation={userLocation}
+            mapCenter={mapCenter}
             onSelectCafe={(cafe) => {
               setSelectedCafe(cafe);
               setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);

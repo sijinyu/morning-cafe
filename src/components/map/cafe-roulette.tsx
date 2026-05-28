@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Dices } from 'lucide-react';
+import { Dices, Crosshair, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
@@ -9,68 +9,78 @@ import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
 import { trackEvent } from '@/lib/analytics';
 import { type Cafe } from '@/lib/types/cafe';
 
-const NEARBY_RADIUS_KM = 2; // 반경 2km
-const SPIN_DURATION = 2000; // 2초 슬롯 애니메이션
-const SLOT_INTERVAL = 80; // 슬롯 전환 간격 (ms)
+const NEARBY_RADIUS_KM = 2;
+const SPIN_DURATION = 2000;
+const SLOT_INTERVAL = 80;
+
+type RouletteMode = 'gps' | 'map';
 
 interface CafeRouletteProps {
   userLocation: { lat: number; lng: number } | null;
+  mapCenter: { lat: number; lng: number } | null;
   onSelectCafe: (cafe: Cafe) => void;
 }
 
-export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) {
+export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRouletteProps) {
   const { filteredCafes } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes })),
   );
 
+  const [mode, setMode] = useState<RouletteMode>('gps');
   const [spinning, setSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [resultCafe, setResultCafe] = useState<Cafe | null>(null);
   const [slotCafe, setSlotCafe] = useState<Cafe | null>(null);
-  const [noLocation, setNoLocation] = useState(false);
-  const [noCafes, setNoCafes] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const spinTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 클린업
   useEffect(() => {
     return () => {
       if (spinTimerRef.current) clearInterval(spinTimerRef.current);
     };
   }, []);
 
+  const getCenter = useCallback(() => {
+    if (mode === 'gps') return userLocation;
+    return mapCenter;
+  }, [mode, userLocation, mapCenter]);
+
   const getNearbyCafes = useCallback(() => {
-    if (!userLocation) return [];
+    const center = getCenter();
+    if (!center) return [];
     return filteredCafes.filter((cafe) => {
-      const dist = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
+      const dist = haversineKm(center.lat, center.lng, cafe.latitude, cafe.longitude);
       return dist <= NEARBY_RADIUS_KM;
     });
-  }, [filteredCafes, userLocation]);
+  }, [filteredCafes, getCenter]);
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2000);
+  }, []);
 
   const handleSpin = useCallback(() => {
     if (spinning) return;
 
-    if (!userLocation) {
-      setNoLocation(true);
-      setTimeout(() => setNoLocation(false), 2000);
+    const center = getCenter();
+    if (!center) {
+      showToast(mode === 'gps' ? '위치를 먼저 켜주세요' : '지도를 먼저 움직여주세요');
       return;
     }
 
     const nearby = getNearbyCafes();
     if (nearby.length === 0) {
-      setNoCafes(true);
-      setTimeout(() => setNoCafes(false), 2000);
+      showToast('반경 2km 내 카페가 없어요');
       return;
     }
 
-    trackEvent('roulette_spin', { nearby_count: nearby.length });
+    trackEvent('roulette_spin', { mode, nearby_count: nearby.length });
     setSpinning(true);
     setShowResult(false);
     setResultCafe(null);
 
-    // 최종 당첨 카페 미리 결정
     const winner = nearby[Math.floor(Math.random() * nearby.length)];
 
-    // 슬롯 애니메이션: 랜덤 카페를 빠르게 전환
     let elapsed = 0;
     spinTimerRef.current = setInterval(() => {
       elapsed += SLOT_INTERVAL;
@@ -86,7 +96,7 @@ export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) 
         setShowResult(true);
       }
     }, SLOT_INTERVAL);
-  }, [spinning, userLocation, getNearbyCafes]);
+  }, [spinning, mode, getCenter, getNearbyCafes, showToast]);
 
   const handleGoToCafe = useCallback(() => {
     if (!resultCafe) return;
@@ -102,14 +112,19 @@ export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) 
     setResultCafe(null);
   }, []);
 
+  const toggleMode = useCallback(() => {
+    setMode((m) => (m === 'gps' ? 'map' : 'gps'));
+  }, []);
+
   const displayCafe = slotCafe;
-  const distanceText = resultCafe && userLocation
-    ? `${(haversineKm(userLocation.lat, userLocation.lng, resultCafe.latitude, resultCafe.longitude) * 1000).toFixed(0)}m`
+  const center = getCenter();
+  const distanceText = resultCafe && center
+    ? `${(haversineKm(center.lat, center.lng, resultCafe.latitude, resultCafe.longitude) * 1000).toFixed(0)}m`
     : null;
 
   return (
     <>
-      {/* 룰렛 버튼 — 현위치 버튼 위에 pill 형태 */}
+      {/* 룰렛 버튼 */}
       <motion.button
         onClick={handleSpin}
         disabled={spinning}
@@ -132,30 +147,16 @@ export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) 
         랜덤
       </motion.button>
 
-      {/* 토스트: 위치 없음 */}
+      {/* 토스트 */}
       <AnimatePresence>
-        {noLocation && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-32 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm text-background shadow-lg"
-          >
-            위치를 먼저 켜주세요
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 토스트: 근처 카페 없음 */}
-      <AnimatePresence>
-        {noCafes && (
+        {toast && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-32 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm text-background shadow-lg whitespace-nowrap"
           >
-            반경 2km 내 카페가 없어요
+            {toast}
           </motion.div>
         )}
       </AnimatePresence>
@@ -178,6 +179,27 @@ export function CafeRoulette({ userLocation, onSelectCafe }: CafeRouletteProps) 
               className="mx-6 w-full max-w-sm overflow-hidden rounded-2xl bg-background shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* 모드 토글 — 카드 상단 */}
+              <div className="flex items-center justify-center gap-1 pt-3 pb-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleMode(); }}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  {mode === 'gps' ? (
+                    <>
+                      <Navigation className="h-3 w-3" />
+                      내 위치 기준
+                    </>
+                  ) : (
+                    <>
+                      <Crosshair className="h-3 w-3" />
+                      지도 중심 기준
+                    </>
+                  )}
+                  <span className="text-[10px] text-muted-foreground/60">탭하여 전환</span>
+                </button>
+              </div>
+
               {/* 썸네일 */}
               {displayCafe.thumbnail_url && (
                 <div className="relative h-40 w-full overflow-hidden bg-muted">

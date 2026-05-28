@@ -233,6 +233,8 @@ export interface CafeMapProps {
   onPanToReady?: (panTo: (lat: number, lng: number) => void) => void;
   /** Current GPS coordinates of the user. Renders a blue dot marker when set. */
   userLocation?: { lat: number; lng: number } | null;
+  /** Called when the map center changes (pan/zoom). */
+  onCenterChange?: (lat: number, lng: number) => void;
 }
 
 /**
@@ -274,7 +276,7 @@ function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
   }
 }
 
-export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
+export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapProps) {
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
 
@@ -516,6 +518,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
 
     setCenter({ lat, lng });
     updateBounds(map);
+    onCenterChange?.(lat, lng);
   }
 
   if (loading) {
