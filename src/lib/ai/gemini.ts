@@ -8,7 +8,7 @@ if (!process.env.GOOGLE_GEMINI_API_KEY && typeof window === 'undefined') {
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY ?? '');
 
-export const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+export const geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 /** Extracts a JSON string from a Gemini response that may be wrapped in markdown code fences. */
 export function extractJson(text: string): string {

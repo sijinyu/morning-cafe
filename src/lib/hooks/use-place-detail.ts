@@ -51,15 +51,14 @@ function preloadPhotos(photos: string[], photosHd?: string[]) {
     if (!url) continue;
 
     if (i < 2) {
-      // Low-priority prefetch for first 2 (avoids "preloaded but not used" console warning)
-      if (document.querySelector(`link[rel="prefetch"][href="${CSS.escape(url)}"]`)) continue;
+      if (document.querySelector(`link[rel="preload"][href="${CSS.escape(url)}"]`)) continue;
       const link = document.createElement('link');
-      link.rel = 'prefetch';
+      link.rel = 'preload';
       link.as = 'image';
       link.href = url;
+      (link as HTMLLinkElement & { fetchPriority: string }).fetchPriority = 'high';
       document.head.appendChild(link);
     } else {
-      // Background prefetch for remaining carousel images
       scheduleIdle(() => {
         const img = new globalThis.Image();
         img.src = url;
@@ -190,7 +189,7 @@ export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResul
     setLoading(true);
 
     // Uses shared fetch — if prefetchPlaceDetail() already started the request,
-    // we join the same promise instead of making a duplicate request
+    // we join the same promise instead of making a duplicate request.
     fetchPlaceDetail(kakaoPlaceId)
       .then((json) => {
         if (cancelled) return;
