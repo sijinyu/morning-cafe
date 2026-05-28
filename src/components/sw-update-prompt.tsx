@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isNativeApp } from '@/lib/capacitor';
 
 export function SwUpdatePrompt() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (isNativeApp()) return;
 
     const handleUpdate = (registration: ServiceWorkerRegistration) => {
       const waiting = registration.waiting;

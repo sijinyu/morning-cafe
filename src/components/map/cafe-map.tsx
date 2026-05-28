@@ -9,6 +9,7 @@ import { is24HoursForDay } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { prefetchPlaceDetail } from '@/lib/hooks/use-place-detail';
 import { trackEvent } from '@/lib/analytics';
+import { isNativeApp } from '@/lib/capacitor';
 
 // Seoul City Hall coordinates — default map center
 const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
@@ -348,6 +349,12 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
   }, [visibleCafes]);
 
   const handleMarkerSelect = useCallback((cafe: Cafe) => {
+    // 네이티브 앱: 미세 햅틱
+    if (isNativeApp()) {
+      import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+        Haptics.impact({ style: ImpactStyle.Light });
+      }).catch(() => {});
+    }
     // 같은 위치에 카페가 2개 이상이면 목록 팝업
     const key = `${cafe.latitude.toFixed(4)},${cafe.longitude.toFixed(4)}`;
     const group = overlapIndex[key];

@@ -16,7 +16,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="메인 네비게이션" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/80 backdrop-blur-md md:hidden">
+    <nav aria-label="메인 네비게이션" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/80 backdrop-blur-md md:hidden" style={{ paddingBottom: 'var(--safe-area-bottom)' }}>
       <div className="flex h-14 items-center justify-around">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;

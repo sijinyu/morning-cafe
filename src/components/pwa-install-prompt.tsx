@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { X, Share, Plus, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isNativeApp } from '@/lib/capacitor';
 
 const DISMISSED_KEY = 'pwa-install-dismissed';
 const DISMISS_DAYS = 14;
@@ -40,6 +41,8 @@ export function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    // 네이티브 앱이면 표시 안 함
+    if (isNativeApp()) return;
     // standalone이면 표시 안 함
     if (isStandalone()) return;
     if (wasDismissedRecently()) return;

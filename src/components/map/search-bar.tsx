@@ -89,7 +89,8 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
   return (
     <div
       ref={containerRef}
-      className="absolute top-3 left-1/2 z-50 w-full max-w-sm -translate-x-1/2 px-4"
+      className="absolute left-1/2 z-50 w-full max-w-sm -translate-x-1/2 px-4"
+      style={{ top: 'calc(0.75rem + var(--safe-area-top))' }}
     >
       {/* Input */}
       <motion.div

@@ -46,3 +46,7 @@ supabase/.temp/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# capacitor
+ios/
+android/

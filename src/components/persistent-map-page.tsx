@@ -132,7 +132,7 @@ export function PersistentMapPage() {
       <TimeFilter />
 
       {/* 뷰 모드 토글 — 현위치 버튼과 같은 수평선, 양끝 */}
-      <div className="absolute bottom-18 md:bottom-6 left-4 z-10">
+      <div className="absolute md:bottom-6 left-4 z-10" style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}>
         <motion.button
           onClick={() => { const next = viewMode === 'map' ? 'list' : 'map'; trackEvent('toggle_view', { mode: next }); setViewMode(next); }}
           whileTap={{ scale: 0.92 }}
@@ -157,7 +157,7 @@ export function PersistentMapPage() {
         </motion.button>
       </div>
 
-      <div className="absolute bottom-16 md:bottom-2 left-1/2 z-10 -translate-x-1/2">
+      <div className="absolute md:bottom-2 left-1/2 z-10 -translate-x-1/2" style={{ bottom: 'calc(var(--bottom-nav-height) + 0.5rem)' }}>
         <a
           href="mailto:sijinyudev@gmail.com"
           className="rounded-full bg-background/60 px-3 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm hover:text-muted-foreground transition-colors"

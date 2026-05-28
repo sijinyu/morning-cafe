@@ -8,6 +8,8 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { PersistentMapPage } from '@/components/persistent-map-page';
 import { SwUpdatePrompt } from '@/components/sw-update-prompt';
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
+import { StatusBarConfig } from '@/components/native/status-bar-config';
+import { OfflineScreen } from '@/components/native/offline-screen';
 
 import './globals.css';
 
@@ -49,6 +51,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover',
   themeColor: '#F59E0B',
 };
 
@@ -123,6 +126,8 @@ export default function RootLayout({
             </main>
           </div>
           <BottomNav />
+          <StatusBarConfig />
+          <OfflineScreen />
           <SwUpdatePrompt />
           <PwaInstallPrompt />
         </ThemeProvider>

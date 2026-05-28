@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore, useCallback } from 'react';
 import { trackEvent } from '@/lib/analytics';
+import { isNativeApp } from '@/lib/capacitor';
 
 const STORAGE_KEY = 'morning-cafe-favorites';
 
@@ -72,6 +73,11 @@ export function useFavorites() {
 
   const toggleFavorite = useCallback((cafeId: string) => {
     trackEvent('toggle_favorite', { cafe_id: cafeId });
+    if (isNativeApp()) {
+      import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+        Haptics.impact({ style: ImpactStyle.Medium });
+      }).catch(() => {});
+    }
     return toggle(cafeId);
   }, []);
 

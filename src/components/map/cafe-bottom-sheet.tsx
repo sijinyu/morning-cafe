@@ -28,6 +28,7 @@ import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
+import { isNativeApp } from '@/lib/capacitor';
 import { PhotoCarousel } from './bottom-sheet/photo-carousel';
 import { MenuSection } from './bottom-sheet/menu-section';
 import { ReviewSection } from './bottom-sheet/review-section';
@@ -88,7 +89,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   // const { hasReminder, scheduleReminder, removeReminder, requestPermission } = useNotifications();
   const { addRecent } = useRecentCafes();
-  const { photosTiny, photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
+  const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
   const favorited = isFavorite(cafe.id);
   // const reminded = hasReminder(cafe.id);
@@ -167,7 +168,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 32, stiffness: 320 }}
       className={cn(
-        'fixed bottom-14 md:bottom-0 left-0 right-0 z-40',
+        'fixed left-0 right-0 z-40',
+        'bottom-[var(--bottom-nav-height)] md:bottom-0',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)]',
         'flex flex-col overflow-hidden',
       )}
@@ -277,7 +279,6 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             <PhotoCarousel
               photos={photos}
               photosHd={photosHd}
-              photosTiny={photosTiny}
               loading={photosLoading}
               cafeName={cafe.name}
               placeUrl={cafe.place_url}
@@ -456,6 +457,18 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
                   const shareUrl = `https://morning-cafe-phi.vercel.app/cafe/${cafe.id}`;
                   const shareText = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}`;
+
+                  // 0. Native share (Capacitor)
+                  if (isNativeApp()) {
+                    import('@capacitor/share').then(({ Share }) => {
+                      Share.share({
+                        title: cafe.name,
+                        text: shareText,
+                        url: shareUrl,
+                      });
+                    }).catch(() => {});
+                    return;
+                  }
 
                   // 1. Kakao Share
                   if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Kakao) {

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { formatOpeningTime } from '@/lib/cafe-utils';
+import { isNativeApp } from '@/lib/capacitor';
 import type { Cafe } from '@/lib/types/cafe';
 
 declare global {
@@ -36,6 +37,15 @@ export function CafeShareButton({ cafe }: CafeShareButtonProps) {
       cafe_name: cafe.name,
       cafe_id: cafe.id,
     });
+
+    // 0. Native share (Capacitor)
+    if (isNativeApp()) {
+      try {
+        const { Share } = await import('@capacitor/share');
+        await Share.share({ title: shareTitle, text: shareText, url: shareUrl });
+        return;
+      } catch { /* fallback */ }
+    }
 
     // 1. Try Kakao Share (mobile-optimized Feed template)
     if (typeof window !== 'undefined' && window.Kakao?.isInitialized()) {
