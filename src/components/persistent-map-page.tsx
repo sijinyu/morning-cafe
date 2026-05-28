@@ -98,16 +98,17 @@ export function PersistentMapPage() {
       aria-hidden={!isMapRoute}
     >
       <SplashScreen ready={cafes.length > 0} />
-      {viewMode === 'map' ? (
-        <>
-          <CafeMap
-            onPanToReady={(fn) => { panToRef.current = fn; }}
-            userLocation={userLocation}
-          />
-          <MyLocationButton onLocation={handleLocationUpdate} />
-          <CafeBottomSheetWrapper />
-        </>
-      ) : (
+      {/* Map — always mounted, hidden when list is active to preserve position */}
+      <div className={viewMode === 'map' ? '' : 'invisible absolute inset-0 pointer-events-none'}>
+        <CafeMap
+          onPanToReady={(fn) => { panToRef.current = fn; }}
+          userLocation={userLocation}
+        />
+        <MyLocationButton onLocation={handleLocationUpdate} />
+        <CafeBottomSheetWrapper />
+      </div>
+      {/* List view */}
+      {viewMode === 'list' && (
         <div className="h-full pt-28">
           <CafeListView
             userLocation={userLocation}

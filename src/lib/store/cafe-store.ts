@@ -343,6 +343,8 @@ const CHAIN_KEYWORDS = [
   '이삭토스트',
   '에그드랍', 'EGG DROP',
   '잇마이샌드', 'EATMYSAND',
+  // 2026-05-28 추가
+  '빌리앤젤', 'BILLY ANGEL',
 ] as const;
 
 const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
