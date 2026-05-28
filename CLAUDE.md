@@ -276,7 +276,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
 8. **상세보기 수직 간격**: 모든 상세 행(별점, 장점칩, 주차, 편의시설, 주소, 전화, 인스타)은 `space-y-0` 그룹 내 각 `py-2.5`로 통일.
 9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 유시진 All rights reserved."
-10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-7 w-7`, 아이콘 `h-[18px] w-[18px]`, gap 없음. 밀착 배치.
+10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-10 w-10`, 아이콘 `h-[18px] w-[18px]`. 터치 타겟 44px 확보.
 11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝커피" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
@@ -284,7 +284,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (14일, 500개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (3일, 150개). SW 업데이트는 `skipWaiting: false` + `SwUpdatePrompt` 컴포넌트로 유저 확인 후 교체.
 16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
 17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
-18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`.
+18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`. 즐겨찾기 일괄 공유는 Kakao ListFeed(최대 5개) 사용.
 19. **딥링크**: `/?cafeId=xxx` → PersistentMapPage에서 cafes 로드 후 해당 카페 자동 select + panTo. `useSearchParams()` 사용 → `<Suspense>` 래핑 필수.
 20. **24시간 판정 (요일별)**: `is24Hours(cafe)`는 **모든 요일** 24시간인 경우만 true (hide24h 필터용). 마커/배지/리스트에서는 `is24HoursForDay(cafe, dayKey)`로 **오늘 요일** 기준 판정. `cafe-utils.ts`에서 export.
 21. **카페명 라벨**: 줌 레벨 3 이하(충분히 확대)에서 `CustomOverlayMap`으로 마커 아래에 카페명 표시. `zoomLevel` state로 추적. `yAnchor={-0.2}`, `pointerEvents: 'none'`.
@@ -295,6 +295,13 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 26. **인앱 리뷰**: `ReviewItem` (카카오 3개) + `BlogReviewItem` (블로그 4개) 통합. `review-section.tsx`에서 접힌 상태=카카오 2개 프리뷰, 펼치면 카카오+블로그 전체. 블로그는 원문 링크 포함. panel3 API에서 제공 (페이지네이션 불가).
 27. **모바일 프리페치**: `IS_MOBILE && zoomLevel <= 4`일 때 뷰포트 중심 기준 가장 가까운 카페 5개 `prefetchPlaceDetail()` 자동 호출 (800ms 디바운스). 모바일은 hover 불가하므로 대체 전략.
 28. **후원 버튼**: Buy Me a Coffee 링크 (report 페이지 + desktop sidebar). 현재 주석 처리 — BMC 계정 준비 후 활성화.
+29. **리스트뷰 피처 섹션**: 검색 쿼리 없을 때 상단에 "신규 카페"(7일 이내, 최대 10개)와 "얼리버드 TOP"(가장 일찍 여는 8개) 가로 스크롤 카드 표시. `isNewCafe()` 사용.
+30. **즐겨찾기 일괄 공유**: favorites 페이지 헤더에 Share2 버튼. Kakao ListFeed(최대 5개) → Native → Web Share → Clipboard 체인.
+31. **panTo 오프셋**: `latSpan * 0.38`로 바텀시트(55vh) 위에 마커가 보이도록 남쪽 오프셋. 줌 레벨 3 이하로 자동 확대 후 적용.
+32. **필터 초기화**: `resetFilters()` 액션으로 모든 필터 기본값 복원. 초기화 버튼은 아이콘(RotateCcw)만 표시, 라벨 없음.
+33. **검색 기록**: `use-search-history.ts` 훅. localStorage 최대 10개, 최소 2글자. 검색바 포커스 + 빈 쿼리 시 "최근 검색" 드롭다운.
+34. **CDN warmup**: `warmupConnections()` — 앱 초기화 시 kakaocdn TCP keep-alive + 첫 카페 place-detail API 사전 호출.
+35. **탭 이동 시 UI 숨김**: SearchBar, TimeFilter, ViewToggle, Copyright는 `{isMapRoute && (...)}` 조건부 렌더링.
 
 ### 커밋 메시지
 
@@ -324,6 +331,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 이미지 로딩 최적화 (전체 프리로드, decoding async, SW 캐시 확장)
 - [x] 블로그 리뷰 추출 + 리뷰 더보기 (카카오 3 + 블로그 4 통합)
 - [x] 모바일 뷰포트 자동 프리페치 (hover 대체, zoom ≤ 4, 가까운 5개)
+- [x] UX 종합 개선 — empty state, 터치타겟 44px, 검색기록, 필터초기화, pill 통일, 다크모드 그림자
+- [x] 비주얼 리뉴얼 — 토스/당근 스타일 (bg-foreground 반전 칩, 따뜻한 색상 체계)
+- [x] CDN keep-alive warmup (이미지 로드 2-3초 지연 해소)
+- [x] 즐겨찾기 일괄 공유 (Kakao ListFeed)
+- [x] 리스트뷰 신규/인기 카페 피처 섹션
+- [x] panTo 바텀시트 오프셋 보정
 - [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
