@@ -12,6 +12,7 @@ import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
+import { CafeRoulette } from '@/components/map/cafe-roulette';
 import { cn } from '@/lib/utils';
 
 import { trackEvent } from '@/lib/analytics';
@@ -146,6 +147,13 @@ export function PersistentMapPage() {
             userLocation={userLocation}
           />
           <MyLocationButton onLocation={handleLocationUpdate} />
+          <CafeRoulette
+            userLocation={userLocation}
+            onSelectCafe={(cafe) => {
+              setSelectedCafe(cafe);
+              setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
+            }}
+          />
           <CafeBottomSheetWrapper />
         </>
       ) : (
