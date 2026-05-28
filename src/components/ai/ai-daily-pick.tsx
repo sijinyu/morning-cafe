@@ -14,7 +14,7 @@ import { trackEvent } from '@/lib/analytics';
 // Types
 // ---------------------------------------------------------------------------
 
-type PickState = 'idle' | 'loading' | 'result' | 'error';
+type PickState = 'idle' | 'loading' | 'result' | 'error' | 'rate-limited';
 
 interface AiDailyPickProps {
   onClose: () => void;
@@ -93,6 +93,10 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
         }),
       });
 
+      if (res.status === 429) {
+        setState('rate-limited');
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = (await res.json()) as { cafe_id?: string; reason?: string };
@@ -175,6 +179,20 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
         <div className="flex flex-col items-center gap-4 py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
           <p className="text-sm text-muted-foreground animate-pulse">오늘의 카페를 고르고 있어요...</p>
+        </div>
+      )}
+
+      {/* Rate limited */}
+      {state === 'rate-limited' && (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-[15px] font-medium text-amber-600 dark:text-amber-400">AI 요청이 많아요</p>
+          <p className="text-sm text-muted-foreground">1분 후 다시 시도해주세요</p>
+          <button
+            onClick={handleReset}
+            className="rounded-full border border-border/60 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            돌아가기
+          </button>
         </div>
       )}
 

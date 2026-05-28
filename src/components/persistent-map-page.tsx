@@ -207,7 +207,7 @@ export function PersistentMapPage() {
               'text-sm font-semibold',
               'transition-all',
               viewMode === 'list'
-                ? 'bg-foreground text-background hover:opacity-90'
+                ? 'bg-background/60 backdrop-blur-xl text-foreground hover:bg-background/80'
                 : 'bg-background/95 backdrop-blur-xl text-foreground hover:bg-foreground/5',
               !listSeen && 'ring-2 ring-foreground/20 ring-offset-2 ring-offset-background animate-pulse',
             )}

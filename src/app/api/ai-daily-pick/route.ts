@@ -161,10 +161,11 @@ export async function POST(request: NextRequest) {
     setCache(cacheKey, normalised);
     return NextResponse.json(normalised);
   } catch (err: unknown) {
-    // Handle Gemini rate limit (429)
     const status = (err as { status?: number })?.status;
-    if (status === 429) {
-      // Rate limited — return first cafe as fallback
+    const message = (err as Error)?.message ?? '';
+    console.error('[ai-daily-pick] Gemini error:', { status, message });
+
+    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
       return NextResponse.json({
         cafe_id: cafeSlice[0]?.id ?? '',
         reason: '오늘도 좋은 아침이에요. 가까운 카페에서 하루를 시작해보세요.',
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { ...EMPTY_RESPONSE, error: 'AI 추천 중 오류가 발생했습니다.' },
+      { ...EMPTY_RESPONSE, error: `AI 추천 중 오류가 발생했습니다. (${status ?? message.slice(0, 50)})` },
       { status: 500 },
     );
   }

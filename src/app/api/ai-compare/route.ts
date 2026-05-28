@@ -200,12 +200,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(normalised);
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
-    if (status === 429) {
+    const message = (err as Error)?.message ?? '';
+    console.error('[ai-compare] Gemini error:', { status, message });
+
+    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
       return NextResponse.json(EMPTY_RESPONSE, { status: 429 });
     }
 
     return NextResponse.json(
-      { ...EMPTY_RESPONSE, error: 'AI 비교 중 오류가 발생했습니다.' },
+      { ...EMPTY_RESPONSE, error: `AI 비교 중 오류가 발생했습니다. (${status ?? message.slice(0, 50)})` },
       { status: 500 },
     );
   }

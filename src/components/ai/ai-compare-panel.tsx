@@ -25,7 +25,7 @@ interface AiCompareResponse {
   winner_id: string;
 }
 
-type CompareState = 'idle' | 'loading' | 'results' | 'error';
+type CompareState = 'idle' | 'loading' | 'results' | 'error' | 'rate-limited';
 
 interface AiComparePanelProps {
   onClose: () => void;
@@ -301,6 +301,10 @@ export function AiComparePanel({ onClose: _onClose }: AiComparePanelProps) {
         signal: controller.signal,
       });
 
+      if (res.status === 429) {
+        setCompareState('rate-limited');
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data: AiCompareResponse = await res.json();
@@ -380,6 +384,19 @@ export function AiComparePanel({ onClose: _onClose }: AiComparePanelProps) {
       )}
 
       {compareState === 'loading' && <CompareSkeleton cafeCount={selectedCafes.length} />}
+
+      {compareState === 'rate-limited' && (
+        <div className="flex flex-col items-center gap-3 py-8 text-center">
+          <p className="text-[15px] font-medium text-amber-600 dark:text-amber-400">AI 요청이 많아요</p>
+          <p className="text-sm text-muted-foreground">1분 후 다시 시도해주세요</p>
+          <button
+            onClick={handleReset}
+            className="mt-1 rounded-full border border-border/60 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            돌아가기
+          </button>
+        </div>
+      )}
 
       {compareState === 'error' && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">

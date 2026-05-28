@@ -14,7 +14,7 @@ import { trackEvent } from '@/lib/analytics';
 // Types
 // ---------------------------------------------------------------------------
 
-type CommuteState = 'idle' | 'loading' | 'results' | 'error';
+type CommuteState = 'idle' | 'loading' | 'results' | 'error' | 'rate-limited';
 
 interface AiCommutePanelProps {
   onClose: () => void;
@@ -112,6 +112,10 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
         }),
       });
 
+      if (res.status === 429) {
+        setState('rate-limited');
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data: CommuteResponse = await res.json();
@@ -143,7 +147,7 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
   return (
     <div className="flex flex-col gap-5 px-4 pb-6 pt-4">
       {/* Form */}
-      {(state === 'idle' || state === 'error') && (
+      {(state === 'idle' || state === 'error' || state === 'rate-limited') && (
         <>
           {/* Home */}
           <div className="flex flex-col gap-2">
@@ -246,6 +250,11 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
             출근길 카페 찾기
           </motion.button>
 
+          {state === 'rate-limited' && (
+            <p className="text-center text-sm text-amber-600 dark:text-amber-400">
+              AI 요청이 많아요. 1분 후 다시 시도해주세요.
+            </p>
+          )}
           {state === 'error' && (
             <p className="text-center text-sm text-red-500">
               추천에 실패했어요. 다시 시도해주세요.

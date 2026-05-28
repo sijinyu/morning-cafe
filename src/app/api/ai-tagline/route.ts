@@ -121,12 +121,14 @@ export async function POST(request: NextRequest) {
     setCache(cacheKey, normalised);
     return NextResponse.json(normalised);
   } catch (err: unknown) {
-    // Handle Gemini rate limit (429)
     const status = (err as { status?: number })?.status;
-    if (status === 429) {
+    const message = (err as Error)?.message ?? '';
+    console.error('[ai-tagline] Gemini error:', { status, message });
+
+    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
       return NextResponse.json({ tagline: '' });
     }
 
-    return NextResponse.json({ tagline: '', error: 'AI 분석 중 오류 발생' }, { status: 500 });
+    return NextResponse.json({ tagline: '', error: `AI 분석 중 오류 발생 (${status ?? message.slice(0, 50)})` }, { status: 500 });
   }
 }

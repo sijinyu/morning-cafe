@@ -204,14 +204,16 @@ export async function POST(request: NextRequest) {
     setCache(cacheKey, normalised);
     return NextResponse.json(normalised);
   } catch (err: unknown) {
-    // Handle Gemini rate limit (429)
     const status = (err as { status?: number })?.status;
-    if (status === 429) {
+    const message = (err as Error)?.message ?? '';
+    console.error('[ai-recommend] Gemini error:', { status, message });
+
+    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
       return NextResponse.json(EMPTY_RESPONSE, { status: 429 });
     }
 
     return NextResponse.json(
-      { ...EMPTY_RESPONSE, error: 'AI 추천 중 오류가 발생했습니다.' },
+      { ...EMPTY_RESPONSE, error: `AI 추천 중 오류가 발생했습니다. (${status ?? message.slice(0, 50)})` },
       { status: 500 },
     );
   }
