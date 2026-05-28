@@ -98,8 +98,9 @@ export function PersistentMapPage() {
       aria-hidden={!isMapRoute}
     >
       <SplashScreen ready={cafes.length > 0} />
-      {/* Map — always mounted, hidden when list is active to preserve position */}
-      <div className={viewMode === 'map' ? '' : 'invisible absolute inset-0 pointer-events-none'}>
+      {/* Map — always mounted, hidden via z-index when list is active to preserve position.
+           visibility:hidden breaks kakao map rendering, so we use z-index + pointer-events instead. */}
+      <div className={viewMode === 'map' ? '' : 'absolute inset-0 -z-10 pointer-events-none'}>
         <CafeMap
           onPanToReady={(fn) => { panToRef.current = fn; }}
           userLocation={userLocation}
