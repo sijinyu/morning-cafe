@@ -522,7 +522,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   <Check className="h-3.5 w-3.5" />
                 ) : null}
               </button> */}
-              <button
+              {/* 감성 카드 버튼 — 보류 */}
+              {/* <button
                 onClick={handleStoryCard}
                 disabled={cardLoading}
                 className={cn(
@@ -535,7 +536,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 aria-label="감성 카드"
               >
                 <Sparkles className={cn('h-4 w-4', cardLoading && 'animate-pulse')} />
-              </button>
+              </button> */}
               <button
                 onClick={() => {
                   trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
