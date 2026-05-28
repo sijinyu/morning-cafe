@@ -57,23 +57,13 @@ function buildPrompt(body: TaglineBody): string {
   if (body.rating) details.push(`별점: ${body.rating.score.toFixed(1)} (${body.rating.count}개 리뷰)`);
   if (body.reviewSnippets?.length) details.push(`리뷰 발췌: ${body.reviewSnippets.join(' / ')}`);
 
-  return `당신은 서울 카페 한줄 카피라이터입니다.
+  return `카페: ${body.name}
+${details.length > 0 ? details.join(', ') : ''}
 
-카페: ${body.name}
-${details.length > 0 ? details.join('\n') : '추가 정보 없음'}
-
-이 카페를 한줄로 표현하세요 (15~25자).
-
-응답 형식은 반드시 아래 JSON만 출력하세요:
-{
-  "tagline": "한줄 태그라인"
-}
-
-규칙:
-- 15~25자 이내 (한국어)
-- 카페의 핵심 매력을 담을 것
-- 형용사+명사 조합 (예: "조용하고 커피 맛있는 아침 작업 카페")
-- 반드시 한국어로 응답`;
+이 카페를 친구에게 소개하듯 한줄로 표현해줘 (15~20자).
+반드시 JSON만: {"tagline":"한줄"}
+- 다정한 톤 ("~거든요", "~좋아요")
+- 딱딱한 존댓말 금지`;
 }
 
 // ---------------------------------------------------------------------------

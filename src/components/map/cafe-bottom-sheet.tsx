@@ -427,25 +427,25 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               )}
 
               {/* Address — items-start: 긴 주소 줄바꿈 시 아이콘 상단 정렬 */}
-              <div className="flex items-start gap-2 py-1.5">
+              <div className="flex items-start gap-2 py-2">
                 <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
                 <button
                   onClick={handleCopyAddress}
-                  className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                  className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
                   aria-label="주소 복사"
                 >
                   {copied ? (
-                    <Check className="h-4 w-4 text-green-500" />
+                    <Check className="h-3.5 w-3.5 text-green-500" />
                   ) : (
-                    <Copy className="h-4 w-4 text-muted-foreground" />
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                   )}
                 </button>
               </div>
 
               {/* Phone */}
               {cafe.phone && (
-                <div className="flex items-center gap-2 py-1.5">
+                <div className="flex items-center gap-2 py-2">
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <a
                     href={`tel:${cafe.phone}`}
@@ -455,13 +455,13 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   </a>
                   <button
                     onClick={handleCopyPhone}
-                    className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
                     aria-label="전화번호 복사"
                   >
                     {phoneCopied ? (
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-3.5 w-3.5 text-green-500" />
                     ) : (
-                      <Copy className="h-4 w-4 text-muted-foreground" />
+                      <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
                   </button>
                 </div>

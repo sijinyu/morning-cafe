@@ -324,7 +324,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
   const prefetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userLoc = useCafeStore((s) => s.userLocation);
   useEffect(() => {
-    if (!viewportBounds || zoomLevel > 5) return;
+    if (!viewportBounds || zoomLevel > 6) return;
 
     if (prefetchTimerRef.current) clearTimeout(prefetchTimerRef.current);
     prefetchTimerRef.current = setTimeout(() => {
@@ -569,7 +569,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
           // DB thumbnail_url 우선, 없으면 place-detail 캐시 fallback
           const photo = isChain ? null : (cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id));
           // 줌 ≤ 3 + 개인카페 + 사진 있음 → 사진 마커가 대신 표시되므로 SVG 숨김
-          const hideIcon = zoomLevel <= 3 && !!photo;
+          const hideIcon = zoomLevel <= 4 && !!photo;
           return (
             <CafeMarker
               key={cafe.id}
@@ -589,7 +589,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
         const isChainCafe = chainCafeIds.has(selectedCafe.id);
         const hasPhoto = !isChainCafe && !!(selectedCafe.thumbnail_url || getCachedFirstPhoto(selectedCafe.kakao_place_id));
         // 사진 마커가 보이는 상황(zoom ≤ 3 + photo)이면 사진 내부 ripple이 담당 → 여기서는 스킵
-        if (zoomLevel <= 3 && hasPhoto) return null;
+        if (zoomLevel <= 4 && hasPhoto) return null;
         const colors = getCachedMarkerColors(selectedCafe, isChainCafe);
         return (
           <CustomOverlayMap
@@ -621,7 +621,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
       })()}
 
       {/* 충분히 확대 시: 개인카페 + 사진 → 원형 사진 마커, 체인은 SVG 마커 유지 */}
-      {zoomLevel <= 3 && visibleCafes.map((cafe) => {
+      {zoomLevel <= 4 && visibleCafes.map((cafe) => {
         const isChain = chainCafeIds.has(cafe.id);
         const photo = isChain ? null : (cafe.thumbnail_url || getCachedFirstPhoto(cafe.kakao_place_id));
         const isSelected = selectedCafe?.id === cafe.id;

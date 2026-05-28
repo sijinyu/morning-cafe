@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Dices } from 'lucide-react';
+import { Dices, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
 import { trackEvent } from '@/lib/analytics';
+import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { type Cafe } from '@/lib/types/cafe';
 
 const NEARBY_RADIUS_KM = 3;
@@ -19,8 +20,8 @@ interface CafeRouletteProps {
 }
 
 export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
-  const { filteredCafes } = useCafeStore(
-    useShallow((s) => ({ filteredCafes: s.filteredCafes })),
+  const { filteredCafes, userLocation } = useCafeStore(
+    useShallow((s) => ({ filteredCafes: s.filteredCafes, userLocation: s.userLocation })),
   );
 
   const [spinning, setSpinning] = useState(false);
@@ -96,9 +97,20 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
   }, []);
 
   const displayCafe = slotCafe;
-  const distanceText = resultCafe
-    ? `${(haversineKm(mapCenter.lat, mapCenter.lng, resultCafe.latitude, resultCafe.longitude) * 1000).toFixed(0)}m`
+  // 거리 기준: GPS 위치 우선, 없으면 지도 중심
+  const distRef = userLocation ?? mapCenter;
+  const distanceKm = resultCafe
+    ? haversineKm(distRef.lat, distRef.lng, resultCafe.latitude, resultCafe.longitude)
     : null;
+  const distanceText = distanceKm != null
+    ? distanceKm >= 1 ? `${distanceKm.toFixed(1)}km` : `${Math.round(distanceKm * 1000)}m`
+    : null;
+
+  // Fetch place detail for result card (photos, rating, reviews)
+  const { photos, rating, reviews } = usePlaceDetail(
+    showResult && resultCafe ? resultCafe.kakao_place_id : null,
+  );
+  const cardPhoto = photos[0] ?? resultCafe?.thumbnail_url ?? null;
 
   return (
     <>
@@ -158,13 +170,14 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
               className="mx-6 w-full max-w-sm overflow-hidden rounded-2xl bg-background shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* 썸네일 */}
-              {displayCafe.thumbnail_url && (
+              {/* 썸네일 — 결과 시 place-detail 사진 우선, 스피닝 시 DB 썸네일 */}
+              {(showResult ? cardPhoto : displayCafe.thumbnail_url) && (
                 <div className="relative h-40 w-full overflow-hidden bg-muted">
                   <img
-                    src={displayCafe.thumbnail_url}
+                    src={(showResult ? cardPhoto : displayCafe.thumbnail_url) ?? ''}
                     alt={displayCafe.name}
                     className="h-full w-full object-cover"
+                    decoding="async"
                   />
                   {spinning && (
                     <div className="absolute inset-0 bg-background/20 backdrop-blur-[2px]" />
@@ -206,7 +219,23 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                             {distanceText}
                           </span>
                         )}
+                        {rating && (
+                          <span className="flex items-center gap-0.5 text-muted-foreground">
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            {rating.score.toFixed(1)}
+                          </span>
+                        )}
                       </div>
+                      {/* 리뷰 프리뷰 */}
+                      {reviews.length > 0 && (
+                        <div className="mt-2.5 space-y-1.5">
+                          {reviews.slice(0, 2).map((r, i) => (
+                            <p key={i} className="text-xs text-muted-foreground line-clamp-1 text-left">
+                              &ldquo;{r.contents}&rdquo;
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </div>

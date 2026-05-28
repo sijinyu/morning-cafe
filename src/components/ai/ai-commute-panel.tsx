@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { MapPin, Clock, Navigation, Train } from 'lucide-react';
+import { MapPin, Navigation, Train } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
@@ -88,10 +88,16 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
     // Build work location (approximate — geocoding would be ideal but we use AI to handle)
     const work = { lat: 37.5665, lng: 126.978, address: workAddress.trim() };
 
-    // Pick nearby cafes that are between home and work area
-    const candidateCafes = filteredCafes
-      .slice(0, 50)
-      .map((c) => ({
+    // Pick nearest 50 cafes (반경 제한 없음)
+    const pool = filteredCafes.length > 0 ? filteredCafes : cafes;
+    const candidateCafes = (userLocation
+      ? [...pool]
+          .sort((a, b) =>
+            haversineKm(userLocation.lat, userLocation.lng, a.latitude, a.longitude) -
+            haversineKm(userLocation.lat, userLocation.lng, b.latitude, b.longitude))
+          .slice(0, 50)
+      : pool.slice(0, 50)
+    ).map((c) => ({
         id: c.id,
         name: c.name,
         address: c.road_address ?? c.address,
@@ -217,19 +223,16 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
           {/* Departure time */}
           <div className="flex flex-col gap-2">
             <p className="text-[12px] font-medium text-muted-foreground">출발 시간</p>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <input
-                type="time"
-                value={departureTime}
-                onChange={(e) => setDepartureTime(e.target.value)}
-                className={cn(
-                  'rounded-xl border border-border/60 bg-background px-4 py-3',
-                  'text-[14px] text-foreground',
-                  'outline-none focus:border-foreground/20 transition-all',
-                )}
-              />
-            </div>
+            <input
+              type="time"
+              value={departureTime}
+              onChange={(e) => setDepartureTime(e.target.value)}
+              className={cn(
+                'w-full rounded-xl border border-border/60 bg-background px-4 py-3',
+                'text-[14px] text-foreground',
+                'outline-none focus:border-foreground/20 transition-all',
+              )}
+            />
           </div>
 
           {/* Submit button */}

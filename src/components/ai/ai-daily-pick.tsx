@@ -32,8 +32,8 @@ type DayKey = (typeof DAY_KEYS)[number];
 // ---------------------------------------------------------------------------
 
 export function AiDailyPick({ onClose }: AiDailyPickProps) {
-  const { filteredCafes, userLocation } = useCafeStore(
-    useShallow((s) => ({ filteredCafes: s.filteredCafes, userLocation: s.userLocation })),
+  const { filteredCafes, cafes, userLocation } = useCafeStore(
+    useShallow((s) => ({ filteredCafes: s.filteredCafes, cafes: s.cafes, userLocation: s.userLocation })),
   );
   const setSelectedCafe = useCafeStore((s) => s.setSelectedCafe);
 
@@ -41,9 +41,9 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
   const [pickedCafe, setPickedCafe] = useState<Cafe | null>(null);
   const [reason, setReason] = useState('');
 
-  // Get candidates: nearby, not recently visited
+  // Get candidates: nearest, not recently visited (반경 제한 없음)
   const candidates = useMemo(() => {
-    if (!userLocation) return filteredCafes.slice(0, 20);
+    const pool = filteredCafes.length > 0 ? filteredCafes : cafes;
 
     // Exclude recently visited cafes (top 5)
     const recentIds = new Set<string>();
@@ -57,18 +57,21 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
       // localStorage unavailable — continue without exclusion
     }
 
-    return filteredCafes
-      .map((cafe) => {
-        const dist = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
-        if (dist > 2) return null;
-        return { cafe, dist };
-      })
-      .filter((x): x is NonNullable<typeof x> => x !== null)
-      .filter((x) => !recentIds.has(x.cafe.id))
+    const filtered = pool.filter((c) => !recentIds.has(c.id));
+    // 최근 방문 제외 후 0개면 전체 사용
+    const source = filtered.length > 0 ? filtered : pool;
+
+    if (!userLocation) return source.slice(0, 20);
+
+    return source
+      .map((cafe) => ({
+        cafe,
+        dist: haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude),
+      }))
       .sort((a, b) => a.dist - b.dist)
       .slice(0, 20)
       .map((x) => x.cafe);
-  }, [filteredCafes, userLocation]);
+  }, [filteredCafes, cafes, userLocation]);
 
   const handlePick = useCallback(async () => {
     if (state === 'loading' || candidates.length === 0) return;
@@ -169,7 +172,9 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
             추천 받기
           </motion.button>
           {candidates.length === 0 && (
-            <p className="text-xs text-muted-foreground">주변에 추천할 카페가 없어요</p>
+            <p className="text-xs text-muted-foreground">
+              {cafes.length === 0 ? '카페 데이터를 불러오는 중...' : '추천할 카페가 없어요'}
+            </p>
           )}
         </div>
       )}

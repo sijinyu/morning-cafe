@@ -79,46 +79,26 @@ function hashQuery(query: string, cafeCount: number): string {
 // Prompt builder
 // ---------------------------------------------------------------------------
 
-function buildPrompt(query: string, cafes: CafeInput[], userLat?: number, userLng?: number): string {
-  const locationNote =
-    userLat != null && userLng != null
-      ? `사용자의 현재 위치는 위도 ${userLat.toFixed(4)}, 경도 ${userLng.toFixed(4)}입니다.`
-      : '사용자 위치 정보가 없습니다.';
-
+function buildPrompt(query: string, cafes: CafeInput[]): string {
   const cafeList = cafes
-    .map((c, i) => {
-      const hours = c.hours_by_day
-        ? Object.entries(c.hours_by_day)
-            .map(([day, h]) => `${day}:${h}`)
-            .join(', ')
-        : c.opening_time ?? '정보없음';
-      return `${i + 1}. [${c.id}] ${c.name} | ${c.address}${c.gu ? ` (${c.gu})` : ''} | 영업시간: ${hours} | 카테고리: ${c.category ?? '카페'}`;
-    })
+    .map((c, i) => `${i + 1}. [${c.id}] ${c.name} | ${c.address} | ${c.opening_time ?? '정보없음'}`)
     .join('\n');
 
-  return `당신은 서울 아침 카페 전문가입니다.
-사용자 요청: "${query}"
-${locationNote}
+  return `너는 서울 아침 카페를 추천해주는 따뜻한 친구야.
+사용자 취향: "${query}"
 
-아래 카페 목록에서 사용자의 요청에 가장 잘 맞는 카페를 최대 5개 추천하세요.
+아래 카페 중 딱 맞는 곳을 최대 3개 골라줘.
 
-카페 목록:
 ${cafeList}
 
-응답 형식은 반드시 아래 JSON만 출력하세요 (마크다운 불필요):
-{
-  "results": [
-    { "id": "카페ID", "reason": "추천 이유 (한국어, 2-3문장)", "score": 추천점수1-10 }
-  ],
-  "summary": "전체 추천 요약 (한국어, 1-2문장)"
-}
+반드시 아래 JSON만 출력해 (마크다운 금지):
+{"results":[{"id":"카페ID","reason":"추천 이유 1-2문장","score":1-10}],"summary":"한줄 요약"}
 
-규칙:
-- 요청과 관련 없는 카페는 포함하지 마세요
-- score는 1(낮음)~10(높음) 정수
-- results는 score 내림차순 정렬
-- 최대 5개까지만 반환
-- 반드시 한국어로 응답`;
+말투 규칙:
+- 친한 언니/오빠가 추천하듯 다정하게 ("~거든요", "~어울려요", "여기 진짜 좋아요", "~어때요?")
+- 이모지 1-2개 자연스럽게
+- reason은 30자 이내로 짧고 감성적으로
+- 딱딱한 존댓말 금지 ("~입니다" "~습니다" 쓰지마)`;
 }
 
 // ---------------------------------------------------------------------------
@@ -166,8 +146,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '카페 목록이 필요합니다.' }, { status: 400 });
   }
 
-  // Clamp to max 50 to control token usage
-  const cafeSlice = cafes.slice(0, 50);
+  // Clamp to max 30 to control token usage
+  const cafeSlice = cafes.slice(0, 30);
 
   // Check cache
   const cacheKey = hashQuery(query, cafeSlice.length);
@@ -177,7 +157,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const prompt = buildPrompt(query, cafeSlice, userLat, userLng);
+    const prompt = buildPrompt(query, cafeSlice);
     const result = await geminiModel.generateContent(prompt);
     const raw = result.response.text();
     const jsonStr = extractJson(raw);
@@ -188,11 +168,11 @@ export async function POST(request: NextRequest) {
       throw new Error('Unexpected response shape from Gemini');
     }
 
-    // Normalise scores to integers, clamp 1-10, limit to 5
+    // Normalise scores to integers, clamp 1-10, limit to 3
     const normalised: GeminiRecommendResponse = {
       summary: parsed.summary,
       results: parsed.results
-        .slice(0, 5)
+        .slice(0, 3)
         .map((r) => ({
           id: String(r.id),
           reason: String(r.reason),

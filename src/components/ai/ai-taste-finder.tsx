@@ -98,23 +98,20 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
       facilities: facilities.join(','),
     });
 
-    // Pick nearest 50 cafes — filteredCafes fallback to cafes (전체) if empty
+    // Pick nearest 30 cafes (반경 제한 없음 — 전체에서 가까운 순)
     const pool = filteredCafes.length > 0 ? filteredCafes : cafes;
     let cafesForApi: Cafe[];
     if (userLocation) {
-      const withDist = pool
+      cafesForApi = pool
         .map((c) => ({
           cafe: c,
           dist: haversineKm(userLocation.lat, userLocation.lng, c.latitude, c.longitude),
         }))
-        .sort((a, b) => a.dist - b.dist);
-      const within5km = withDist.filter(({ dist }) => dist <= 5);
-      // 5km 내 카페가 있으면 그중 50개, 없으면 가까운 순 50개
-      cafesForApi = (within5km.length > 0 ? within5km : withDist)
-        .slice(0, 50)
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, 30)
         .map(({ cafe }) => cafe);
     } else {
-      cafesForApi = pool.slice(0, 50);
+      cafesForApi = pool.slice(0, 30);
     }
 
     try {
@@ -133,8 +130,6 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
             name: c.name,
             address: c.road_address ?? c.address,
             opening_time: c.opening_time,
-            hours_by_day: c.hours_by_day,
-            category: c.category,
           })),
         }),
       });

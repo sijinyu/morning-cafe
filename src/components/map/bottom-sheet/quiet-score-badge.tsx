@@ -24,8 +24,8 @@ export function QuietScoreBadge({ strengths, facilities, reviews }: QuietScoreBa
     [strengths, facilities, reviews],
   );
 
-  // 정보 부족이면 표시하지 않음
-  if (result.label === '정보 부족' || result.label === '정보 없음') return null;
+  // 2점 미만(보통/정보부족)이면 표시하지 않음 — 유의미한 정보만 노출
+  if (result.score < 2) return null;
 
   const badgeStyle = SCORE_STYLES[result.label] ?? SCORE_STYLES['보통'];
 
