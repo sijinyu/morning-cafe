@@ -576,8 +576,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
       {/* 선택된 마커 ripple 파동 효과 — 마커 border에서 시작, 2배까지 확장 */}
       {selectedCafe && (() => {
         const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
-        // 마커 직경: selected=44px → 반지름 22px. 파동은 22px에서 시작 → 44px(2배)까지
-        // SVG 100x100 viewBox, 중심 50,50. 시작 r=22, 끝 r=44
+        // 마커 직경: selected=44px → 반지름 22px. 파동은 22px에서 시작 → 55px(2.5배)까지
         return (
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}
@@ -587,21 +586,21 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
             zIndex={0}
           >
             <svg
-              width="88"
-              height="88"
-              viewBox="0 0 88 88"
+              width="120"
+              height="120"
+              viewBox="0 0 120 120"
               style={{ pointerEvents: 'none' }}
             >
               <style>{`
                 @keyframes cafe-ripple {
-                  0% { r: 22; opacity: 0.4; stroke-width: 2; }
-                  100% { r: 44; opacity: 0; stroke-width: 0.5; }
+                  0% { r: 22; opacity: 0.5; stroke-width: 3.5; }
+                  100% { r: 55; opacity: 0; stroke-width: 1; }
                 }
                 .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 1.8s ease-out infinite; }
               `}</style>
-              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '0ms' }} />
-              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '600ms' }} />
-              <circle className="ripple-ring" cx="44" cy="44" r="22" style={{ animationDelay: '1200ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '0ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '600ms' }} />
+              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '1200ms' }} />
             </svg>
           </CustomOverlayMap>
         );
@@ -620,7 +619,7 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
               key={`photo-${cafe.id}`}
               position={{ lat: cafe.latitude, lng: cafe.longitude }}
               xAnchor={0.5}
-              yAnchor={0.5}
+              yAnchor={0.35}
               zIndex={isSelected ? 99 : 2}
             >
               {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
