@@ -576,34 +576,33 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
         })}
       </MarkerClusterer>
 
-      {/* 선택된 마커 ripple 파동 효과 — 마커 border에서 시작, 2배까지 확장 */}
-      {selectedCafe && (() => {
+      {/* SVG 핀 마커용 ripple — 줌 > 3 (사진 마커 안 보일 때)에서만 표시 */}
+      {selectedCafe && zoomLevel > 3 && (() => {
         const colors = getCachedMarkerColors(selectedCafe, chainCafeIds.has(selectedCafe.id));
-        // 마커 직경: selected=44px → 반지름 22px. 파동은 22px에서 시작 → 55px(2.5배)까지
         return (
           <CustomOverlayMap
             key={`ripple-${selectedCafe.id}`}
             position={{ lat: selectedCafe.latitude, lng: selectedCafe.longitude }}
-            yAnchor={0.45}
+            yAnchor={0.5}
             xAnchor={0.5}
             zIndex={0}
           >
             <svg
-              width="120"
-              height="120"
-              viewBox="0 0 120 120"
+              width="200"
+              height="200"
+              viewBox="0 0 200 200"
               style={{ pointerEvents: 'none' }}
             >
               <style>{`
-                @keyframes cafe-ripple {
-                  0% { r: 22; opacity: 0.5; stroke-width: 3.5; }
-                  100% { r: 55; opacity: 0; stroke-width: 1; }
+                @keyframes cafe-ripple-svg {
+                  0% { r: 22; opacity: 0.45; stroke-width: 2.5; }
+                  100% { r: 80; opacity: 0; stroke-width: 0.5; }
                 }
-                .ripple-ring { fill: none; stroke: ${colors.fill}; animation: cafe-ripple 2.5s ease-out infinite; }
+                .ripple-svg { fill: none; stroke: ${colors.fill}; animation: cafe-ripple-svg 2.5s ease-out infinite; }
               `}</style>
-              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '0ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '800ms' }} />
-              <circle className="ripple-ring" cx="60" cy="60" r="22" style={{ animationDelay: '1600ms' }} />
+              <circle className="ripple-svg" cx="100" cy="100" r="22" style={{ animationDelay: '0ms' }} />
+              <circle className="ripple-svg" cx="100" cy="100" r="22" style={{ animationDelay: '800ms' }} />
+              <circle className="ripple-svg" cx="100" cy="100" r="22" style={{ animationDelay: '1600ms' }} />
             </svg>
           </CustomOverlayMap>
         );
@@ -617,6 +616,7 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
         const size = isSelected ? 52 : 42;
 
         if (photo) {
+          const isFav = favorites.has(cafe.id);
           return (
             <CustomOverlayMap
               key={`photo-${cafe.id}`}
@@ -640,35 +640,78 @@ export function CafeMap({ onPanToReady, userLocation, onCenterChange }: CafeMapP
                   cursor: 'pointer',
                 }}
               >
-                <div
-                  style={{
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    borderRadius: '50%',
-                    border: isSelected ? '3px solid #B45309' : '2.5px solid #fff',
-                    boxShadow: isSelected
-                      ? '0 2px 8px rgba(180,83,9,0.4)'
-                      : '0 2px 6px rgba(0,0,0,0.2)',
-                    overflow: 'hidden',
-                    background: '#f5f5f4',
-                    transition: 'transform 0.15s ease',
-                    transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                  }}
-                >
-                  <img
-                    src={photo}
-                    alt={cafe.name}
-                    width={size}
-                    height={size}
-                    loading="lazy"
-                    decoding="async"
+                {/* 사진 원형 + 파동 + 찜 배지 relative 컨테이너 */}
+                <div style={{ position: 'relative', display: 'inline-flex' }}>
+                  {/* 파동 — 사진과 동일 중심, 사진 둘레에서 시작 → 3.5배 확장 */}
+                  {isSelected && (() => {
+                    const markerColors = getCachedMarkerColors(cafe, false);
+                    return (
+                      <svg
+                        width="200" height="200" viewBox="0 0 200 200"
+                        style={{
+                          position: 'absolute',
+                          top: '50%', left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        <style>{`
+                          @keyframes cafe-ripple-photo {
+                            0% { r: 26; opacity: 0.45; stroke-width: 2.5; }
+                            100% { r: 90; opacity: 0; stroke-width: 0.5; }
+                          }
+                          .ripple-photo { fill: none; stroke: ${markerColors.fill}; animation: cafe-ripple-photo 2.5s ease-out infinite; }
+                        `}</style>
+                        <circle className="ripple-photo" cx="100" cy="100" r="26" style={{ animationDelay: '0ms' }} />
+                        <circle className="ripple-photo" cx="100" cy="100" r="26" style={{ animationDelay: '800ms' }} />
+                        <circle className="ripple-photo" cx="100" cy="100" r="26" style={{ animationDelay: '1600ms' }} />
+                      </svg>
+                    );
+                  })()}
+                  {/* 사진 원형 */}
+                  <div
                     style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      borderRadius: '50%',
+                      border: isSelected ? '3px solid #B45309' : '2.5px solid #fff',
+                      boxShadow: isSelected
+                        ? '0 2px 8px rgba(180,83,9,0.4)'
+                        : '0 2px 6px rgba(0,0,0,0.2)',
+                      overflow: 'hidden',
+                      background: '#f5f5f4',
+                      transition: 'transform 0.15s ease',
+                      transform: isSelected ? 'scale(1.1)' : 'scale(1)',
                     }}
-                  />
+                  >
+                    <img
+                      src={photo}
+                      alt={cafe.name}
+                      width={size}
+                      height={size}
+                      loading="lazy"
+                      decoding="async"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+                  {/* 찜 배지 */}
+                  {isFav && (
+                    <div style={{
+                      position: 'absolute', top: -2, right: -2, zIndex: 1,
+                      width: 18, height: 18, borderRadius: '50%',
+                      background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    }}>
+                      <svg width="10" height="12" viewBox="0 0 10 12">
+                        <path d="M1 0h8v11L5 8.5 1 11z" fill="#F59E0B" stroke="#D97706" strokeWidth="0.5"/>
+                      </svg>
+                    </div>
+                  )}
                 </div>
                 <span
                   style={{

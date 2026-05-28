@@ -38,6 +38,7 @@ import { MenuSection } from './bottom-sheet/menu-section';
 import { ReviewSection } from './bottom-sheet/review-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
+import { QuietScoreBadge } from './bottom-sheet/quiet-score-badge';
 
 /** 직선 거리 → 도보 예상 시간 (분) */
 const WALK_DISTANCE_FACTOR = 1.3;
@@ -359,6 +360,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   </div>
                 </div>
               )}
+
+              {/* Quiet Morning Score */}
+              <QuietScoreBadge strengths={strengths} facilities={facilities} reviews={reviews} />
 
               {/* Parking — items-start: 두 줄일 때 아이콘 상단 정렬 */}
               {parking && (

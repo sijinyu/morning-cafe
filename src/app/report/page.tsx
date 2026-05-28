@@ -243,6 +243,7 @@ export default function ReportPage() {
 
         {/* 안내 */}
         <div className="mt-8 border-t border-border pt-6 pb-8 text-center">
+          <p className="text-xs text-muted-foreground/80 mb-1">sijinyudev@gmail.com</p>
           <p className="text-[10px] text-muted-foreground/60">
             제보해주신 내용은 관리자에게 전달됩니다
           </p>
