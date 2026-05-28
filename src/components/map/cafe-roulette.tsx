@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Dices, Crosshair, Navigation } from 'lucide-react';
+import { Dices } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
@@ -13,20 +13,16 @@ const NEARBY_RADIUS_KM = 3;
 const SPIN_DURATION = 2000;
 const SLOT_INTERVAL = 80;
 
-type RouletteMode = 'gps' | 'map';
-
 interface CafeRouletteProps {
-  userLocation: { lat: number; lng: number } | null;
   mapCenter: { lat: number; lng: number };
   onSelectCafe: (cafe: Cafe) => void;
 }
 
-export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRouletteProps) {
+export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
   const { cafes } = useCafeStore(
     useShallow((s) => ({ cafes: s.cafes })),
   );
 
-  const [mode, setMode] = useState<RouletteMode>('gps');
   const [spinning, setSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [resultCafe, setResultCafe] = useState<Cafe | null>(null);
@@ -40,19 +36,12 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
     };
   }, []);
 
-  const getCenter = useCallback(() => {
-    if (mode === 'gps') return userLocation;
-    return mapCenter;
-  }, [mode, userLocation, mapCenter]);
-
   const getNearbyCafes = useCallback(() => {
-    const center = getCenter();
-    if (!center) return [];
     return cafes.filter((cafe) => {
-      const dist = haversineKm(center.lat, center.lng, cafe.latitude, cafe.longitude);
+      const dist = haversineKm(mapCenter.lat, mapCenter.lng, cafe.latitude, cafe.longitude);
       return dist <= NEARBY_RADIUS_KM;
     });
-  }, [cafes, getCenter]);
+  }, [cafes, mapCenter]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -62,19 +51,13 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
   const handleSpin = useCallback(() => {
     if (spinning) return;
 
-    const center = getCenter();
-    if (!center) {
-      showToast(mode === 'gps' ? '위치를 먼저 켜주세요' : '지도를 먼저 움직여주세요');
-      return;
-    }
-
     const nearby = getNearbyCafes();
     if (nearby.length === 0) {
       showToast('반경 3km 내 카페가 없어요');
       return;
     }
 
-    trackEvent('roulette_spin', { mode, nearby_count: nearby.length });
+    trackEvent('roulette_spin', { mode: 'map', nearby_count: nearby.length });
     setSpinning(true);
     setShowResult(false);
     setResultCafe(null);
@@ -96,7 +79,7 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
         setShowResult(true);
       }
     }, SLOT_INTERVAL);
-  }, [spinning, mode, getCenter, getNearbyCafes, showToast]);
+  }, [spinning, getNearbyCafes, showToast]);
 
   const handleGoToCafe = useCallback(() => {
     if (!resultCafe) return;
@@ -112,14 +95,9 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
     setResultCafe(null);
   }, []);
 
-  const toggleMode = useCallback(() => {
-    setMode((m) => (m === 'gps' ? 'map' : 'gps'));
-  }, []);
-
   const displayCafe = slotCafe;
-  const center = getCenter();
-  const distanceText = resultCafe && center
-    ? `${(haversineKm(center.lat, center.lng, resultCafe.latitude, resultCafe.longitude) * 1000).toFixed(0)}m`
+  const distanceText = resultCafe
+    ? `${(haversineKm(mapCenter.lat, mapCenter.lng, resultCafe.latitude, resultCafe.longitude) * 1000).toFixed(0)}m`
     : null;
 
   return (
@@ -130,12 +108,12 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
         disabled={spinning}
         whileTap={{ scale: 0.92 }}
         className={[
-          'absolute md:bottom-[5.5rem] left-4 z-10 flex h-12 items-center gap-1.5 px-4',
+          'absolute md:bottom-6 left-4 z-10 flex h-12 items-center gap-1.5 px-4',
           'rounded-full bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
           'text-sm font-semibold text-foreground',
           'transition-opacity disabled:opacity-60',
         ].join(' ')}
-        style={{ bottom: 'calc(var(--bottom-nav-height) + 4.5rem)' }}
+        style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}
         aria-label="근처 카페 랜덤 추천"
       >
         <Dices
@@ -179,27 +157,6 @@ export function CafeRoulette({ userLocation, mapCenter, onSelectCafe }: CafeRoul
               className="mx-6 w-full max-w-sm overflow-hidden rounded-2xl bg-background shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* 모드 토글 — 카드 상단 */}
-              <div className="flex items-center justify-center gap-1 pt-3 pb-1">
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleMode(); }}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
-                >
-                  {mode === 'gps' ? (
-                    <>
-                      <Navigation className="h-3 w-3" />
-                      내 위치 기준
-                    </>
-                  ) : (
-                    <>
-                      <Crosshair className="h-3 w-3" />
-                      지도 중심 기준
-                    </>
-                  )}
-                  <span className="text-[10px] text-muted-foreground/60">탭하여 전환</span>
-                </button>
-              </div>
-
               {/* 썸네일 */}
               {displayCafe.thumbnail_url && (
                 <div className="relative h-40 w-full overflow-hidden bg-muted">

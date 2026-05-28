@@ -155,7 +155,6 @@ export function PersistentMapPage() {
           />
           <MyLocationButton onLocation={handleLocationUpdate} />
           <CafeRoulette
-            userLocation={userLocation}
             mapCenter={mapCenter}
             onSelectCafe={(cafe) => {
               setSelectedCafe(cafe);
@@ -204,7 +203,7 @@ export function PersistentMapPage() {
 
       {/* 뷰 모드 토글 — 현위치 버튼과 같은 수평선, 양끝 */}
       {isMapRoute && (
-        <div className="absolute md:bottom-6 left-4 z-10" style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}>
+        <div className="absolute md:bottom-[5.5rem] left-4 z-10" style={{ bottom: 'calc(var(--bottom-nav-height) + 4.5rem)' }}>
           <motion.button
             onClick={handleToggleView}
             whileTap={{ scale: 0.92 }}
