@@ -6,6 +6,7 @@ import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
+import { warmupConnections } from '@/lib/hooks/use-place-detail';
 import { CafeMap } from '@/components/map/cafe-map';
 import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
@@ -45,6 +46,14 @@ export function PersistentMapPage() {
   useEffect(() => {
     fetchCafes();
   }, [fetchCafes]);
+
+  // CDN + API warmup — cafes 로드 직후 1회 실행
+  const cafesReady = cafes.length > 0;
+  useEffect(() => {
+    if (!cafesReady) return;
+    warmupConnections(cafes[0]?.kakao_place_id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cafesReady]);
 
   // Deep link: /?cafeId=xxx → select and pan to the cafe
   useEffect(() => {
@@ -138,9 +147,9 @@ export function PersistentMapPage() {
           whileTap={{ scale: 0.92 }}
           className={cn(
             'flex h-12 items-center gap-2 rounded-full px-4',
-            'bg-background shadow-lg border border-border',
-            'text-sm font-medium text-foreground',
-            'transition-colors hover:bg-muted',
+            'bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
+            'text-sm font-semibold text-foreground',
+            'transition-colors hover:bg-foreground/5',
           )}
         >
           {viewMode === 'map' ? (

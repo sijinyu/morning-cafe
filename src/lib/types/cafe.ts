@@ -15,6 +15,7 @@ export interface Cafe {
   hours_by_day: Record<string, string> | null;
   is_earlybird: boolean;
   last_crawled_at: string | null;
+  created_at: string | null;
 }
 
 /** 주소에서 구 이름 추출 */

@@ -71,7 +71,30 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
   const [expanded, setExpanded] = useState(false);
   const totalCount = reviews.length + blogReviews.length;
 
-  if (totalCount === 0) return null;
+  if (totalCount === 0) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
+          <MessageCircle className="h-4 w-4" />
+          <span>리뷰</span>
+        </div>
+        <div className="rounded-2xl bg-muted/50 px-4 py-5 text-center">
+          <MessageCircle className="mx-auto h-5 w-5 text-muted-foreground/50" />
+          <p className="mt-1.5 text-sm text-muted-foreground">아직 리뷰가 없습니다</p>
+          {placeUrl && (
+            <a
+              href={placeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-xs text-primary hover:underline"
+            >
+              카카오맵에서 첫 리뷰 남기기
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // 접힌 상태: kakao 리뷰 최대 2개만
   const previewReviews = reviews.slice(0, 2);

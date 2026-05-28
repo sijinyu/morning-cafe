@@ -138,6 +138,31 @@ export function prefetchPlaceDetail(kakaoPlaceId: string | null) {
   fetchPlaceDetail(kakaoPlaceId).catch(() => {});
 }
 
+// ---- CDN keep-alive warmup ------------------------------------------------
+
+let warmedUp = false;
+
+/** 앱 초기화 시 1회 호출 — kakaocdn TCP 커넥션 + place-detail API 콜드스타트를 사전에 해결.
+ *  - kakaocdn: 1x1 투명 이미지 요청으로 실제 TCP+TLS 핸드셰이크 완료 (preconnect만으론 유지 안 됨)
+ *  - place-detail API: Edge runtime 콜드스타트 워밍업 */
+export function warmupConnections(firstCafeKakaoId?: string | null) {
+  if (warmedUp) return;
+  warmedUp = true;
+
+  // 1. kakaocdn TCP keep-alive — 실제 이미지 요청으로 커넥션 확보
+  //    존재하는 작은 이미지 URL로 요청 (q1 = 최저품질, 수백 바이트)
+  const cdnWarmUrl = 'https://img1.kakaocdn.net/cthumb/local/C50x50.q1/?fname=https%3A%2F%2Ft1.daumcdn.net%2Fplace%2Flogo%2Fdefault.png';
+  const img = new globalThis.Image();
+  img.src = cdnWarmUrl;
+
+  // 2. place-detail API 콜드스타트 워밍업 — 첫 번째 카페로 실제 요청
+  if (firstCafeKakaoId) {
+    scheduleIdle(() => {
+      fetchPlaceDetail(firstCafeKakaoId).catch(() => {});
+    });
+  }
+}
+
 export function usePlaceDetail(kakaoPlaceId: string | null): UsePlaceDetailResult {
   const [fetchedData, setFetchedData] = useState<PlaceDetailResponse>(EMPTY);
   const [loading, setLoading] = useState(false);

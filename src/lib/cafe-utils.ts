@@ -38,6 +38,14 @@ export function formatOpeningTime(openingTime: string | null): string {
   return `${parts[0] ?? '00'}:${parts[1] ?? '00'}`;
 }
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** 카페가 7일 이내에 추가되었는지 판별 */
+export function isNewCafe(cafe: Pick<Cafe, 'created_at'>): boolean {
+  if (!cafe.created_at) return false;
+  return Date.now() - new Date(cafe.created_at).getTime() < SEVEN_DAYS_MS;
+}
+
 /** Tailwind class string for the opening-time badge color. */
 export function getOpeningBadgeStyle(openingTime: string | null): string {
   if (!openingTime) return 'bg-muted text-muted-foreground';

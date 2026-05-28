@@ -8,8 +8,31 @@ interface MenuSectionProps {
   menu: MenuItem[];
 }
 
-export function MenuSection({ menu }: MenuSectionProps) {
-  if (menu.length === 0) return null;
+export function MenuSection({ menu, placeUrl }: MenuSectionProps & { placeUrl?: string | null }) {
+  if (menu.length === 0) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
+          <UtensilsCrossed className="h-4 w-4" />
+          <span>메뉴</span>
+        </div>
+        <div className="rounded-2xl bg-muted/50 px-4 py-5 text-center">
+          <UtensilsCrossed className="mx-auto h-5 w-5 text-muted-foreground/50" />
+          <p className="mt-1.5 text-sm text-muted-foreground">메뉴 정보가 없습니다</p>
+          {placeUrl && (
+            <a
+              href={placeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-xs text-primary hover:underline"
+            >
+              카카오맵에서 확인
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

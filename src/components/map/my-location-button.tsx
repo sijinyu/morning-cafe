@@ -35,7 +35,7 @@ export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
       whileTap={{ scale: 0.92 }}
       className={[
         'absolute md:bottom-6 right-4 z-10 flex h-12 w-12 items-center justify-center',
-        'rounded-full bg-background shadow-lg border border-border',
+        'rounded-full bg-background/95 backdrop-blur-xl shadow-sm border border-border/60',
         'transition-opacity disabled:opacity-60',
       ].join(' ')}
       style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}

@@ -13,7 +13,20 @@ interface HoursSectionProps {
 export function HoursSection({ hoursByDay }: HoursSectionProps) {
   const [expanded, setExpanded] = useState(false);
 
-  if (!hoursByDay || Object.keys(hoursByDay).length === 0) return null;
+  if (!hoursByDay || Object.keys(hoursByDay).length === 0) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
+          <Clock className="h-4 w-4" />
+          <span>요일별 영업시간</span>
+        </div>
+        <div className="rounded-2xl bg-muted/50 px-4 py-5 text-center">
+          <Clock className="mx-auto h-5 w-5 text-muted-foreground/50" />
+          <p className="mt-1.5 text-sm text-muted-foreground">영업시간 정보가 없습니다</p>
+        </div>
+      </div>
+    );
+  }
 
   const entries = DAY_ORDER
     .filter((day) => day in hoursByDay)

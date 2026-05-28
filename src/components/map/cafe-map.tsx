@@ -391,10 +391,10 @@ export function CafeMap({ onPanToReady, userLocation }: CafeMapProps) {
           map.setLevel(3);
         }
         // 바텀시트(55vh)가 하단을 덮으므로, 지도 중심을 남쪽으로 오프셋하여
-        // 마커가 시트 위 영역에 보이도록 조정
+        // 마커가 시트 위 상단 1/3 영역에 보이도록 조정
         const bounds = map.getBounds();
         const latSpan = bounds.getNorthEast().getLat() - bounds.getSouthWest().getLat();
-        const offsetLat = lat - latSpan * 0.2;
+        const offsetLat = lat - latSpan * 0.28;
         map.panTo(new kakao.maps.LatLng(offsetLat, lng));
       });
     }

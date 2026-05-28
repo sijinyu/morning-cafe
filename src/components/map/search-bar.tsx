@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
+import { useSearchHistory } from '@/lib/hooks/use-search-history';
 
 interface SearchBarProps {
   /** 지도 모드: 카페 선택 시 panTo */
@@ -24,6 +25,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { history, addSearch, removeSearch, clearHistory } = useSearchHistory();
 
   const isListMode = mode === 'list';
 
@@ -40,7 +42,8 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
       .slice(0, 5);
   }, [cafes, query, isListMode]);
 
-  const showDropdown = !isListMode && focused && results.length > 0;
+  const showResults = !isListMode && focused && results.length > 0;
+  const showHistory = !isListMode && focused && query.trim().length === 0 && history.length > 0;
 
   // 리스트 모드: 300ms debounce로 부모에 알림 (매 키입력마다 필터링 방지)
   useEffect(() => {
@@ -59,12 +62,21 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
   const handleSelect = useCallback(
     (cafe: Cafe) => {
       trackEvent('search_select', { cafe_name: cafe.name, query });
+      if (query.trim().length >= 2) addSearch(query.trim());
       setSelectedCafe(cafe);
       onSelectCafe(cafe.latitude, cafe.longitude);
       setQuery('');
       inputRef.current?.blur();
     },
-    [setSelectedCafe, onSelectCafe, query]
+    [setSelectedCafe, onSelectCafe, query, addSearch]
+  );
+
+  const handleHistorySelect = useCallback(
+    (historyQuery: string) => {
+      setQuery(historyQuery);
+      inputRef.current?.focus();
+    },
+    []
   );
 
   function handleClear() {
@@ -96,17 +108,18 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
       <motion.div
         animate={{
           boxShadow: focused
-            ? '0 4px 24px rgba(245,158,11,0.2)'
-            : '0 2px 8px rgba(0,0,0,0.08)',
+            ? '0 4px 20px rgba(0,0,0,0.10)'
+            : '0 2px 12px rgba(0,0,0,0.06)',
         }}
         className={cn(
-          'flex items-center gap-2 rounded-2xl',
-          'bg-background/90 backdrop-blur-md',
-          'border border-border px-4 py-2.5',
-          'transition-all'
+          'flex items-center gap-2.5 rounded-2xl',
+          'bg-background/95 backdrop-blur-xl',
+          'border border-border/60 px-4 py-3',
+          'transition-all',
+          focused && 'border-foreground/15',
         )}
       >
-        <Search className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+        <Search className="h-[18px] w-[18px] flex-shrink-0 text-muted-foreground" />
         <input
           ref={inputRef}
           type="text"
@@ -115,8 +128,8 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
           onFocus={() => setFocused(true)}
           placeholder={isListMode ? '리스트에서 검색' : '카페명, 지역명 검색'}
           className={cn(
-            'flex-1 bg-transparent text-sm text-foreground',
-            'placeholder:text-muted-foreground/50',
+            'flex-1 bg-transparent text-[15px] text-foreground',
+            'placeholder:text-muted-foreground/40',
             'outline-none'
           )}
         />
@@ -129,7 +142,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.15 }}
               onClick={handleClear}
-              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-muted hover:bg-muted/80 transition-colors"
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/15 transition-colors"
               aria-label="검색어 지우기"
             >
               <X className="h-3 w-3 text-muted-foreground" />
@@ -138,9 +151,9 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
         </AnimatePresence>
       </motion.div>
 
-      {/* Dropdown results — 지도 모드에서만 */}
+      {/* Dropdown — 검색 결과 또는 검색 기록 */}
       <AnimatePresence>
-        {showDropdown && (
+        {(showResults || showHistory) && (
           <motion.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -148,11 +161,56 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
             transition={{ duration: 0.15 }}
             className={cn(
               'mt-1.5 overflow-hidden rounded-2xl',
-              'bg-background/95 backdrop-blur-md',
-              'border border-border shadow-lg'
+              'bg-background/95 backdrop-blur-xl',
+              'border border-border/60 shadow-lg'
             )}
           >
-            {results.map((cafe, idx) => (
+            {/* 검색 기록 */}
+            {showHistory && (
+              <>
+                <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  최근 검색
+                </div>
+                {history.map((h, idx) => (
+                  <div
+                    key={h}
+                    className={cn(
+                      'flex w-full items-center px-4 py-2.5',
+                      'hover:bg-muted/60 transition-colors',
+                      idx !== 0 && 'border-t border-border/50'
+                    )}
+                  >
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleHistorySelect(h)}
+                      className="flex flex-1 items-center gap-2.5 text-left min-w-0"
+                    >
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm text-foreground truncate">{h}</span>
+                    </button>
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => removeSearch(h)}
+                      className="flex h-8 w-8 items-center justify-center flex-shrink-0 rounded-full hover:bg-muted transition-colors"
+                      aria-label="삭제"
+                    >
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={clearHistory}
+                  className="flex w-full items-center justify-center gap-1 px-4 py-2.5 border-t border-border/50 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  검색 기록 삭제
+                </button>
+              </>
+            )}
+
+            {/* 검색 결과 */}
+            {showResults && results.map((cafe, idx) => (
               <button
                 key={cafe.id}
                 onMouseDown={(e) => {

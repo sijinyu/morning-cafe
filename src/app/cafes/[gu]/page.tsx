@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MapPin, Clock, ExternalLink, Map } from 'lucide-react';
+import { MapPin, Clock, ExternalLink, Map, Sparkles } from 'lucide-react';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import type { Cafe } from '@/lib/types/cafe';
+
+const MAX_FEATURED = 8;
 
 export const revalidate = 86400; // 24h ISR
 
@@ -92,6 +94,16 @@ export default async function GuPage({ params }: PageProps) {
   const otherGus = allGus.filter((g) => g !== decodedGu);
   const timeGroups = groupByTime(cafes);
 
+  // Featured cafes: sort by earliest opening time (earlybirds first)
+  const featuredCafes = [...cafes]
+    .filter((c) => c.opening_time)
+    .sort((a, b) => {
+      const aMin = parseMinutes(a.opening_time) ?? 999;
+      const bMin = parseMinutes(b.opening_time) ?? 999;
+      return aMin - bMin;
+    })
+    .slice(0, MAX_FEATURED);
+
   return (
     <div className="flex h-full flex-col bg-background">
       {/* Header */}
@@ -115,6 +127,20 @@ export default async function GuPage({ params }: PageProps) {
 
       {/* Cafe list */}
       <div className="flex-1 overflow-y-auto">
+        {/* Featured cafes */}
+        {featuredCafes.length > 0 && (
+          <section className="px-5 py-4">
+            <div className="flex items-center gap-1.5 mb-3">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h2 className="text-sm font-semibold text-foreground">얼리버드 카페</h2>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
+              {featuredCafes.map((cafe) => (
+                <FeaturedCafeCard key={cafe.id} cafe={cafe} />
+              ))}
+            </div>
+          </section>
+        )}
         {cafes.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
             <MapPin className="h-10 w-10 stroke-1" />
@@ -158,6 +184,34 @@ export default async function GuPage({ params }: PageProps) {
         )}
       </div>
     </div>
+  );
+}
+
+function FeaturedCafeCard({ cafe }: { cafe: Cafe }) {
+  const displayAddress = cafe.road_address ?? cafe.address;
+  const addressShort = displayAddress.replace(/서울\S*\s+\S+구\s*/, '');
+
+  return (
+    <Link
+      href={`/cafe/${cafe.id}`}
+      className="flex-shrink-0 w-40 rounded-2xl border border-border bg-muted/30 p-3.5 transition-colors hover:bg-muted/60"
+    >
+      <div className="flex items-center gap-1.5 mb-2">
+        {cafe.opening_time && (
+          <span
+            className={cn(
+              'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap',
+              getOpeningBadgeStyle(cafe.opening_time),
+            )}
+          >
+            <Clock className="mr-0.5 h-2.5 w-2.5" />
+            {formatOpeningTime(cafe.opening_time)}
+          </span>
+        )}
+      </div>
+      <p className="font-semibold text-sm truncate">{cafe.name}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground truncate">{addressShort}</p>
+    </Link>
   );
 }
 

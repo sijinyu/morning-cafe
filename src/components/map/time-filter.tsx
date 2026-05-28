@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, MapPin, Store, ChevronDown } from 'lucide-react';
+import { Clock, MapPin, Store, ChevronDown, RotateCcw } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import {
   useCafeStore,
@@ -89,7 +89,7 @@ function Dropdown({ trigger, open, onToggle, children, align = 'left' }: Dropdow
             exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={cn(
-              'absolute top-full mt-1.5 z-30 rounded-2xl border border-border bg-background/95 backdrop-blur-md p-1.5 shadow-xl',
+              'absolute top-full mt-1.5 z-30 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-xl p-1.5 shadow-lg',
               align === 'right' ? 'right-0' : 'left-0',
             )}
           >
@@ -104,8 +104,8 @@ function Dropdown({ trigger, open, onToggle, children, align = 'left' }: Dropdow
 // ---- chip styles ------------------------------------------------------------
 
 const CHIP_BASE = 'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all duration-150';
-const CHIP_ACTIVE = `${CHIP_BASE} bg-primary text-primary-foreground shadow-md`;
-const CHIP_INACTIVE = `${CHIP_BASE} bg-background/80 text-muted-foreground backdrop-blur-md border border-border shadow-sm hover:bg-background hover:shadow-md`;
+const CHIP_ACTIVE = `${CHIP_BASE} bg-foreground text-background shadow-sm`;
+const CHIP_INACTIVE = `${CHIP_BASE} bg-background/90 text-muted-foreground backdrop-blur-xl border border-border/60 hover:bg-background hover:border-foreground/15`;
 
 // ---- main component ---------------------------------------------------------
 
@@ -120,16 +120,25 @@ export function TimeFilter() {
       availableGus: s.availableGus,
     })),
   );
-  const { setTimeFilter, setDayFilter, setGuFilter, setHideChains, setHide24h } = useCafeStore(
+  const { setTimeFilter, setDayFilter, setGuFilter, setHideChains, setHide24h, resetFilters } = useCafeStore(
     useShallow((s) => ({
       setTimeFilter: s.setTimeFilter,
       setDayFilter: s.setDayFilter,
       setGuFilter: s.setGuFilter,
       setHideChains: s.setHideChains,
       setHide24h: s.setHide24h,
+      resetFilters: s.resetFilters,
     })),
   );
   const filteredCount = useCafeStore((s) => s.filteredCafes.length);
+
+  const activeFilterCount = [
+    timeFilter !== 'all',
+    dayFilter !== 'today',
+    guFilter !== null,
+    !hideChains, // default is true, so false = actively changed
+    hide24h,
+  ].filter(Boolean).length;
 
   const [openDropdown, setOpenDropdown] = useState<'time' | 'area' | null>(null);
 
@@ -168,7 +177,7 @@ export function TimeFilter() {
                 onClick={() => { trackEvent('filter_time', { value }); setTimeFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
-                  timeFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
+                  timeFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
                 {label}
@@ -185,7 +194,7 @@ export function TimeFilter() {
                 onClick={() => { trackEvent('filter_day', { value }); setDayFilter(value); }}
                 className={cn(
                   'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
-                  dayFilter === value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
+                  dayFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
                 {label}
@@ -216,7 +225,7 @@ export function TimeFilter() {
             onClick={() => { trackEvent('filter_gu', { value: 'all' }); setGuFilter(null); setOpenDropdown(null); }}
             className={cn(
               'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-              !guFilter ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
+              !guFilter ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
             )}
           >
             서울 전체
@@ -227,7 +236,7 @@ export function TimeFilter() {
               onClick={() => { trackEvent('filter_gu', { value: gu }); setGuFilter(gu); setOpenDropdown(null); }}
               className={cn(
                 'w-full rounded-xl px-3 py-1.5 text-left text-xs font-medium transition-colors',
-                guFilter === gu ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground',
+                guFilter === gu ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
               )}
             >
               {gu}
@@ -261,10 +270,21 @@ export function TimeFilter() {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="rounded-full bg-primary px-2.5 py-1.5 text-[10px] font-semibold text-primary-foreground shadow-md backdrop-blur-sm whitespace-nowrap"
+        className="rounded-full bg-foreground/90 px-2.5 py-1.5 text-[10px] font-semibold text-background shadow-sm backdrop-blur-sm whitespace-nowrap"
       >
         총 {filteredCount.toLocaleString()}개
       </motion.span>
+
+      {/* 초기화 */}
+      {activeFilterCount > 0 && (
+        <button
+          onClick={() => { trackEvent('reset_filters'); resetFilters(); }}
+          className={`${CHIP_BASE} bg-background/90 text-foreground backdrop-blur-xl border border-border/60 hover:bg-foreground/5`}
+        >
+          <RotateCcw className="h-3 w-3" />
+          초기화
+        </button>
+      )}
     </div>
   );
 }

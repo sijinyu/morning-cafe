@@ -36,7 +36,7 @@ export function SplashScreen({ ready }: SplashScreenProps) {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FFF8F0] dark:bg-[#111] overflow-hidden"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#FAFAF9] dark:bg-[#0F0F0F] overflow-hidden"
         >
           {/* 마커 오브제 — 맵 마커와 동일 형태, 스플래시 사이즈 */}
           <motion.div
@@ -110,9 +110,9 @@ export function SplashScreen({ ready }: SplashScreenProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <div className="h-[1px] w-24 overflow-hidden bg-black/[0.06] dark:bg-white/[0.06]">
+            <div className="h-[2px] w-16 overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
               <motion.div
-                className="h-full bg-amber-500/70 dark:bg-amber-400/70"
+                className="h-full rounded-full bg-foreground/30"
                 initial={{ x: '-100%' }}
                 animate={{ x: '100%' }}
                 transition={{

@@ -344,7 +344,7 @@ const CHAIN_KEYWORDS = [
   '에그드랍', 'EGG DROP',
   '잇마이샌드', 'EATMYSAND',
   // 2026-05-28 추가
-  '빌리앤젤', 'BILLY ANGEL',
+  '빌리앤젤', '빌리엔젤', 'BILLY ANGEL',
 ] as const;
 
 const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
@@ -418,6 +418,7 @@ interface CafeState {
   setGuFilter: (gu: string | null) => void;
   setHideChains: (hide: boolean) => void;
   setHide24h: (hide: boolean) => void;
+  resetFilters: () => void;
 }
 
 function parseOpeningMinutes(openingTime: string | null): number | null {
@@ -562,7 +563,7 @@ async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
   while (true) {
     const { data, error } = await supabase
       .from('cafes_with_coords')
-      .select('id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at')
+      .select('id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at, created_at')
       .eq('is_earlybird', true)
       .range(from, from + PAGE_SIZE - 1);
 
@@ -594,6 +595,7 @@ function mapRowsToCafes(rows: Record<string, unknown>[]): Cafe[] {
     hours_by_day: row.hours_by_day as Record<string, string> | null,
     is_earlybird: row.is_earlybird as boolean,
     last_crawled_at: row.last_crawled_at as string | null,
+    created_at: (row.created_at as string | null) ?? null,
   }));
 }
 
@@ -700,6 +702,11 @@ export const useCafeStore = create<CafeState>((set, get) => ({
 
   setHide24h(hide) {
     set({ hide24h: hide });
+    recompute(get, set);
+  },
+
+  resetFilters() {
+    set({ timeFilter: 'all', dayFilter: 'today', guFilter: null, hideChains: true, hide24h: false });
     recompute(get, set);
   },
 }));

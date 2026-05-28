@@ -18,14 +18,14 @@ export function DesktopSidebar() {
 
   return (
     <aside className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border md:bg-background">
-      {/* Logo — 클릭 시 홈으로 */}
+      {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5 px-5 py-5 hover:opacity-80 transition-opacity">
         <Image src="/icons/icon-96.png" alt="모닝커피" width={28} height={28} className="rounded-lg" />
-        <span className="text-lg font-bold tracking-tight">모닝커피</span>
+        <span className="text-lg font-extrabold tracking-tight">모닝커피</span>
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-0.5 px-3">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
@@ -33,13 +33,13 @@ export function DesktopSidebar() {
               key={href}
               href={href}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground',
+                  ? 'bg-foreground/[0.06] text-foreground font-semibold'
+                  : 'text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground',
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className={cn('h-[18px] w-[18px]', active && 'stroke-[2.5px]')} />
               {label}
             </Link>
           );
@@ -52,7 +52,7 @@ export function DesktopSidebar() {
           href="https://buymeacoffee.com/sijinyu"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs text-muted-foreground hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+          className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground transition-colors"
         >
           <span>&#9749;</span>
           응원하기

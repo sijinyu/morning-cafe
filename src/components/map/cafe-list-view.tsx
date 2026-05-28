@@ -5,7 +5,7 @@ import { MapPin, Clock, Navigation } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
-import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/cafe-utils';
+import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -105,11 +105,16 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
             >
               <button
                 onClick={() => onSelectCafe(cafe)}
-                className="flex w-full items-start gap-3 px-5 py-3.5 hover:bg-muted/50 transition-colors text-left border-b border-border"
+                className="flex w-full items-start gap-3 px-5 py-4 hover:bg-foreground/[0.03] active:bg-foreground/[0.05] transition-colors text-left border-b border-border/50"
               >
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm truncate">{cafe.name}</span>
+                    <span className="font-bold text-sm truncate">{cafe.name}</span>
+                    {isNewCafe(cafe) && (
+                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-emerald-500 text-white">
+                        NEW
+                      </span>
+                    )}
                     {isChain && (
                       <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
                         프랜차이즈

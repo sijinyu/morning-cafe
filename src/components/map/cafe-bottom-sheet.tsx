@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
-import { is24HoursForDay } from '@/lib/cafe-utils';
+import { is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 // import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
@@ -169,21 +169,26 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       transition={{ type: 'spring', damping: 32, stiffness: 320 }}
       className={cn(
         'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
-        'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)]',
+        'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)] dark:shadow-none dark:border-t dark:border-border',
         'flex flex-col overflow-hidden',
       )}
       style={{ touchAction: 'none', willChange: 'transform, height', contain: 'layout style' }}
     >
       {/* Drag handle */}
-      <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
-        <div className="h-1 w-10 rounded-full bg-border" />
+      <div className="flex-shrink-0 flex flex-col items-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+        <div className="h-[5px] w-9 rounded-full bg-foreground/15" />
       </div>
 
       {/* Peek content — always visible */}
       <div className="flex-shrink-0 flex items-start justify-between px-5 py-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl font-bold truncate">{cafe.name}</h2>
+            <h2 className="text-xl font-extrabold tracking-tight truncate">{cafe.name}</h2>
+            {isNewCafe(cafe) && (
+              <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white whitespace-nowrap">
+                NEW
+              </span>
+            )}
             {isChain && (
               <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 whitespace-nowrap">
                 프랜차이즈
@@ -249,7 +254,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             whileTap={{ scale: 0.85 }}
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}
-            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label={favorited ? '즐겨찾기 제거' : '즐겨찾기 추가'}
           >
             <Heart
@@ -261,7 +266,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           </motion.button>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
             aria-label="닫기"
           >
             <X className="h-3.5 w-3.5 text-muted-foreground" />
@@ -344,7 +349,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 <p className="flex-1 min-w-0 text-sm text-foreground leading-snug">{displayAddress}</p>
                 <button
                   onClick={handleCopyAddress}
-                  className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                  className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
                   aria-label="주소 복사"
                 >
                   {copied ? (
@@ -367,7 +372,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   </a>
                   <button
                     onClick={handleCopyPhone}
-                    className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
+                    className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
                     aria-label="전화번호 복사"
                   >
                     {phoneCopied ? (
@@ -398,7 +403,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </div>
             </div>
 
-            <MenuSection menu={menu} />
+            <MenuSection menu={menu} placeUrl={cafe.place_url} />
 
             <HoursSection hoursByDay={cafe.hours_by_day} />
 
@@ -418,8 +423,8 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name })}
                   className={cn(
                     'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
-                    'bg-primary text-primary-foreground py-3.5',
-                    'text-sm font-medium',
+                    'bg-foreground text-background py-3.5',
+                    'text-sm font-semibold',
                     'hover:opacity-90 transition-opacity'
                   )}
                 >
