@@ -34,6 +34,56 @@ export function extractJson(text: string): string {
   return json;
 }
 
+/** Remove trailing commas before } and ] (common Gemini malformation). */
+function removeTrailingCommas(s: string): string {
+  return s.replace(/,\s*([}\]])/g, '$1');
+}
+
+/** Escape raw control characters (newlines, tabs) inside JSON string values. */
+function escapeControlCharsInStrings(s: string): string {
+  // Walk through the string character-by-character, tracking whether we're
+  // inside a JSON string value. When inside a string, replace raw control
+  // characters with their escaped equivalents.
+  let result = '';
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+
+    if (escaped) {
+      result += ch;
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\' && inString) {
+      result += ch;
+      escaped = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = !inString;
+      result += ch;
+      continue;
+    }
+
+    if (inString) {
+      if (ch === '\n') { result += '\\n'; continue; }
+      if (ch === '\r') { result += '\\r'; continue; }
+      if (ch === '\t') { result += '\\t'; continue; }
+      // Other control chars (0x00-0x1F)
+      const code = ch.charCodeAt(0);
+      if (code < 0x20) { result += `\\u${code.toString(16).padStart(4, '0')}`; continue; }
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
 /** Safely parse JSON from Gemini — attempts repair if truncated or malformed. */
 export function safeParseJson<T>(jsonStr: string): T {
   // First try: direct parse
@@ -41,17 +91,28 @@ export function safeParseJson<T>(jsonStr: string): T {
     return JSON.parse(jsonStr);
   } catch { /* continue to repair */ }
 
-  // Second try: extract outermost {...} and re-parse
+  // Extract outermost {...}
   const start = jsonStr.indexOf('{');
   const end = jsonStr.lastIndexOf('}');
-  if (start !== -1 && end > start) {
-    try {
-      return JSON.parse(jsonStr.slice(start, end + 1));
-    } catch { /* continue to repair */ }
-  }
+  let body = start !== -1 && end > start ? jsonStr.slice(start, end + 1) : jsonStr;
 
-  // Third try: aggressive repair for truncated output
-  let repaired = start !== -1 && end > start ? jsonStr.slice(start, end + 1) : jsonStr;
+  // Second try: extract and re-parse
+  try {
+    return JSON.parse(body);
+  } catch { /* continue to repair */ }
+
+  // Third try: remove trailing commas
+  try {
+    return JSON.parse(removeTrailingCommas(body));
+  } catch { /* continue to repair */ }
+
+  // Fourth try: escape control chars inside strings + remove trailing commas
+  try {
+    return JSON.parse(removeTrailingCommas(escapeControlCharsInStrings(body)));
+  } catch { /* continue to repair */ }
+
+  // Fifth try: aggressive repair for truncated output
+  let repaired = removeTrailingCommas(escapeControlCharsInStrings(body));
   // Close unterminated strings
   const quoteCount = (repaired.match(/"/g) ?? []).length;
   if (quoteCount % 2 !== 0) repaired += '"';
@@ -62,6 +123,9 @@ export function safeParseJson<T>(jsonStr: string): T {
   const openBraces = (repaired.match(/\{/g) ?? []).length;
   const closeBraces = (repaired.match(/}/g) ?? []).length;
   for (let i = 0; i < openBraces - closeBraces; i++) repaired += '}';
+
+  // Remove trailing commas again after bracket balancing
+  repaired = removeTrailingCommas(repaired);
 
   return JSON.parse(repaired);
 }
