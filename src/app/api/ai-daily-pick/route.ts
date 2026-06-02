@@ -159,9 +159,18 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
     const message = (err as Error)?.message ?? '';
-    console.error('[ai-daily-pick] Gemini error:', { status, message });
+    const errStr = String(err);
+    console.error('[ai-daily-pick] Gemini error:', { status, message, errStr });
 
-    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
+    const isRateLimit =
+      status === 429 ||
+      message.includes('429') ||
+      message.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('429') ||
+      errStr.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('quota');
+
+    if (isRateLimit) {
       return NextResponse.json({
         cafe_id: cafeSlice[0]?.id ?? '',
         reason: '오늘도 좋은 아침이에요. 가까운 카페에서 하루를 시작해보세요.',

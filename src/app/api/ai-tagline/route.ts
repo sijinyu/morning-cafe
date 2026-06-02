@@ -113,9 +113,18 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
     const message = (err as Error)?.message ?? '';
-    console.error('[ai-tagline] Gemini error:', { status, message });
+    const errStr = String(err);
+    console.error('[ai-tagline] Gemini error:', { status, message, errStr });
 
-    if (status === 429 || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
+    const isRateLimit =
+      status === 429 ||
+      message.includes('429') ||
+      message.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('429') ||
+      errStr.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('quota');
+
+    if (isRateLimit) {
       return NextResponse.json({ tagline: '' });
     }
 

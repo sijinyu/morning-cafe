@@ -214,11 +214,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(normalised);
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
-    const errorStatus = (err as { errorDetails?: { status?: string }[] })?.errorDetails?.[0]?.status;
     const message = (err as Error)?.message ?? '';
-    console.error('[ai-commute] Gemini error:', { status, errorStatus, message, errType: typeof err, keys: err && typeof err === 'object' ? Object.keys(err) : [] });
+    const errStr = String(err);
+    console.error('[ai-commute] Gemini error:', { status, message, errStr });
 
-    if (status === 429 || errorStatus === 'RESOURCE_EXHAUSTED' || message.includes('429') || message.includes('RESOURCE_EXHAUSTED')) {
+    const isRateLimit =
+      status === 429 ||
+      message.includes('429') ||
+      message.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('429') ||
+      errStr.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('quota');
+
+    if (isRateLimit) {
       return NextResponse.json(EMPTY_RESPONSE, { status: 429 });
     }
 
