@@ -197,11 +197,13 @@ export async function POST(request: NextRequest) {
 
     const isRateLimit =
       status === 429 ||
+      status === 503 ||
       message.includes('429') ||
       message.includes('RESOURCE_EXHAUSTED') ||
       errStr.includes('429') ||
       errStr.includes('RESOURCE_EXHAUSTED') ||
-      errStr.includes('quota');
+      errStr.includes('quota') ||
+      errStr.includes('high demand');
 
     if (isRateLimit) {
       return NextResponse.json(EMPTY_RESPONSE, { status: 429 });
