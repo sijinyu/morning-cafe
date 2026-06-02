@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -57,37 +57,18 @@ function setCachedTagline(cafeId: string, tagline: string): void {
 export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, reviews }: AiTaglineProps) {
   const [tagline, setTagline] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const fetchedRef = useRef<string | null>(null);
-
-  // Stabilize array/object dependencies by serializing to strings.
-  // This prevents re-fetching when parent re-renders with new array references
-  // that contain the same data.
-  const strengthsKey = useMemo(() => strengths.join(','), [strengths]);
-  const facilitiesKey = useMemo(() => facilities.join(','), [facilities]);
-  const ratingKey = rating ? `${rating.score}:${rating.count}` : '';
   const hasData = strengths.length > 0 || facilities.length > 0 || !!rating;
 
+  // Check localStorage cache on mount / cafeId change
   useEffect(() => {
-    // Check localStorage cache first
     const cached = getCachedTagline(cafeId);
-    if (cached) {
-      setTagline(cached);
-      setLoading(false);
-      return;
-    }
+    setTagline(cached);
+    setLoading(false);
+  }, [cafeId]);
 
-    // No data to generate a meaningful tagline from
-    if (!hasData) {
-      // Don't clear existing tagline or loading — data may still be loading from parent
-      return;
-    }
+  const fetchTagline = useCallback(async () => {
+    if (!hasData) return;
 
-    // Prevent duplicate fetches for the same cafe+data combo
-    const fetchKey = `${cafeId}:${strengthsKey}:${facilitiesKey}:${ratingKey}`;
-    if (fetchedRef.current === fetchKey) return;
-    fetchedRef.current = fetchKey;
-
-    const controller = new AbortController();
     setLoading(true);
 
     const reviewSnippets = reviews
@@ -95,57 +76,63 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
       .filter((c): c is string => !!c && c.length > 10)
       .slice(0, 3);
 
-    // Delay 1.5s to avoid burning RPM quota on rapid cafe browsing
-    const timer = setTimeout(() => {
-    fetch('/api/ai-tagline', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cafeId,
-        name: cafeName,
-        strengths,
-        facilities,
-        rating,
-        reviewSnippets,
-      }),
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data: { tagline?: string }) => {
-        if (data.tagline) {
-          setTagline(data.tagline);
-          setCachedTagline(cafeId, data.tagline);
-        }
-        setLoading(false);
-      })
-      .catch((err: unknown) => {
-        if ((err as Error).name !== 'AbortError') {
-          setLoading(false);
-        }
+    try {
+      const res = await fetch('/api/ai-tagline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cafeId,
+          name: cafeName,
+          strengths,
+          facilities,
+          rating,
+          reviewSnippets,
+        }),
       });
-    }, 1500);
+      const data: { tagline?: string } = await res.json();
+      if (data.tagline) {
+        setTagline(data.tagline);
+        setCachedTagline(cafeId, data.tagline);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, [cafeId, cafeName, strengths, facilities, rating, reviews, hasData]);
 
-    return () => { clearTimeout(timer); controller.abort(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cafeId, cafeName, strengthsKey, facilitiesKey, ratingKey, hasData]);
-
-  // Reset state when cafeId changes
-  useEffect(() => {
-    setTagline(null);
-    setLoading(false);
-    fetchedRef.current = null;
-  }, [cafeId]);
-
-  if (!loading && !tagline) return null;
-
-  return (
-    <div className="flex items-center gap-1.5 mt-1">
-      <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400" />
-      {loading ? (
-        <div className={cn('h-3.5 w-32 rounded-full bg-muted animate-pulse')} />
-      ) : (
+  // Cached tagline — show immediately
+  if (tagline) {
+    return (
+      <div className="flex items-center gap-1.5 mt-1">
+        <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400" />
         <p className="text-[12px] text-muted-foreground leading-snug">{tagline}</p>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center gap-1.5 mt-1">
+        <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400" />
+        <div className={cn('h-3.5 w-32 rounded-full bg-muted animate-pulse')} />
+      </div>
+    );
+  }
+
+  // No cache, no data — hide entirely
+  if (!hasData) return null;
+
+  // Manual trigger button
+  return (
+    <button
+      type="button"
+      onClick={fetchTagline}
+      className="flex items-center gap-1 mt-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+    >
+      <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400/60" />
+      <span>AI 한줄평 보기</span>
+    </button>
   );
 }
