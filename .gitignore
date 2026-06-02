@@ -48,5 +48,11 @@ supabase/.temp/
 next-env.d.ts
 
 # capacitor
-ios/
 android/
+
+# capacitor iOS (track config, ignore build artifacts)
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/capacitor-cordova-ios-plugins/
+*.xcuserdatad/

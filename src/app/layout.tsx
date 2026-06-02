@@ -10,6 +10,7 @@ import { SwUpdatePrompt } from '@/components/sw-update-prompt';
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { StatusBarConfig } from '@/components/native/status-bar-config';
 import { OfflineScreen } from '@/components/native/offline-screen';
+import { PushInit } from '@/components/native/push-init';
 
 import './globals.css';
 
@@ -134,6 +135,7 @@ export default function RootLayout({
           <OfflineScreen />
           <SwUpdatePrompt />
           <PwaInstallPrompt />
+          <PushInit />
         </ThemeProvider>
       </body>
     </html>

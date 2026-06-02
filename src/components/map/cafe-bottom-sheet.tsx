@@ -330,7 +330,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           )}
           */}
           <motion.button
-            onClick={() => toggleFavorite(cafe.id)}
+            onClick={() => toggleFavorite(cafe.id, { name: cafe.name, openingTime: cafe.opening_time })}
             whileTap={{ scale: 0.85 }}
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}

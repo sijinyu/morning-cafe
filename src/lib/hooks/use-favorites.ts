@@ -3,6 +3,10 @@
 import { useSyncExternalStore, useCallback } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import { isNativeApp } from '@/lib/capacitor';
+import {
+  scheduleNativeNotification,
+  cancelNativeNotification,
+} from '@/lib/native-notifications';
 
 const STORAGE_KEY = 'morning-cafe-favorites';
 
@@ -71,14 +75,28 @@ function toggle(cafeId: string): boolean {
 export function useFavorites() {
   const favorites = useSyncExternalStore(subscribe, getStableSnapshot, getServerSnapshot);
 
-  const toggleFavorite = useCallback((cafeId: string) => {
+  const toggleFavorite = useCallback((
+    cafeId: string,
+    cafeInfo?: { name: string; openingTime: string | null },
+  ) => {
     trackEvent('toggle_favorite', { cafe_id: cafeId });
     if (isNativeApp()) {
       import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
         Haptics.impact({ style: ImpactStyle.Medium });
       }).catch(() => {});
     }
-    return toggle(cafeId);
+    const isNowFavorite = toggle(cafeId);
+
+    // Schedule/cancel native local notification
+    if (isNativeApp() && cafeInfo?.openingTime) {
+      if (isNowFavorite) {
+        scheduleNativeNotification(cafeId, cafeInfo.name, cafeInfo.openingTime);
+      } else {
+        cancelNativeNotification(cafeId);
+      }
+    }
+
+    return isNowFavorite;
   }, []);
 
   const isFavorite = useCallback((cafeId: string) => {

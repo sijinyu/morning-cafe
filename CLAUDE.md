@@ -27,6 +27,7 @@
 | Carousel | embla-carousel-react |
 | AI | Google Gemini Flash (무료 티어) |
 | PWA | Serwist (서비스 워커) |
+| Native | Capacitor 7 (iOS 하이브리드 앱) |
 | Package | npm |
 
 ---
@@ -80,6 +81,7 @@ src/
 │   └── api/
 │       ├── place-detail/route.ts   # 카카오 Place API 프록시 (사진+메뉴+별점+주차+편의시설)
 │       ├── photo-proxy/route.ts    # Naver pstatic 이미지 프록시 (Referer 우회)
+│       ├── push-token/route.ts     # 디바이스 토큰 등록 (APNs 서버 푸시용)
 │       └── reports/route.ts        # 제보 POST → Supabase insert + Resend 이메일
 │
 ├── components/
@@ -89,6 +91,11 @@ src/
 │   │   └── theme-provider.tsx      # next-themes 다크모드
 │   │
 │   ├── splash-screen.tsx             # 스플래시 스크린 (커피잔 + 김 애니메이션)
+│   │
+│   ├── native/
+│   │   ├── push-init.tsx             # 푸시 알림 초기화 (APNs 등록 + 딥링크)
+│   │   ├── status-bar-config.tsx     # 네이티브 상태바 설정
+│   │   └── offline-screen.tsx        # 오프라인 감지 UI
 │   │
 │   └── map/
 │       ├── cafe-map.tsx            # 카카오 맵 + 마커 (뷰포트 필터링, SVG 핀마커)
@@ -114,12 +121,15 @@ src/
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
 │   │   └── cafe-store.ts           # Zustand 메인 스토어 (아래 상세)
+│   ├── capacitor.ts                  # isNativeApp() 유틸
+│   ├── native-notifications.ts      # 네이티브 로컬 알림 schedule/cancel (standalone)
 │   ├── hooks/
 │   │   ├── use-kakao-loader.ts     # 카카오 SDK 로더
 │   │   ├── use-place-detail.ts     # 사진+메뉴 통합 훅
-│   │   ├── use-favorites.ts        # 즐겨찾기 (localStorage)
+│   │   ├── use-favorites.ts        # 즐겨찾기 (localStorage + 네이티브 알림 연동)
 │   │   ├── use-recent-cafes.ts     # 최근 본 카페 (localStorage)
 │   │   ├── use-notifications.ts    # 오픈 알림 (Web Notifications)
+│   │   ├── use-native-notifications.ts # 네이티브 로컬 알림 훅 (Capacitor)
 │   │   └── use-cafe-memos.ts       # 카페별 메모 (localStorage)
 │   └── supabase/
 │       ├── client.ts               # 브라우저용 Supabase 클라이언트
@@ -134,7 +144,8 @@ scripts/
 ├── migrations/
 │   ├── 001-add-gu-column.sql       # cafes 테이블 gu 컬럼 추가
 │   ├── 002-gu-stats-function.sql   # 구별 통계 RPC 함수
-│   └── 003-gu-trigger.sql          # gu 자동 추출 트리거
+│   ├── 003-gu-trigger.sql          # gu 자동 추출 트리거
+│   └── 006-push-tokens.sql         # push_tokens 테이블 (디바이스 토큰)
 └── ...
 │
 .github/
@@ -144,6 +155,17 @@ scripts/
 docs/
 ├── seoul-morning-cafe-stats.md      # 자동 생성 통계 리포트
 └── ...
+│
+ios/                                   # Capacitor iOS 프로젝트
+└── App/
+    ├── App/
+    │   ├── AppDelegate.swift          # APNs 토큰 포워딩 포함
+    │   ├── Info.plist                 # 위치 권한, Portrait only
+    │   ├── App.entitlements           # Push Notifications capability
+    │   ├── PrivacyInfo.xcprivacy      # Apple Privacy Manifest
+    │   └── Assets.xcassets/           # 앱 아이콘 (1024x1024)
+    ├── App.xcodeproj/                 # Xcode 프로젝트
+    └── Podfile                        # CocoaPods 의존성
 ```
 
 ---
@@ -237,6 +259,13 @@ Naver pstatic 이미지 프록시. Referer 제한 우회.
 - Resend로 관리자 이메일 알림 (sijinyudev@gmail.com)
 - 서버 키 사용: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 
+### POST `/api/push-token`
+네이티브 앱 디바이스 토큰 등록 (향후 APNs 서버 푸시용).
+- body: `{ token, platform, favoriteCafeIds? }`
+- platform: `ios` | `android` | `web`
+- Supabase `push_tokens` 테이블 upsert (device_token UNIQUE)
+- 서버 키 사용: `SUPABASE_SERVICE_ROLE_KEY`
+
 ---
 
 ## 주요 의존성
@@ -250,6 +279,13 @@ Naver pstatic 이미지 프록시. Referer 제한 우회.
 - `next-themes` — 다크모드
 - `serwist` — PWA 서비스 워커
 - `resend` — 이메일 발송 (제보 알림)
+- `@capacitor/core` + `@capacitor/ios` — 네이티브 앱 런타임
+- `@capacitor/push-notifications` — APNs 푸시 등록
+- `@capacitor/local-notifications` — 로컬 알림 (찜 카페 오픈 30분 전)
+- `@capacitor/haptics` — 햅틱 피드백 (찜 토글)
+- `@capacitor/share` — 네이티브 공유 시트
+- `@capacitor/splash-screen` — 네이티브 스플래시
+- `@capacitor/status-bar` — 상태바 커스터마이징
 
 ---
 
@@ -260,6 +296,11 @@ npm install          # 의존성 설치
 npm run dev          # 개발 서버 (localhost:3000)
 npm run build        # 프로덕션 빌드
 npm run lint         # ESLint
+
+# iOS 빌드
+npm run cap:sync     # 웹 에셋 + 플러그인 → iOS 동기화
+npm run cap:open     # Xcode 열기
+# Xcode: Product > Archive > Distribute to App Store Connect
 
 # 통계 리포트 생성
 node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
@@ -312,6 +353,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 39. **조용한 아침 지수**: `src/lib/quiet-score.ts` → `QuietScoreBadge` (`bottom-sheet/quiet-score-badge.tsx`). strengths+facilities+reviews 키워드 매칭. 0~5 스케일. "정보 부족/없음"이면 숨김.
 40. **데스크탑 사이드바 반투명**: `bg-background/80 backdrop-blur-md z-30`. `layout.tsx`에서 main에 `md:-ml-56`으로 지도가 사이드바 아래로 확장.
 41. **AI 카페 추천**: Gemini Flash 무료 티어 (15RPM, 1500/일). `/api/ai-recommend` 엔드포인트. `GOOGLE_GEMINI_API_KEY` env. Supabase에 응답 캐시 (30분~1시간). Rate limit 429 시 캐시 fallback.
+42. **Capacitor iOS 앱**: `capacitor.config.ts`에서 원격 URL 로드 (`server.url: morning-cafe-phi.vercel.app`). `isNativeApp()` (`src/lib/capacitor.ts`)으로 네이티브 분기. 네이티브 전용 컴포넌트는 `src/components/native/`에 배치. `npx cap sync ios` 후 `npx cap open ios`로 Xcode 열기.
+43. **네이티브 알림 이중 구조**: 웹=`use-notifications.ts` (Web Notifications API), 네이티브=`native-notifications.ts` + `use-native-notifications.ts` (`@capacitor/local-notifications`). 찜 토글 시 `toggleFavorite(cafeId, { name, openingTime })` 호출하면 네이티브 앱에서 자동 로컬 알림 스케줄/취소.
+44. **PushInit 컴포넌트**: `layout.tsx`에 마운트. 앱 로드 5초 후 APNs 권한 요청 → 토큰 서버 전송 (`/api/push-token`). 알림 탭 → `/?cafeId=xxx` 딥링크.
+45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Deployment Target iOS 16.0, iPhone only (Portrait), Version 1.0.0 Build 1. `App.entitlements`에 Push Notifications capability. `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
+46. **앱 아이콘**: `public/icons/icon.svg` → `icon-1024.png` (rx=0, sharp 렌더링) → `AppIcon.appiconset`. Xcode 15+는 1024x1024 단일 이미지 자동 리사이즈.
+47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
 
 ### 커밋 메시지
 
@@ -351,6 +398,15 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 찜 마커 배지 (사진 마커 우상단 북마크)
 - [x] 조용한 아침 지수 (`quiet-score.ts` → `QuietScoreBadge`)
 - [x] 데스크탑 사이드바 반투명 (backdrop-blur-md)
+- [x] iOS Capacitor 프로젝트 생성 + 빌드 설정 (Bundle ID, iOS 16.0, Portrait)
+- [x] 앱 아이콘 1024x1024 + LaunchScreen 크림 배경
+- [x] Info.plist 위치 권한 한글 설명 + PrivacyInfo.xcprivacy
+- [x] Push Notifications 구현 — APNs 등록 + 로컬 알림 (찜 카페 오픈 30분 전)
+- [x] PushInit 컴포넌트 + push-token API + push_tokens 마이그레이션
+- [x] 찜 토글 네이티브 알림 연동 (toggleFavorite에 cafeInfo 파라미터 추가)
+- [x] 개인정보처리방침 푸시 알림 섹션 추가
+- [x] App.entitlements (Push Notifications capability)
+- [ ] **iOS App Store 제출** — Apple Developer 등록 → Xcode Archive → App Store Connect 업로드 → TestFlight 테스트 → 심사 제출
 - [ ] AI 카페 추천/비교 (Gemini Flash)
 - [ ] AI 출근길 경로 추천 (집→카페→회사 최적 경로)
 - [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)

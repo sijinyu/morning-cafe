@@ -137,7 +137,7 @@ export default function FavoritesPage() {
                 cafe={cafe}
                 isChain={chainCafeIds.has(cafe.id)}
                 onCardClick={() => handleCardClick(cafe)}
-                onRemove={() => toggleFavorite(cafe.id)}
+                onRemove={() => toggleFavorite(cafe.id, { name: cafe.name, openingTime: cafe.opening_time })}
               />
             ))}
           </ul>
