@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '카페 제보 — 모닝커피',
+  title: '카페 제보 — 모닝카페',
 };
 
 export default function ReportLayout({

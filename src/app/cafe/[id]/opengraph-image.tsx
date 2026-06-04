@@ -4,7 +4,7 @@ import { formatOpeningTime } from '@/lib/cafe-utils';
 import { extractGu } from '@/lib/types/cafe';
 
 export const runtime = 'edge';
-export const alt = '모닝커피 — 서울 아침 카페';
+export const alt = '모닝카페 — 서울 아침 카페';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -144,7 +144,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 letterSpacing: '0.02em',
               }}
             >
-              모닝커피 — 서울 아침 카페 지도
+              모닝카페 — 서울 아침 카페 지도
             </div>
           </div>
         </div>

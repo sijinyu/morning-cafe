@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cafes = await fetchCafesByGu(decodedGu);
   const count = cafes.length;
 
-  const title = `${decodedGu} 아침 카페 ${count}곳 — 모닝커피`;
+  const title = `${decodedGu} 아침 카페 ${count}곳 — 모닝카페`;
   const description = `${decodedGu}에서 아침 일찍 여는 카페 ${count}곳. 6시, 7시 오픈 카페를 확인하세요.`;
 
   return {
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       type: 'website',
       locale: 'ko_KR',
-      siteName: '모닝커피',
+      siteName: '모닝카페',
     },
     twitter: {
       card: 'summary_large_image',

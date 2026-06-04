@@ -122,7 +122,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `${cafe.name} — 모닝커피`,
+          title: `${cafe.name} — 모닝카페`,
         });
       } else {
         // 2. Download fallback
@@ -609,7 +609,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                             imageUrl: 'https://morning-cafe-phi.vercel.app/icons/icon-512x512.png',
                             link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
                           },
-                          buttons: [{ title: '모닝커피에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+                          buttons: [{ title: '모닝카페에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
                         });
                         return;
                       } catch { /* fallback */ }

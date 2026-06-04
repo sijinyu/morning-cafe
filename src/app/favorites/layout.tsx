@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '찜 — 모닝커피',
+  title: '찜 — 모닝카페',
 };
 
 export default function FavoritesLayout({

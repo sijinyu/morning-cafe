@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '개인정보처리방침 — 모닝커피',
-  description: '모닝커피 앱의 개인정보처리방침',
+  title: '개인정보처리방침 — 모닝카페',
+  description: '모닝카페 앱의 개인정보처리방침',
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
 
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-foreground">1. 수집하는 개인정보</h2>
-          <p>모닝커피는 서비스 제공을 위해 다음 정보를 처리합니다:</p>
+          <p>모닝카페는 서비스 제공을 위해 다음 정보를 처리합니다:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
               <strong className="text-foreground">위치 정보 (선택)</strong>: 현재 위치 근처 카페를 찾기 위해 GPS 좌표를 사용합니다. 위치 정보는 서버에 저장되지 않으며, 기기에서만 처리됩니다.
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-foreground">2. 계정 시스템</h2>
           <p>
-            모닝커피는 회원가입이나 로그인을 요구하지 않습니다. 별도의 계정 시스템이 없으므로 이름, 이메일, 비밀번호 등의 개인정보를 수집하지 않습니다.
+            모닝카페는 회원가입이나 로그인을 요구하지 않습니다. 별도의 계정 시스템이 없으므로 이름, 이메일, 비밀번호 등의 개인정보를 수집하지 않습니다.
           </p>
         </section>
 
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               <strong className="text-foreground">로컬 알림</strong>: 찜한 카페의 오픈시간 30분 전 알림은 기기에서 로컬로 처리되며 서버를 거치지 않습니다.
             </li>
             <li>
-              <strong className="text-foreground">설정 및 해제</strong>: iOS 설정 &gt; 모닝커피 &gt; 알림에서 언제든 알림을 끄거나 켤 수 있습니다. 알림을 끄면 디바이스 토큰은 더 이상 사용되지 않습니다.
+              <strong className="text-foreground">설정 및 해제</strong>: iOS 설정 &gt; 모닝카페 &gt; 알림에서 언제든 알림을 끄거나 켤 수 있습니다. 알림을 끄면 디바이스 토큰은 더 이상 사용되지 않습니다.
             </li>
           </ul>
         </section>
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-foreground">7. 아동의 개인정보</h2>
           <p>
-            모닝커피는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.
+            모닝카페는 만 14세 미만 아동의 개인정보를 의도적으로 수집하지 않습니다.
           </p>
         </section>
 

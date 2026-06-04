@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       const cafeLine = cafe_name ? `카페: ${cafe_name}` : '카페: (미지정)';
 
       await resend.emails.send({
-        from: '모닝커피 <onboarding@resend.dev>',
+        from: '모닝카페 <onboarding@resend.dev>',
         to: ADMIN_EMAIL,
-        subject: `[모닝커피 제보] ${typeLabel}${cafe_name ? ` — ${cafe_name}` : ''}`,
-        text: `새 제보가 접수되었습니다.\n\n유형: ${typeLabel}\n${cafeLine}\n\n내용:\n${content.trim()}\n\n---\n모닝커피 관리자 알림`,
+        subject: `[모닝카페 제보] ${typeLabel}${cafe_name ? ` — ${cafe_name}` : ''}`,
+        text: `새 제보가 접수되었습니다.\n\n유형: ${typeLabel}\n${cafeLine}\n\n내용:\n${content.trim()}\n\n---\n모닝카페 관리자 알림`,
       }).catch(() => {
         // 이메일 실패는 무시 — 제보는 DB에 저장됨
       });

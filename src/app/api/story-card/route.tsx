@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.02em',
               }}
             >
-              모닝커피
+              모닝카페
             </div>
           </div>
         </div>

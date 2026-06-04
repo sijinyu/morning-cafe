@@ -7,19 +7,19 @@ import { formatOpeningTime } from '@/lib/cafe-utils';
 export const revalidate = 86400; // 24h ISR
 
 export const metadata: Metadata = {
-  title: '서울 구별 아침 카페 — 모닝커피',
+  title: '서울 구별 아침 카페 — 모닝카페',
   description:
     '서울 각 구별 아침 일찍 여는 카페를 한눈에. 강남, 마포, 종로 등 구별 얼리버드 카페 목록.',
   openGraph: {
-    title: '서울 구별 아침 카페 — 모닝커피',
+    title: '서울 구별 아침 카페 — 모닝카페',
     description: '서울 각 구별 아침 일찍 여는 카페를 한눈에.',
     type: 'website',
     locale: 'ko_KR',
-    siteName: '모닝커피',
+    siteName: '모닝카페',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '서울 구별 아침 카페 — 모닝커피',
+    title: '서울 구별 아침 카페 — 모닝카페',
     description: '서울 각 구별 아침 일찍 여는 카페를 한눈에.',
   },
   alternates: {

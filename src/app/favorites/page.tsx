@@ -69,7 +69,7 @@ export default function FavoritesPage() {
               webUrl: `${BASE_URL}/cafe/${c.id}`,
             },
           })),
-          buttons: [{ title: '모닝커피에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+          buttons: [{ title: '모닝카페에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
         });
         return;
       } catch { /* fallback */ }

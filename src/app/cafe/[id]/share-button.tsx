@@ -63,7 +63,7 @@ export function CafeShareButton({ cafe }: CafeShareButtonProps) {
           },
           buttons: [
             {
-              title: '모닝커피에서 보기',
+              title: '모닝카페에서 보기',
               link: {
                 mobileWebUrl: shareUrl,
                 webUrl: shareUrl,

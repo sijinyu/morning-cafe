@@ -34,7 +34,7 @@ export function SplashScreen({ ready }: SplashScreenProps) {
         >
           <Image
             src="/splash.png"
-            alt="모닝커피 — 서울의 아침을 깨우는 카페"
+            alt="모닝카페 — 서울의 아침을 깨우는 카페"
             fill
             priority
             className="object-cover"

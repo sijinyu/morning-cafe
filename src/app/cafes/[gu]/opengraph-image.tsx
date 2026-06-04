@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { fetchCafesByGu } from '@/lib/supabase/queries';
 
 export const runtime = 'edge';
-export const alt = '모닝커피 — 구별 아침 카페';
+export const alt = '모닝카페 — 구별 아침 카페';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 

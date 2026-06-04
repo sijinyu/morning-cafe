@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '스탬프 — 모닝커피',
+  title: '스탬프 — 모닝카페',
 };
 
 export default function StampLayout({ children }: { children: React.ReactNode }) {

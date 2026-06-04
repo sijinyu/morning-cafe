@@ -24,19 +24,19 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://morning-cafe-phi.vercel.app'),
-  title: '모닝커피 — 서울 아침 카페 지도',
+  title: '모닝카페 — 서울 아침 카페 지도',
   description: '서울에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.',
-  keywords: ['아침 카페', '새벽 카페', '서울 카페', '얼리버드 카페', '카페 오픈 시간', '모닝커피'],
+  keywords: ['아침 카페', '새벽 카페', '서울 카페', '얼리버드 카페', '카페 오픈 시간', '모닝카페'],
   openGraph: {
-    title: '모닝커피 — 서울 아침 카페 지도',
+    title: '모닝카페 — 서울 아침 카페 지도',
     description: '서울에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.',
     type: 'website',
     locale: 'ko_KR',
-    siteName: '모닝커피',
+    siteName: '모닝카페',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '모닝커피 — 서울 아침 카페 지도',
+    title: '모닝카페 — 서울 아침 카페 지도',
     description: '서울에서 아침 일찍 여는 카페를 한눈에!',
   },
   verification: {

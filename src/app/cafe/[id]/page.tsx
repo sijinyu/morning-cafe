@@ -30,14 +30,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cafe = await fetchCafeById(id);
 
   if (!cafe) {
-    return { title: '카페를 찾을 수 없습니다 — 모닝커피' };
+    return { title: '카페를 찾을 수 없습니다 — 모닝카페' };
   }
 
   const openTime = cafe.opening_time
     ? `아침 ${formatOpeningTime(cafe.opening_time)} 오픈`
     : '아침 카페';
-  const title = `${cafe.name} — ${openTime} | 모닝커피`;
-  const description = `${cafe.name} — ${cafe.road_address ?? cafe.address}. ${openTime}. 모닝커피에서 서울 아침 카페를 찾아보세요.`;
+  const title = `${cafe.name} — ${openTime} | 모닝카페`;
+  const description = `${cafe.name} — ${cafe.road_address ?? cafe.address}. ${openTime}. 모닝카페에서 서울 아침 카페를 찾아보세요.`;
   const url = `${BASE_URL}/cafe/${id}`;
 
   return {
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       type: 'article',
       locale: 'ko_KR',
-      siteName: '모닝커피',
+      siteName: '모닝카페',
       url,
     },
     twitter: {
@@ -252,7 +252,7 @@ export default async function CafePage({ params }: PageProps) {
                 )}
               >
                 <Map className="h-4 w-4" />
-                모닝커피에서 보기
+                모닝카페에서 보기
               </Link>
               {cafe.place_url && (
                 <a
