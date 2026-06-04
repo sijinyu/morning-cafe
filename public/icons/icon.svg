@@ -1,17 +1,89 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Background -->
-  <rect width="512" height="512" rx="112" fill="#F59E0B"/>
+  <defs>
+    <!-- 배경 그라데이션: 따뜻한 오렌지→앰버 -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF8C42"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <!-- 배경 광택 -->
+    <radialGradient id="bgShine" cx="0.3" cy="0.25" r="0.7">
+      <stop offset="0%" stop-color="white" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 컵 그라데이션: 3D 느낌 -->
+    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E8E0D8"/>
+    </linearGradient>
+    <!-- 컵 그림자 -->
+    <linearGradient id="cupShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00000000"/>
+      <stop offset="100%" stop-color="#00000020"/>
+    </linearGradient>
+    <!-- 해(sunrise) 그라데이션 -->
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#FDE68A"/>
+      <stop offset="60%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </radialGradient>
+    <!-- 해 광선 -->
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#FDE68A" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 김(steam) -->
+    <linearGradient id="steam" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="white" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Coffee cup body — 중앙, 미니멀 -->
-  <rect x="136" y="168" width="192" height="176" rx="28" fill="white"/>
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#bgShine)"/>
 
-  <!-- Cup handle -->
-  <path d="M328 216 C368 216 388 252 388 272 C388 292 368 328 328 328"
-        fill="none" stroke="white" stroke-width="24" stroke-linecap="round"/>
+  <!-- 해(sunrise) — 컵 뒤에서 떠오르는 반원 -->
+  <circle cx="256" cy="218" r="80" fill="url(#sunGlow)"/>
+  <clipPath id="sunClip">
+    <rect x="140" y="100" width="232" height="118"/>
+  </clipPath>
+  <circle cx="256" cy="218" r="56" fill="url(#sun)" clip-path="url(#sunClip)"/>
 
-  <!-- Coffee surface -->
-  <ellipse cx="232" cy="228" rx="72" ry="14" fill="#92400E" opacity="0.35"/>
+  <!-- 해 광선 (짧은 선) -->
+  <g stroke="#FDE68A" stroke-width="4" stroke-linecap="round" opacity="0.7">
+    <line x1="256" y1="108" x2="256" y2="92"/>
+    <line x1="296" y1="116" x2="304" y2="102"/>
+    <line x1="216" y1="116" x2="208" y2="102"/>
+    <line x1="326" y1="140" x2="340" y2="130"/>
+    <line x1="186" y1="140" x2="172" y2="130"/>
+  </g>
 
-  <!-- Glossy highlight -->
-  <rect x="160" y="184" width="56" height="24" rx="12" fill="white" opacity="0.3"/>
+  <!-- 접시(saucer) — 3D 느낌 타원 -->
+  <ellipse cx="256" cy="382" rx="120" ry="22" fill="#E8E0D8"/>
+  <ellipse cx="256" cy="378" rx="120" ry="22" fill="#F5F0EB"/>
+  <ellipse cx="256" cy="378" rx="100" ry="15" fill="white" opacity="0.4"/>
+
+  <!-- 커피 컵 바디 -->
+  <rect x="168" y="210" width="176" height="168" rx="24" fill="url(#cup)"/>
+  <rect x="168" y="210" width="176" height="168" rx="24" fill="url(#cupShadow)"/>
+
+  <!-- 컵 좌측 하이라이트 (3D 둥근 느낌) -->
+  <rect x="178" y="220" width="40" height="80" rx="20" fill="white" opacity="0.35"/>
+
+  <!-- 컵 핸들 -->
+  <path d="M344 258 C380 258 396 290 396 310 C396 330 380 362 344 362"
+        fill="none" stroke="url(#cup)" stroke-width="22" stroke-linecap="round"/>
+  <path d="M344 258 C380 258 396 290 396 310 C396 330 380 362 344 362"
+        fill="none" stroke="white" stroke-width="16" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 커피 표면 -->
+  <ellipse cx="256" cy="234" rx="66" ry="14" fill="#92400E" opacity="0.3"/>
+
+  <!-- 김(steam) — 부드러운 S곡선 3개 -->
+  <g fill="none" stroke="url(#steam)" stroke-width="5" stroke-linecap="round">
+    <path d="M228 198 C228 182 238 178 238 162 C238 146 228 142 228 126"/>
+    <path d="M256 192 C256 174 268 170 268 152 C268 134 256 130 256 112"/>
+    <path d="M284 198 C284 182 274 178 274 162 C274 146 284 142 284 126"/>
+  </g>
 </svg>
