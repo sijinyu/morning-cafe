@@ -40,7 +40,7 @@ import { ReviewSection } from './bottom-sheet/review-section';
 import { HoursSection } from './bottom-sheet/hours-section';
 import { MemoSection } from './bottom-sheet/memo-section';
 import { QuietScoreBadge } from './bottom-sheet/quiet-score-badge';
-import { AiTagline } from '@/components/ai/ai-tagline';
+// import { AiTagline } from '@/components/ai/ai-tagline'; // AI 유료 전환 후 복원
 
 /** 직선 거리 → 도보 예상 시간 (분) */
 const WALK_DISTANCE_FACTOR = 1.3;
@@ -276,6 +276,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </span>
             )}
           </div>
+          {/* AI 유료 전환 후 복원
           <AiTagline
             cafeId={cafe.id}
             cafeName={cafe.name}
@@ -283,7 +284,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             facilities={facilities}
             rating={rating}
             reviews={reviews}
-          />
+          /> */}
         </div>
 
         <div className="flex items-center -mr-2 flex-shrink-0">

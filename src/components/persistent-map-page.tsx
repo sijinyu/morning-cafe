@@ -14,7 +14,7 @@ import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
 import { CafeListView } from '@/components/map/cafe-list-view';
 import { CafeRoulette } from '@/components/map/cafe-roulette';
-import { AiHubButton } from '@/components/ai/ai-hub-button';
+// import { AiHubButton } from '@/components/ai/ai-hub-button'; // AI 유료 전환 후 복원
 import { MorningPick } from '@/components/morning-pick';
 import { cn } from '@/lib/utils';
 
@@ -163,7 +163,7 @@ export function PersistentMapPage() {
               setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
             }}
           />
-          <AiHubButton />
+          {/* <AiHubButton /> */}{/* AI 유료 전환 후 복원 */}
           <CafeBottomSheetWrapper />
         </>
       ) : (
