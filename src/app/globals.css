@@ -144,3 +144,13 @@
     height: 0;
   }
 }
+
+/* 바텀시트: 모바일은 네비바+safe area 위, 데스크탑은 바닥 */
+.bottom-sheet-position {
+  bottom: var(--bottom-nav-height);
+}
+@media (min-width: 768px) {
+  .bottom-sheet-position {
+    bottom: 0;
+  }
+}

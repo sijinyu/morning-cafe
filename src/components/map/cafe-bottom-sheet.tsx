@@ -216,7 +216,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
       exit={{ y: '100%' }}
       transition={{ type: 'tween', duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
-        'fixed left-0 right-0 z-40 bottom-14 md:bottom-0',
+        'fixed left-0 right-0 z-40 bottom-sheet-position',
         'rounded-t-3xl bg-background shadow-[0_-4px_24px_rgba(0,0,0,0.12)] dark:shadow-none dark:border-t dark:border-border',
         'flex flex-col overflow-hidden',
       )}
