@@ -238,7 +238,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               </span>
             )}
             {isChain && (
-              <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 whitespace-nowrap">
+              <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-nowrap">
                 프랜차이즈
               </span>
             )}
@@ -323,7 +323,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               aria-label={reminded ? '알림 제거' : '오픈 알림 설정'}
             >
               {reminded ? (
-                <BellOff className="h-[18px] w-[18px] fill-amber-400 stroke-amber-500" />
+                <BellOff className="h-[18px] w-[18px] fill-red-400 stroke-red-500" />
               ) : (
                 <Bell className="h-[18px] w-[18px] stroke-muted-foreground" />
               )}
@@ -341,7 +341,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             <Bookmark
               className={cn(
                 'h-[18px] w-[18px] transition-colors',
-                favorited ? 'fill-amber-500 stroke-amber-500' : 'stroke-muted-foreground'
+                favorited ? 'fill-red-500 stroke-red-500' : 'stroke-muted-foreground'
               )}
             />
           </motion.button>
@@ -377,7 +377,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               {/* Rating */}
               {rating && (
                 <div className="flex items-center gap-2 py-1.5">
-                  <Star className="h-4 w-4 fill-amber-400 stroke-amber-400 flex-shrink-0" />
+                  <Star className="h-4 w-4 fill-red-400 stroke-red-400 flex-shrink-0" />
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-semibold text-foreground">{rating.score.toFixed(1)}</span>
                     {rating.count > 0 && (
@@ -551,9 +551,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   'flex items-center justify-center gap-1.5 rounded-2xl',
                   'py-3.5 px-4 text-sm font-medium transition-colors',
                   checkedIn
-                    ? 'bg-amber-500 text-white'
+                    ? 'bg-red-500 text-white'
                     : canCheckin
-                      ? 'border border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                      ? 'border border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                       : 'border border-border text-muted-foreground opacity-50',
                 )}
                 aria-label={checkedIn ? '체크인 완료' : '체크인'}

@@ -57,26 +57,26 @@ function getMarkerColors(cafe: Cafe, isChain: boolean): MarkerColors {
 
   // 오늘 요일 기준 24시간 영업 판단
   if (is24HoursForDay(cafe, todayKey)) {
-    return { fill: '#DC2626', stroke: '#2D3748', cream: '#FFF0F0', steam: '#EF4444', coffee: '#A16207' };
+    return { fill: '#9B2C2C', stroke: '#2D3748', cream: '#FFF0F0', steam: '#C53030', coffee: '#742A2A' };
   }
 
   // 오늘 요일 기준 오픈 시간
   const openingTime = getOpeningTimeForDay(cafe, 'today');
-  if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#FFF8F0', steam: '#D4A574', coffee: '#A16207' };
+  if (!openingTime) return { fill: '#9CA3AF', stroke: '#4B5563', cream: '#FEF2F1', steam: '#D4A574', coffee: '#7C3A30' };
 
   const parts = openingTime.split(':');
   const totalMinutes = parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
 
   if (totalMinutes < 360) {
-    // ~6시: deep amber
-    return { fill: '#D97706', stroke: '#2D3748', cream: '#FFF8F0', steam: '#F59E0B', coffee: '#92400E' };
+    // ~6시: deep coral
+    return { fill: '#D04440', stroke: '#2D3748', cream: '#FEF2F1', steam: '#E8554E', coffee: '#7C3A30' };
   }
   if (totalMinutes < 420) {
-    // 6~7시: amber (brand primary)
-    return { fill: '#F59E0B', stroke: '#2D3748', cream: '#FFF8F0', steam: '#FBBF24', coffee: '#A16207' };
+    // 6~7시: coral (brand primary)
+    return { fill: '#E8554E', stroke: '#2D3748', cream: '#FEF2F1', steam: '#F4807A', coffee: '#9B4440' };
   }
-  // 7~8시: light amber
-  return { fill: '#FBBF24', stroke: '#2D3748', cream: '#FFFDF0', steam: '#FCD34D', coffee: '#A16207' };
+  // 7~8시: light coral
+  return { fill: '#F4807A', stroke: '#2D3748', cream: '#FFF5F4', steam: '#F9AAA6', coffee: '#9B4440' };
 }
 
 interface CafeMarkerProps {
@@ -88,8 +88,8 @@ interface CafeMarkerProps {
   onSelect: (cafe: Cafe) => void;
 }
 
-// Selected marker stroke color (amber-700 — brand dark amber)
-const SELECTED_STROKE = '#B45309';
+// Selected marker stroke color (coral-700 — brand dark coral)
+const SELECTED_STROKE = '#B83B36';
 const SELECTED_STROKE_WIDTH = 3;
 
 // 원형 마커 — 커피잔 아이콘 (야장맵 스타일)
@@ -113,7 +113,7 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
     <path d="M${r + r * 0.2} ${r - r * 0.04}C${r + r * 0.32} ${r - r * 0.04} ${r + r * 0.38} ${r + r * 0.04} ${r + r * 0.38} ${r + r * 0.12}C${r + r * 0.38} ${r + r * 0.2} ${r + r * 0.32} ${r + r * 0.28} ${r + r * 0.2} ${r + r * 0.28}" stroke="${stroke}" stroke-width="${selected ? 0.9 : 0.7}" stroke-linecap="round"/>
     <rect x="${r - r * 0.22}" y="${r + r * 0.08}" width="${r * 0.36}" height="${r * 0.14}" rx="${r * 0.03}" fill="${coffee}" opacity="0.9"/>
     ${fav ? `<circle cx="${sz - 7}" cy="5" r="5.5" fill="white" stroke="${stroke}" stroke-width="0.8"/>
-    <path d="M${sz - 7 - 2.5} 1.5h5v6l-2.5-1.5-2.5 1.5z" fill="#F59E0B" stroke="#D97706" stroke-width="0.5"/>` : ''}
+    <path d="M${sz - 7 - 2.5} 1.5h5v6l-2.5-1.5-2.5 1.5z" fill="#E8554E" stroke="#D04440" stroke-width="0.5"/>` : ''}
   </svg>`;
 }
 
@@ -217,11 +217,11 @@ const USER_DOT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="${USER_DOT_
     .ring { animation: pulse 1.8s ease-out infinite; }
   </style>
   <!-- pulsing ring -->
-  <circle class="ring" cx="20" cy="20" r="10" fill="#F59E0B" opacity="0.55"/>
+  <circle class="ring" cx="20" cy="20" r="10" fill="#E8554E" opacity="0.55"/>
   <!-- white border -->
   <circle cx="20" cy="20" r="9" fill="white"/>
-  <!-- blue core -->
-  <circle cx="20" cy="20" r="6.5" fill="#F59E0B"/>
+  <!-- coral core -->
+  <circle cx="20" cy="20" r="6.5" fill="#E8554E"/>
 </svg>`;
 
 export interface CafeMapProps {
@@ -686,7 +686,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
                       width: `${size}px`,
                       height: `${size}px`,
                       borderRadius: '50%',
-                      border: isSelected ? '3px solid #B45309' : '2.5px solid #fff',
+                      border: isSelected ? '3px solid #B83B36' : '2.5px solid #fff',
                       boxShadow: isSelected
                         ? '0 2px 8px rgba(180,83,9,0.4)'
                         : '0 2px 6px rgba(0,0,0,0.2)',
@@ -720,7 +720,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
                       boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                     }}>
                       <svg width="10" height="12" viewBox="0 0 10 12">
-                        <path d="M1 0h8v11L5 8.5 1 11z" fill="#F59E0B" stroke="#D97706" strokeWidth="0.5"/>
+                        <path d="M1 0h8v11L5 8.5 1 11z" fill="#E8554E" stroke="#D04440" strokeWidth="0.5"/>
                       </svg>
                     </div>
                   )}

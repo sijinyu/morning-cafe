@@ -105,7 +105,7 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
   if (tagline) {
     return (
       <div className="flex items-center gap-1.5 mt-1">
-        <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400" />
+        <Sparkles className="h-3 w-3 flex-shrink-0 text-red-400" />
         <p className="text-[12px] text-muted-foreground leading-snug">{tagline}</p>
       </div>
     );
@@ -115,7 +115,7 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
   if (loading) {
     return (
       <div className="flex items-center gap-1.5 mt-1">
-        <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400" />
+        <Sparkles className="h-3 w-3 flex-shrink-0 text-red-400" />
         <div className={cn('h-3.5 w-32 rounded-full bg-muted animate-pulse')} />
       </div>
     );
@@ -131,7 +131,7 @@ export function AiTagline({ cafeId, cafeName, strengths, facilities, rating, rev
       onClick={fetchTagline}
       className="flex items-center gap-1 mt-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
     >
-      <Sparkles className="h-3 w-3 flex-shrink-0 text-amber-400/60" />
+      <Sparkles className="h-3 w-3 flex-shrink-0 text-red-400/60" />
       <span>AI 한줄평 보기</span>
     </button>
   );

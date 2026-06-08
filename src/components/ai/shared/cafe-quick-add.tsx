@@ -89,7 +89,7 @@ export function CafeQuickAdd({ selectedIds, onAdd, maxItems = 3 }: CafeQuickAddP
                     {cafe.road_address ?? cafe.address}
                   </p>
                 </div>
-                {isAdded && <Check className="h-4 w-4 flex-shrink-0 text-amber-500" />}
+                {isAdded && <Check className="h-4 w-4 flex-shrink-0 text-red-500" />}
               </button>
             );
           })}

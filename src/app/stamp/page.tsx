@@ -31,11 +31,11 @@ export default function StampPage() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <header className="flex items-center gap-2 border-b border-border px-5 py-4">
-        <Award className="h-5 w-5 text-amber-500" />
+        <Award className="h-5 w-5 text-red-500" />
         <h1 className="text-lg font-bold">스탬프</h1>
         <span className="text-sm text-muted-foreground">({totalStamps})</span>
         <div className="flex-1" />
-        <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+        <span className="text-sm font-medium text-red-600 dark:text-red-400">
           {conqueredGus.size}/25구 정복
         </span>
       </header>
@@ -56,11 +56,11 @@ export default function StampPage() {
               <h2 className="mb-3 text-sm font-semibold text-foreground">서울 25구 정복 지도</h2>
 
               {allConquered && (
-                <div className="mb-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-center">
-                  <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                <div className="mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-center">
+                  <p className="text-sm font-bold text-red-700 dark:text-red-400">
                     서울 25구를 모두 정복했습니다!
                   </p>
-                  <p className="mt-0.5 text-xs text-amber-600/80 dark:text-amber-500/80">
+                  <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-500/80">
                     진정한 얼리버드 정복자
                   </p>
                 </div>
@@ -75,18 +75,18 @@ export default function StampPage() {
                       className={cn(
                         'relative flex flex-col items-center justify-center rounded-xl px-1 py-2.5 text-center transition-colors',
                         conquered
-                          ? 'bg-amber-100 dark:bg-amber-900/30'
+                          ? 'bg-red-100 dark:bg-red-900/30'
                           : 'bg-muted/50',
                       )}
                     >
                       {conquered && (
-                        <CheckCircle2 className="mb-1 h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
+                        <CheckCircle2 className="mb-1 h-3.5 w-3.5 text-red-500 dark:text-red-400" />
                       )}
                       <span
                         className={cn(
                           'text-[10px] font-semibold leading-tight',
                           conquered
-                            ? 'text-amber-800 dark:text-amber-300'
+                            ? 'text-red-800 dark:text-red-300'
                             : 'text-muted-foreground',
                         )}
                       >
@@ -117,8 +117,8 @@ export default function StampPage() {
                     className="flex items-center gap-3 px-5 py-3.5"
                   >
                     {/* Stamp dot */}
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                      <MapPin className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                      <MapPin className="h-4 w-4 text-red-600 dark:text-red-400" />
                     </div>
 
                     {/* Info */}
@@ -128,7 +128,7 @@ export default function StampPage() {
                       </p>
                       <div className="mt-0.5 flex items-center gap-1.5">
                         {stamp.gu && (
-                          <span className="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                          <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/20 px-2 py-0.5 text-[10px] font-semibold text-red-700 dark:text-red-400">
                             {stamp.gu}
                           </span>
                         )}
@@ -139,7 +139,7 @@ export default function StampPage() {
                     </div>
 
                     {/* Check icon */}
-                    <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-amber-400 dark:text-amber-500" />
+                    <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-red-400 dark:text-red-500" />
                   </li>
                 ))}
               </ul>

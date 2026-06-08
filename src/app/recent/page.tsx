@@ -257,7 +257,7 @@ function RecentCafeItem({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
           {isChain && (
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
               프랜차이즈
             </span>
           )}

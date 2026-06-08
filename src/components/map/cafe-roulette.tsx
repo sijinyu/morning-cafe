@@ -210,7 +210,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                       </p>
                       <div className="flex items-center justify-center gap-2 text-sm">
                         {displayCafe.opening_time && (
-                          <span className="text-amber-600 font-medium">
+                          <span className="text-red-600 font-medium">
                             {formatOpeningTime(displayCafe.opening_time)} 오픈
                           </span>
                         )}
@@ -221,7 +221,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                         )}
                         {rating && (
                           <span className="flex items-center gap-0.5 text-muted-foreground">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            <Star className="h-3 w-3 fill-red-400 text-red-400" />
                             {rating.score.toFixed(1)}
                           </span>
                         )}

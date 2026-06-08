@@ -83,7 +83,7 @@ export default function ReportPage() {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-border px-5 py-4">
-        <Send className="h-5 w-5 text-amber-500" />
+        <Send className="h-5 w-5 text-red-500" />
         <h1 className="text-lg font-bold">제보하기</h1>
       </header>
 
@@ -105,13 +105,13 @@ export default function ReportPage() {
                 className={cn(
                   'flex items-start gap-3 rounded-2xl border p-4 text-left transition-all',
                   reportType === value
-                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/20'
+                    ? 'border-red-500 bg-red-50 dark:bg-red-950/20'
                     : 'border-border hover:bg-muted/50',
                 )}
               >
                 <Icon className={cn(
                   'h-5 w-5 mt-0.5 flex-shrink-0',
-                  reportType === value ? 'text-amber-500' : 'text-muted-foreground',
+                  reportType === value ? 'text-red-500' : 'text-muted-foreground',
                 )} />
                 <div>
                   <p className="text-sm font-semibold">{label}</p>
@@ -136,8 +136,8 @@ export default function ReportPage() {
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground">카페를 선택하세요</p>
                   {selectedCafe ? (
-                    <div className="flex items-center gap-2 rounded-2xl border border-amber-500 bg-amber-50 dark:bg-amber-950/20 p-3">
-                      <MapPin className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    <div className="flex items-center gap-2 rounded-2xl border border-red-500 bg-red-50 dark:bg-red-950/20 p-3">
+                      <MapPin className="h-4 w-4 text-red-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate">{selectedCafe.name}</p>
                         <p className="text-xs text-muted-foreground truncate">{selectedCafe.road_address ?? selectedCafe.address}</p>
@@ -192,7 +192,7 @@ export default function ReportPage() {
                     value={cafeSearch}
                     onChange={(e) => setCafeSearch(e.target.value)}
                     placeholder="카페명과 위치 (예: 동네카페 마포구 연남동)"
-                    className="w-full rounded-2xl border border-border px-4 py-3 text-sm bg-transparent outline-none placeholder:text-muted-foreground/50 focus:border-amber-500 transition-colors"
+                    className="w-full rounded-2xl border border-border px-4 py-3 text-sm bg-transparent outline-none placeholder:text-muted-foreground/50 focus:border-red-500 transition-colors"
                   />
                 </div>
               )}
@@ -213,7 +213,7 @@ export default function ReportPage() {
                     '예: 2024년 12월부터 폐업 확인'
                   }
                   rows={3}
-                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm bg-transparent outline-none resize-none placeholder:text-muted-foreground/50 focus:border-amber-500 transition-colors"
+                  className="w-full rounded-2xl border border-border px-4 py-3 text-sm bg-transparent outline-none resize-none placeholder:text-muted-foreground/50 focus:border-red-500 transition-colors"
                 />
               </div>
 
@@ -226,7 +226,7 @@ export default function ReportPage() {
                   'flex w-full items-center justify-center gap-2 rounded-2xl py-3.5',
                   'text-sm font-medium transition-all',
                   content.trim() && (!needsCafe || selectedCafe) && !submitting
-                    ? 'bg-amber-500 text-white hover:bg-amber-600'
+                    ? 'bg-red-500 text-white hover:bg-red-600'
                     : 'bg-muted text-muted-foreground cursor-not-allowed',
                 )}
               >
@@ -255,7 +255,7 @@ export default function ReportPage() {
             href="https://buymeacoffee.com/sijinyu"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-5 py-3 text-sm font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-5 py-3 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors"
           >
             <span className="text-lg">&#9749;</span>
             응원하기

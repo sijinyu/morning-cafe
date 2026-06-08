@@ -30,7 +30,7 @@ const FEATURES = [
     icon: Search,
     title: '내 취향 카페 찾기',
     description: '칩으로 목적·분위기·시설 선택하면 맞춤 추천',
-    color: 'text-amber-500',
+    color: 'text-red-500',
   },
   {
     id: 'compare' as const,
@@ -163,7 +163,7 @@ export function AiHubModal({ open, onClose }: AiHubModalProps) {
                 </button>
               )}
               <div className="flex flex-1 items-center gap-2">
-                <Sparkles className="h-4 w-4 flex-shrink-0 text-amber-500" />
+                <Sparkles className="h-4 w-4 flex-shrink-0 text-red-500" />
                 <span className="text-[15px] font-semibold text-foreground">
                   {getFeatureTitle(activeFeature)}
                 </span>

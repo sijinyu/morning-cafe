@@ -190,7 +190,7 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
       {/* Rate limited */}
       {state === 'rate-limited' && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <p className="text-[15px] font-medium text-amber-600 dark:text-amber-400">AI 요청이 많아요</p>
+          <p className="text-[15px] font-medium text-red-600 dark:text-red-400">AI 요청이 많아요</p>
           <p className="text-sm text-muted-foreground">1분 후 다시 시도해주세요</p>
           <button
             onClick={handleReset}
@@ -239,7 +239,7 @@ export function AiDailyPick({ onClose }: AiDailyPickProps) {
               <h3 className="text-lg font-bold text-foreground">{pickedCafe.name}</h3>
               <div className="flex items-center gap-2 flex-wrap">
                 {todayOpenTime && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
                     <Clock className="h-3 w-3" />
                     {formatOpeningTime(todayOpenTime)} 오픈
                   </span>

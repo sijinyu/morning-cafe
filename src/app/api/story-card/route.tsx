@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
             width: 400,
             height: 400,
             borderRadius: '50%',
-            background: 'rgba(245, 158, 11, 0.08)',
+            background: 'rgba(232, 85, 78, 0.08)',
           }}
         />
         <div
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
             width: 300,
             height: 300,
             borderRadius: '50%',
-            background: 'rgba(245, 158, 11, 0.06)',
+            background: 'rgba(232, 85, 78, 0.06)',
           }}
         />
 
@@ -122,8 +122,8 @@ export async function GET(request: NextRequest) {
               style={{
                 padding: '8px 24px',
                 borderRadius: 999,
-                backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                color: '#D97706',
+                backgroundColor: 'rgba(232, 85, 78, 0.12)',
+                color: '#D04440',
                 fontSize: 28,
                 fontWeight: 700,
               }}
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
             <path
               d="M35 25C35 18 40 15 40 8"
               fill="none"
-              stroke="#F59E0B"
+              stroke="#E8554E"
               strokeWidth="3"
               strokeLinecap="round"
               opacity="0.5"
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
             <path
               d="M50 22C50 15 55 12 55 5"
               fill="none"
-              stroke="#F59E0B"
+              stroke="#E8554E"
               strokeWidth="3"
               strokeLinecap="round"
               opacity="0.4"
@@ -173,20 +173,20 @@ export async function GET(request: NextRequest) {
             <path
               d="M65 25C65 18 70 15 70 8"
               fill="none"
-              stroke="#F59E0B"
+              stroke="#E8554E"
               strokeWidth="3"
               strokeLinecap="round"
               opacity="0.3"
             />
             {/* Cup body */}
-            <rect x="20" y="35" width="55" height="45" rx="8" fill="#F59E0B" />
+            <rect x="20" y="35" width="55" height="45" rx="8" fill="#E8554E" />
             {/* Cup liquid */}
-            <rect x="26" y="42" width="43" height="30" rx="5" fill="#D97706" />
+            <rect x="26" y="42" width="43" height="30" rx="5" fill="#D04440" />
             {/* Handle */}
             <path
               d="M75 45C82 45 86 52 86 58C86 64 82 71 75 71"
               fill="none"
-              stroke="#F59E0B"
+              stroke="#E8554E"
               strokeWidth="6"
               strokeLinecap="round"
             />
@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
                 style={{
                   padding: '12px 32px',
                   borderRadius: 999,
-                  backgroundColor: '#F59E0B',
+                  backgroundColor: '#E8554E',
                   color: '#FFFFFF',
                   fontSize: 30,
                   fontWeight: 700,
@@ -239,8 +239,8 @@ export async function GET(request: NextRequest) {
                 style={{
                   padding: '12px 32px',
                   borderRadius: 999,
-                  border: '3px solid #F59E0B',
-                  color: '#D97706',
+                  border: '3px solid #E8554E',
+                  color: '#D04440',
                   fontSize: 30,
                   fontWeight: 600,
                 }}
@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                backgroundColor: '#F59E0B',
+                backgroundColor: '#E8554E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

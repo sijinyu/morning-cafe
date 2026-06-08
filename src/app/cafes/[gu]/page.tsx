@@ -117,7 +117,7 @@ export default async function GuPage({ params }: PageProps) {
           </div>
           <Link
             href={`/?gu=${encodeURIComponent(decodedGu)}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600"
           >
             <Map className="h-4 w-4" />
             지도에서 보기
@@ -131,7 +131,7 @@ export default async function GuPage({ params }: PageProps) {
         {featuredCafes.length > 0 && (
           <section className="px-5 py-4">
             <div className="flex items-center gap-1.5 mb-3">
-              <Sparkles className="h-4 w-4 text-amber-500" />
+              <Sparkles className="h-4 w-4 text-red-500" />
               <h2 className="text-sm font-semibold text-foreground">얼리버드 카페</h2>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
@@ -174,7 +174,7 @@ export default async function GuPage({ params }: PageProps) {
                 <Link
                   key={g}
                   href={`/cafes/${encodeURIComponent(g)}`}
-                  className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-amber-400 hover:text-amber-600"
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-red-400 hover:text-red-600"
                 >
                   {g}
                 </Link>

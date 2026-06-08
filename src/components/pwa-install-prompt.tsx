@@ -133,7 +133,7 @@ export function PwaInstallPrompt() {
                 <button
                   type="button"
                   onClick={handleInstall}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-2.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white hover:bg-red-600 transition-colors"
                 >
                   <Download className="h-4 w-4" />
                   홈 화면에 추가

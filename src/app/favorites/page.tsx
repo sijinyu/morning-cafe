@@ -103,7 +103,7 @@ export default function FavoritesPage() {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-border px-5 py-4">
-        <Bookmark className="h-5 w-5 text-amber-500" />
+        <Bookmark className="h-5 w-5 text-red-500" />
         <h1 className="text-lg font-bold">찜</h1>
         <span className="text-sm text-muted-foreground">({favoriteCafes.length})</span>
         <div className="flex-1" />
@@ -173,7 +173,7 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold truncate">{cafe.name}</span>
           {isChain && (
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
               프랜차이즈
             </span>
           )}
@@ -232,7 +232,7 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
         className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-colors"
         aria-label="찜 해제"
       >
-        <Bookmark className="h-4 w-4 fill-amber-500 stroke-amber-500" />
+        <Bookmark className="h-4 w-4 fill-red-500 stroke-red-500" />
       </button>
     </li>
   );

@@ -54,13 +54,13 @@ function CafeSlot({ cafe, isWinner, onRemove }: CafeSlotProps) {
       className={cn(
         'relative flex flex-1 min-w-0 flex-col rounded-2xl border-2 py-3 px-3',
         isWinner
-          ? 'border-amber-400/70 bg-amber-50/60 dark:bg-amber-900/10'
+          ? 'border-red-400/70 bg-red-50/60 dark:bg-red-900/10'
           : 'border-border/50 bg-muted/30',
       )}
     >
       {isWinner && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-          <span className="flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-white whitespace-nowrap shadow-sm">
+          <span className="flex items-center gap-1 rounded-full bg-red-400 px-2 py-0.5 text-[10px] font-bold text-white whitespace-nowrap shadow-sm">
             <Trophy className="h-2.5 w-2.5" />
             최고
           </span>
@@ -128,12 +128,12 @@ function ComparisonTable({ result, cafes }: ComparisonTableProps) {
                     className={cn(
                       'px-3 py-2.5 text-center text-[13px] font-semibold',
                       isWinner
-                        ? 'bg-amber-50/80 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400'
+                        ? 'bg-red-50/80 dark:bg-red-900/10 text-red-700 dark:text-red-400'
                         : 'bg-muted/30 text-foreground',
                     )}
                   >
                     <div className="flex flex-col items-center gap-0.5">
-                      {isWinner && <Trophy className="h-3 w-3 text-amber-500" />}
+                      {isWinner && <Trophy className="h-3 w-3 text-red-500" />}
                       <span className="line-clamp-2 leading-snug">{cafe.name}</span>
                     </div>
                   </th>
@@ -387,7 +387,7 @@ export function AiComparePanel({ onClose: _onClose }: AiComparePanelProps) {
 
       {compareState === 'rate-limited' && (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
-          <p className="text-[15px] font-medium text-amber-600 dark:text-amber-400">AI 요청이 많아요</p>
+          <p className="text-[15px] font-medium text-red-600 dark:text-red-400">AI 요청이 많아요</p>
           <p className="text-sm text-muted-foreground">1분 후 다시 시도해주세요</p>
           <button
             onClick={handleReset}

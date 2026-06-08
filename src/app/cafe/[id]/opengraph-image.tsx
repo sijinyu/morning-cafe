@@ -73,7 +73,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 style={{
                   padding: '10px 24px',
                   borderRadius: 999,
-                  backgroundColor: '#F59E0B',
+                  backgroundColor: '#E8554E',
                   color: '#FFFFFF',
                   fontSize: 24,
                   fontWeight: 700,
@@ -86,8 +86,8 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                   style={{
                     padding: '10px 24px',
                     borderRadius: 999,
-                    border: '2px solid #F59E0B',
-                    color: '#F59E0B',
+                    border: '2px solid #E8554E',
+                    color: '#E8554E',
                     fontSize: 24,
                     fontWeight: 600,
                   }}
@@ -125,7 +125,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                backgroundColor: '#F59E0B',
+                backgroundColor: '#E8554E',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -168,7 +168,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
           >
             <path
               d="M50 126C50 126 10 72 10 42C10 19.9 27.9 2 50 2C72.1 2 90 19.9 90 42C90 72 50 126 50 126Z"
-              fill="#F59E0B"
+              fill="#E8554E"
             />
             <ellipse cx="38" cy="28" rx="18" ry="14" fill="white" opacity="0.18" />
             <circle cx="50" cy="42" r="24" fill="#5C3A1E" />

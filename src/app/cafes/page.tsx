@@ -36,7 +36,7 @@ export default async function CafesIndexPage() {
       {/* Header */}
       <header className="border-b border-border px-5 py-5">
         <div className="flex items-center gap-2">
-          <Coffee className="h-5 w-5 text-amber-500" />
+          <Coffee className="h-5 w-5 text-red-500" />
           <h1 className="text-lg font-bold">서울 구별 아침 카페</h1>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -51,13 +51,13 @@ export default async function CafesIndexPage() {
             <Link
               key={gu}
               href={`/cafes/${encodeURIComponent(gu)}`}
-              className="group flex flex-col rounded-xl border border-border p-4 transition-colors hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-900/10"
+              className="group flex flex-col rounded-xl border border-border p-4 transition-colors hover:border-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10"
             >
               <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-amber-500" />
+                <MapPin className="h-4 w-4 text-red-500" />
                 <span className="font-semibold text-sm">{gu}</span>
               </div>
-              <span className="mt-2 text-xl font-bold text-amber-600 dark:text-amber-400">
+              <span className="mt-2 text-xl font-bold text-red-600 dark:text-red-400">
                 {count}
                 <span className="text-sm font-normal text-muted-foreground ml-0.5">곳</span>
               </span>

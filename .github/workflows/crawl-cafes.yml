@@ -40,6 +40,9 @@ jobs:
       - name: Mark stale cafes
         run: npx tsx scripts/mark-stale-cafes.ts
 
+      - name: Sync thumbnails
+        run: npx tsx scripts/sync-thumbnails.ts
+
       - name: Send failure email
         if: failure()
         run: |
@@ -50,7 +53,7 @@ jobs:
           {
             "from": "Morning Cafe Bot <onboarding@resend.dev>",
             "to": "sijinyudev@gmail.com",
-            "subject": "[모닝커피] 카페 크롤링 실패",
+            "subject": "[모닝카페] 카페 크롤링 실패",
             "html": "<p>GitHub Actions 크롤링 워크플로우가 실패했습니다.</p><p><a href='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'>로그 확인</a></p>"
           }
           BODY

@@ -198,7 +198,7 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
               />
             )}
             {useCurrentLocation && !userLocation && (
-              <p className="text-[12px] text-amber-600 dark:text-amber-400">
+              <p className="text-[12px] text-red-600 dark:text-red-400">
                 위치 권한을 허용해주세요
               </p>
             )}
@@ -254,7 +254,7 @@ export function AiCommutePanel({ onClose }: AiCommutePanelProps) {
           </motion.button>
 
           {state === 'rate-limited' && (
-            <p className="text-center text-sm text-amber-600 dark:text-amber-400">
+            <p className="text-center text-sm text-red-600 dark:text-red-400">
               AI 요청이 많아요. 1분 후 다시 시도해주세요.
             </p>
           )}

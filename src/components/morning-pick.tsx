@@ -189,7 +189,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
             </button>
 
             {/* 헤더 라벨 */}
-            <div className="absolute top-3 left-3 z-10 rounded-full bg-amber-500 px-3 py-1">
+            <div className="absolute top-3 left-3 z-10 rounded-full bg-red-500 px-3 py-1">
               <span className="text-xs font-bold text-white">오늘의 아침 카페</span>
             </div>
 
@@ -203,7 +203,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
                 />
               </div>
             ) : (
-              <div className="h-32 w-full bg-gradient-to-br from-amber-100 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/20 flex items-center justify-center">
+              <div className="h-32 w-full bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-900/20 flex items-center justify-center">
                 <span className="text-4xl">☕</span>
               </div>
             )}
@@ -214,7 +214,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
                 <h2 className="text-xl font-bold">{cafe.name}</h2>
                 <div className="mt-1.5 flex items-center gap-2 flex-wrap">
                   {todayOpenTime && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
                       <Clock className="h-3 w-3" />
                       {formatOpeningTime(todayOpenTime)} 오픈
                     </span>

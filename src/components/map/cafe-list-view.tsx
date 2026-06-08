@@ -242,7 +242,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                       </span>
                     )}
                     {isChain && (
-                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+                      <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
                         프랜차이즈
                       </span>
                     )}

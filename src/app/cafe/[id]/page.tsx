@@ -83,10 +83,10 @@ function HoursTable({ hoursByDay }: { hoursByDay: Record<string, string> | null 
               key={day}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-2 py-1 text-sm',
-                isToday && 'bg-amber-50 dark:bg-amber-900/20 font-medium',
+                isToday && 'bg-red-50 dark:bg-red-900/20 font-medium',
               )}
             >
-              <span className={cn('w-6 text-center', isToday ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground')}>
+              <span className={cn('w-6 text-center', isToday ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground')}>
                 {day}
               </span>
               <span className={isToday ? 'text-foreground' : 'text-muted-foreground'}>

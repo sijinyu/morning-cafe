@@ -191,9 +191,9 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
 
       {/* GPS status hint */}
       {!userLocation && (
-        <div className="flex items-center gap-2 rounded-xl bg-amber-50/60 dark:bg-amber-900/10 px-3 py-2">
-          <MapPin className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-          <p className="text-[12px] text-amber-700 dark:text-amber-400">
+        <div className="flex items-center gap-2 rounded-xl bg-red-50/60 dark:bg-red-900/10 px-3 py-2">
+          <MapPin className="h-3.5 w-3.5 text-red-600 dark:text-red-400 flex-shrink-0" />
+          <p className="text-[12px] text-red-700 dark:text-red-400">
             위치 권한을 허용하면 가까운 카페를 우선 추천해요
           </p>
         </div>
@@ -229,7 +229,7 @@ export function AiTasteFinder({ onClose }: AiTasteFinderProps) {
       {/* Rate limited */}
       {state === 'rate-limited' && (
         <div className="flex flex-col items-center gap-2 py-8 text-center">
-          <p className="text-[15px] font-medium text-amber-600 dark:text-amber-400">AI 요청이 많아요</p>
+          <p className="text-[15px] font-medium text-red-600 dark:text-red-400">AI 요청이 많아요</p>
           <p className="text-sm text-muted-foreground">1분 후 다시 시도해주세요</p>
           <button
             onClick={() => setState('idle')}

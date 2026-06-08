@@ -191,14 +191,14 @@ ios/                                   # Capacitor iOS 프로젝트
 - **줌 제한**: `MAX_ZOOM_LEVEL` 모바일=8, 데스크탑=6 (줌아웃 이벤트 차단)
 - **겹친 마커**: 같은 위치(toFixed(4) 기준) 카페 2개+ → `overlapIndex` Record → `CustomOverlayMap` 목록 팝업. kakao `Map`과 JS `Map` 충돌 → Record 사용.
 
-### 색상 체계 (마커)
+### 색상 체계 (마커) — 토마토 코랄
 
 | 시간대 | 마커 fill | 의미 |
 |--------|----------|------|
-| 24시간 (오늘 요일 기준) | `#DC2626` (red) | 빨간 배지와 동일 |
-| ~6시 | `#EA580C` (deep orange) | |
-| 6~7시 | `#F28B4E` (warm orange) | |
-| 7~8시 | `#FBBF24` (amber) | |
+| 24시간 (오늘 요일 기준) | `#9B2C2C` (dark red) | 코랄과 구분되는 진한 레드 |
+| ~6시 | `#D04440` (deep coral) | |
+| 6~7시 | `#E8554E` (coral, brand primary) | |
+| 7~8시 | `#F4807A` (light coral) | |
 | 정보없음 | `#9CA3AF` (gray) | |
 
 ### 레이아웃 z-index 순서
@@ -349,7 +349,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 35. **탭 이동 시 UI 숨김**: SearchBar, TimeFilter, ViewToggle, Copyright는 `{isMapRoute && (...)}` 조건부 렌더링.
 36. **마커 ripple (사진)**: 사진 마커 내부 `position: relative` 컨테이너에 absolute SVG 삽입. `r=26→90`, `top:50% left:50% translate(-50%,-50%)` 정중앙. 줌 ≤ 3에서만.
 37. **마커 ripple (SVG 핀)**: 줌 > 3에서만 별도 `CustomOverlayMap`. `r=22→80`, `yAnchor=0.5`.
-38. **찜 마커 배지**: 사진 마커 우상단 `absolute top:-2 right:-2` 18px 원형 + 북마크 SVG (amber).
+38. **찜 마커 배지**: 사진 마커 우상단 `absolute top:-2 right:-2` 18px 원형 + 북마크 SVG (coral).
 39. **조용한 아침 지수**: `src/lib/quiet-score.ts` → `QuietScoreBadge` (`bottom-sheet/quiet-score-badge.tsx`). strengths+facilities+reviews 키워드 매칭. 0~5 스케일. "정보 부족/없음"이면 숨김.
 40. **데스크탑 사이드바 반투명**: `bg-background/80 backdrop-blur-md z-30`. `layout.tsx`에서 main에 `md:-ml-56`으로 지도가 사이드바 아래로 확장.
 41. **AI 카페 추천 (주석 처리)**: Gemini Flash 무료 티어 불안정(503/429). AiHubButton + AiTagline 진입점 숨김. API 엔드포인트는 유지. 유료 전환 후 `persistent-map-page.tsx`, `cafe-bottom-sheet.tsx` 주석 2개 풀면 복원.
@@ -357,7 +357,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 43. **네이티브 알림 이중 구조**: 웹=`use-notifications.ts` (Web Notifications API), 네이티브=`native-notifications.ts` + `use-native-notifications.ts` (`@capacitor/local-notifications`). 찜 토글 시 `toggleFavorite(cafeId, { name, openingTime })` 호출하면 네이티브 앱에서 자동 로컬 알림 스케줄/취소.
 44. **PushInit 컴포넌트**: `layout.tsx`에 마운트. 앱 로드 5초 후 APNs 권한 요청 → 토큰 서버 전송 (`/api/push-token`). 알림 탭 → `/?cafeId=xxx` 딥링크.
 45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
-46. **앱 아이콘**: 해+커피잔+접시 3D 스타일. `public/icons/icon.svg` → `icon-1024.png` → `AppIcon.appiconset`. 오렌지→앰버 그라데이션 배경.
+46. **앱 아이콘**: 미니멀 커피잔+김 스타일. `public/icons/icon.svg` → `icon-1024.png` → `AppIcon.appiconset`. 토마토 코랄 그라데이션 배경(`#F4807A`→`#E8554E`→`#D04440`).
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
 
 ### 커밋 메시지

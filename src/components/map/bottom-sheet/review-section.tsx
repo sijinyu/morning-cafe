@@ -19,7 +19,7 @@ function KakaoReviewCard({ review }: { readonly review: ReviewItem }) {
           {Array.from({ length: 5 }, (_, j) => (
             <Star
               key={j}
-              className={`h-3 w-3 ${j < review.starRating ? 'fill-amber-400 stroke-amber-400' : 'stroke-muted-foreground/40 fill-none'}`}
+              className={`h-3 w-3 ${j < review.starRating ? 'fill-red-400 stroke-red-400' : 'stroke-muted-foreground/40 fill-none'}`}
             />
           ))}
         </div>

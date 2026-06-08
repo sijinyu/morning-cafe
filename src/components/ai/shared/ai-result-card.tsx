@@ -40,9 +40,9 @@ export function AiResultCard({ cafe, reason, score, index, onSelect }: AiResultC
           className={cn(
             'flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
             scorePercent >= 80
-              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+              ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
               : scorePercent >= 60
-                ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400'
+                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
                 : 'bg-muted text-muted-foreground',
           )}
         >
