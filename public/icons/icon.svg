@@ -1,68 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <!-- 배경 그라데이션: 토마토 코랄 → 딥 코랄 -->
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F4807A"/>
-      <stop offset="50%" stop-color="#E8554E"/>
-      <stop offset="100%" stop-color="#D04440"/>
+    <!-- 배경: 코랄 그라데이션 (대각선, 깊이감) -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#F7908B"/>
+      <stop offset="40%" stop-color="#E8554E"/>
+      <stop offset="100%" stop-color="#C43D38"/>
     </linearGradient>
-    <!-- 배경 광택 -->
-    <radialGradient id="bgShine" cx="0.3" cy="0.2" r="0.65">
-      <stop offset="0%" stop-color="white" stop-opacity="0.18"/>
+    <!-- 상단 글로우 — 글래스모피즘 -->
+    <radialGradient id="glow" cx="0.35" cy="0.15" r="0.6">
+      <stop offset="0%" stop-color="white" stop-opacity="0.22"/>
       <stop offset="100%" stop-color="white" stop-opacity="0"/>
     </radialGradient>
-    <!-- 컵 그라데이션: 크림 화이트 -->
-    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
+    <!-- 컵: 순백 → 크림 -->
+    <linearGradient id="cup" x1="0.2" y1="0" x2="0.8" y2="1">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#F5EEED"/>
+      <stop offset="100%" stop-color="#F0E8E6"/>
     </linearGradient>
-    <!-- 컵 미묘한 그림자 -->
-    <linearGradient id="cupShadow" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#00000000"/>
-      <stop offset="100%" stop-color="#00000012"/>
-    </linearGradient>
-    <!-- 김(steam) — 반투명 화이트 -->
+    <!-- 커피 표면 -->
+    <radialGradient id="latte" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#D4A68C"/>
+      <stop offset="70%" stop-color="#8B5E3C"/>
+      <stop offset="100%" stop-color="#6B3F28"/>
+    </radialGradient>
+    <!-- 김 -->
     <linearGradient id="steam" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="white" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="white" stop-opacity="0.1"/>
+      <stop offset="0%" stop-color="white" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
   <!-- 배경 -->
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="112" fill="url(#bgShine)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
 
-  <!-- 접시(saucer) — 미니멀 타원 -->
-  <ellipse cx="256" cy="370" rx="110" ry="18" fill="white" opacity="0.18"/>
-  <ellipse cx="256" cy="366" rx="110" ry="18" fill="white" opacity="0.25"/>
+  <!-- 데코: 큰 반투명 원 (토스/당근 스타일 배경 모션감) -->
+  <circle cx="380" cy="120" r="100" fill="white" opacity="0.06"/>
+  <circle cx="100" cy="420" r="130" fill="white" opacity="0.04"/>
 
-  <!-- 커피 컵 바디 — 둥글고 미니멀 -->
-  <rect x="172" y="210" width="168" height="156" rx="28" fill="url(#cup)"/>
-  <rect x="172" y="210" width="168" height="156" rx="28" fill="url(#cupShadow)"/>
+  <!-- 접시 — 미니멀 반투명 -->
+  <ellipse cx="248" cy="378" rx="115" ry="16" fill="white" opacity="0.2"/>
 
-  <!-- 컵 좌측 하이라이트 -->
-  <rect x="183" y="222" width="32" height="70" rx="16" fill="white" opacity="0.4"/>
+  <!-- 컵 바디 — 통통한 머그컵, 약간 왼쪽 배치 -->
+  <rect x="156" y="204" width="184" height="172" rx="32" fill="url(#cup)"/>
+  <!-- 컵 좌측 하이라이트 스트라이프 -->
+  <rect x="170" y="220" width="28" height="80" rx="14" fill="white" opacity="0.5"/>
 
-  <!-- 컵 핸들 — 깔끔한 C 곡선 -->
-  <path d="M340 260 C374 260 388 288 388 306 C388 324 374 352 340 352"
-        fill="none" stroke="url(#cup)" stroke-width="20" stroke-linecap="round"/>
-  <path d="M340 260 C374 260 388 288 388 306 C388 324 374 352 340 352"
-        fill="none" stroke="white" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+  <!-- 컵 핸들 -->
+  <path d="M340 256 C380 256 398 290 398 312 C398 334 380 368 340 368"
+        fill="none" stroke="white" stroke-width="22" stroke-linecap="round"/>
+  <path d="M340 256 C376 256 392 288 392 312 C392 336 376 368 340 368"
+        fill="none" stroke="#F0E8E6" stroke-width="14" stroke-linecap="round"/>
 
-  <!-- 커피 표면 — 라떼 아트 암시 -->
-  <ellipse cx="256" cy="232" rx="60" ry="12" fill="#7C3A30" opacity="0.25"/>
-  <ellipse cx="256" cy="232" rx="30" ry="6" fill="white" opacity="0.15"/>
+  <!-- 커피 표면 — 라떼아트 느낌 -->
+  <ellipse cx="248" cy="228" rx="68" ry="14" fill="url(#latte)"/>
+  <!-- 라떼아트 하트 암시 (크림 리프) -->
+  <path d="M248 222 C240 218 232 220 234 226 C236 230 248 236 248 236 C248 236 260 230 262 226 C264 220 256 218 248 222Z"
+        fill="white" opacity="0.35"/>
 
-  <!-- 김(steam) — 우아한 S곡선 3개 (젠지 바이브: 얇고 긴) -->
-  <g fill="none" stroke="url(#steam)" stroke-width="4.5" stroke-linecap="round">
-    <path d="M230 200 C230 180 242 175 242 155 C242 135 230 130 230 110"/>
-    <path d="M256 193 C256 171 270 166 270 144 C270 122 256 117 256 95"/>
-    <path d="M282 200 C282 180 270 175 270 155 C270 135 282 130 282 110"/>
+  <!-- 김(steam) — 2개, 더 크고 과감하게 -->
+  <g fill="none" stroke="url(#steam)" stroke-width="5" stroke-linecap="round">
+    <path d="M232 192 C232 168 248 162 248 138 C248 114 232 108 232 84"/>
+    <path d="M268 188 C268 164 252 158 252 134 C252 110 268 104 268 80"/>
   </g>
 
-  <!-- 미니멀 선라이즈 — 컵 위 작은 반원 (브랜드 시그니처) -->
-  <clipPath id="sunClip">
-    <rect x="210" y="140" width="92" height="52"/>
-  </clipPath>
-  <circle cx="256" cy="192" r="40" fill="white" opacity="0.15" clip-path="url(#sunClip)"/>
+  <!-- 스파클 ✦ — 젠지 시그니처 (3개, 다른 크기) -->
+  <g fill="white">
+    <!-- 큰 스파클 (우상단) -->
+    <path d="M400 156 L404 144 L408 156 L420 160 L408 164 L404 176 L400 164 L388 160Z" opacity="0.9"/>
+    <!-- 중간 스파클 (좌상단) -->
+    <path d="M130 140 L133 132 L136 140 L144 143 L136 146 L133 154 L130 146 L122 143Z" opacity="0.65"/>
+    <!-- 작은 스파클 (우측) -->
+    <path d="M420 280 L422 274 L424 280 L430 282 L424 284 L422 290 L420 284 L414 282Z" opacity="0.5"/>
+  </g>
 </svg>
