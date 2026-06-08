@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# 모닝커피 — 서울 얼리버드 카페 지도
+# 모닝카페 — 서울 얼리버드 카페 지도
 
 ## 프로젝트 개요
 
@@ -322,13 +322,13 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 8. **상세보기 수직 간격**: 모든 상세 행(별점, 장점칩, 주차, 편의시설, 주소, 전화, 인스타)은 `space-y-0` 그룹 내 각 `py-2.5`로 통일.
 9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 유시진 All rights reserved."
 10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-10 w-10`, 아이콘 `h-[18px] w-[18px]`. 터치 타겟 44px 확보.
-11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝커피" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
+11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝카페" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
 13. **SVG 마커**: sparkle + glossy highlight + 커피잔 + squiggle tail 디자인. 스케일 팩터 `s = w / 28`.
 14. **SEO 구별 페이지**: `/cafes/[gu]`는 Server Component (SSG + 24h ISR). `generateStaticParams()`에서 raw 한글 문자열 반환 (Next.js가 자동 인코딩). `fetchCafesByGu()`는 `isSupabaseConfigured()` 체크 필수.
 15. **서비스워커 캐싱**: kakaocdn cthumb는 `CacheFirst` (14일, 500개). daum CDN은 `CacheFirst` (7일). place-detail API는 `StaleWhileRevalidate` (3일, 150개). SW 업데이트는 `skipWaiting: false` + `SwUpdatePrompt` 컴포넌트로 유저 확인 후 교체.
 16. **요일별 시간 fallback 규칙**: `hours_by_day`가 존재하는 카페에서 해당 요일 키가 없으면 → `null`(정보없음) 반환. `opening_time` fallback은 `hours_by_day` 자체가 `null`인 카페에만 적용. 관련 함수: `getOpeningTimeForDay()`, `getOpeningMinutesForDay()`, `computeFilteredCafes()` 휴무 체크.
-17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝커피에서 보기" → `/?cafeId={id}` 딥링크.
+17. **개별 카페 페이지**: `/cafe/[id]`는 SSR + 24h revalidate. `fetchCafeById(id)` 사용. JSON-LD `CafeOrCoffeeShop` 스키마 포함. "모닝카페에서 보기" → `/?cafeId={id}` 딥링크.
 18. **공유 기능 체인**: Kakao.Share.sendDefault (Feed 템플릿) → navigator.share → clipboard fallback. 공유 URL은 `https://morning-cafe-phi.vercel.app/cafe/{id}`. GA4 이벤트: `share_cafe`. 즐겨찾기 일괄 공유는 Kakao ListFeed(최대 5개) 사용.
 19. **딥링크**: `/?cafeId=xxx` → PersistentMapPage에서 cafes 로드 후 해당 카페 자동 select + panTo. `useSearchParams()` 사용 → `<Suspense>` 래핑 필수.
 20. **24시간 판정 (요일별)**: `is24Hours(cafe)`는 **모든 요일** 24시간인 경우만 true (hide24h 필터용). 마커/배지/리스트에서는 `is24HoursForDay(cafe, dayKey)`로 **오늘 요일** 기준 판정. `cafe-utils.ts`에서 export.
@@ -352,12 +352,12 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 38. **찜 마커 배지**: 사진 마커 우상단 `absolute top:-2 right:-2` 18px 원형 + 북마크 SVG (amber).
 39. **조용한 아침 지수**: `src/lib/quiet-score.ts` → `QuietScoreBadge` (`bottom-sheet/quiet-score-badge.tsx`). strengths+facilities+reviews 키워드 매칭. 0~5 스케일. "정보 부족/없음"이면 숨김.
 40. **데스크탑 사이드바 반투명**: `bg-background/80 backdrop-blur-md z-30`. `layout.tsx`에서 main에 `md:-ml-56`으로 지도가 사이드바 아래로 확장.
-41. **AI 카페 추천**: Gemini Flash 무료 티어 (15RPM, 1500/일). `/api/ai-recommend` 엔드포인트. `GOOGLE_GEMINI_API_KEY` env. Supabase에 응답 캐시 (30분~1시간). Rate limit 429 시 캐시 fallback.
+41. **AI 카페 추천 (주석 처리)**: Gemini Flash 무료 티어 불안정(503/429). AiHubButton + AiTagline 진입점 숨김. API 엔드포인트는 유지. 유료 전환 후 `persistent-map-page.tsx`, `cafe-bottom-sheet.tsx` 주석 2개 풀면 복원.
 42. **Capacitor iOS 앱**: `capacitor.config.ts`에서 원격 URL 로드 (`server.url: morning-cafe-phi.vercel.app`). `isNativeApp()` (`src/lib/capacitor.ts`)으로 네이티브 분기. 네이티브 전용 컴포넌트는 `src/components/native/`에 배치. `npx cap sync ios` 후 `npx cap open ios`로 Xcode 열기.
 43. **네이티브 알림 이중 구조**: 웹=`use-notifications.ts` (Web Notifications API), 네이티브=`native-notifications.ts` + `use-native-notifications.ts` (`@capacitor/local-notifications`). 찜 토글 시 `toggleFavorite(cafeId, { name, openingTime })` 호출하면 네이티브 앱에서 자동 로컬 알림 스케줄/취소.
 44. **PushInit 컴포넌트**: `layout.tsx`에 마운트. 앱 로드 5초 후 APNs 권한 요청 → 토큰 서버 전송 (`/api/push-token`). 알림 탭 → `/?cafeId=xxx` 딥링크.
-45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Deployment Target iOS 16.0, iPhone only (Portrait), Version 1.0.0 Build 1. `App.entitlements`에 Push Notifications capability. `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
-46. **앱 아이콘**: `public/icons/icon.svg` → `icon-1024.png` (rx=0, sharp 렌더링) → `AppIcon.appiconset`. Xcode 15+는 1024x1024 단일 이미지 자동 리사이즈.
+45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
+46. **앱 아이콘**: 해+커피잔+접시 3D 스타일. `public/icons/icon.svg` → `icon-1024.png` → `AppIcon.appiconset`. 오렌지→앰버 그라데이션 배경.
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
 
 ### 커밋 메시지
@@ -406,9 +406,14 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 찜 토글 네이티브 알림 연동 (toggleFavorite에 cafeInfo 파라미터 추가)
 - [x] 개인정보처리방침 푸시 알림 섹션 추가
 - [x] App.entitlements (Push Notifications capability)
-- [ ] **iOS App Store 제출** — Apple Developer 등록 → Xcode Archive → App Store Connect 업로드 → TestFlight 테스트 → 심사 제출
-- [ ] AI 카페 추천/비교 (Gemini Flash)
-- [ ] AI 출근길 경로 추천 (집→카페→회사 최적 경로)
+- [x] 브랜드 리네이밍 — "모닝커피" → "모닝카페" (21개 파일)
+- [x] 앱 아이콘 리디자인 — 해+커피잔+접시 3D 스타일
+- [x] AI 기능 주석 처리 — 무료 Gemini 불안정, 진입점만 숨김
+- [x] AI 429/503 감지 강화 — 5개 엔드포인트 통일
+- [x] App Store Connect 업로드 — Xcode 26.3, iOS 26 SDK
+- [ ] **iOS 빈 화면 해결** — Capacitor Remote URL WebView 로딩 이슈
+- [ ] **iOS TestFlight 테스트 통과 → 심사 제출**
+- [ ] AI 카페 추천 복원 (Gemini 유료 전환 후)
 - [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
