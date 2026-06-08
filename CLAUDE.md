@@ -357,7 +357,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 43. **네이티브 알림 이중 구조**: 웹=`use-notifications.ts` (Web Notifications API), 네이티브=`native-notifications.ts` + `use-native-notifications.ts` (`@capacitor/local-notifications`). 찜 토글 시 `toggleFavorite(cafeId, { name, openingTime })` 호출하면 네이티브 앱에서 자동 로컬 알림 스케줄/취소.
 44. **PushInit 컴포넌트**: `layout.tsx`에 마운트. 앱 로드 5초 후 APNs 권한 요청 → 토큰 서버 전송 (`/api/push-token`). 알림 탭 → `/?cafeId=xxx` 딥링크.
 45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
-46. **앱 아이콘**: 미니멀 커피잔+김 스타일. `public/icons/icon.svg` → `icon-1024.png` → `AppIcon.appiconset`. 토마토 코랄 그라데이션 배경(`#F4807A`→`#E8554E`→`#D04440`).
+46. **앱 아이콘**: 젠지 컨셉 — 통통한 머그컵 + 라떼아트 하트 + 스파클 3개 + 글래스모피즘 배경 원. `public/icons/icon.svg` → 모든 사이즈 PNG + `favicon.ico` + `apple-touch-icon.png` + `kakao-app-icon.png`. 코랄 그라데이션(`#F7908B`→`#E8554E`→`#C43D38`).
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
 
 ### 커밋 메시지
@@ -407,7 +407,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] 개인정보처리방침 푸시 알림 섹션 추가
 - [x] App.entitlements (Push Notifications capability)
 - [x] 브랜드 리네이밍 — "모닝커피" → "모닝카페" (21개 파일)
-- [x] 앱 아이콘 리디자인 — 해+커피잔+접시 3D 스타일
+- [x] 앱 아이콘 리디자인 — 젠지 라떼아트 하트+스파클+글래스모피즘 (토마토 코랄)
 - [x] AI 기능 주석 처리 — 무료 Gemini 불안정, 진입점만 숨김
 - [x] AI 429/503 감지 강화 — 5개 엔드포인트 통일
 - [x] App Store Connect 업로드 — Xcode 26.3, iOS 26 SDK
