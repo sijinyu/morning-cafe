@@ -167,7 +167,7 @@ export function PersistentMapPage() {
           <CafeBottomSheetWrapper />
         </>
       ) : (
-        <div className="h-full pt-28">
+        <div className="h-full" style={{ paddingTop: 'calc(7rem + var(--safe-area-top))' }}>
           <CafeListView
             userLocation={userLocation}
             searchQuery={listSearchQuery}
