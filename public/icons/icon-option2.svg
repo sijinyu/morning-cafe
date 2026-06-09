@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- 배경: 코랄 그라데이션 -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#F7908B"/>
+      <stop offset="45%" stop-color="#E8554E"/>
+      <stop offset="100%" stop-color="#C43D38"/>
+    </linearGradient>
+    <!-- 상단 글로우 -->
+    <radialGradient id="glow" cx="0.35" cy="0.15" r="0.6">
+      <stop offset="0%" stop-color="white" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 해 그라데이션 -->
+    <radialGradient id="sun" cx="0.5" cy="0.65" r="0.5">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFE0DE"/>
+      <stop offset="100%" stop-color="#FFD0CC"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+
+  <!-- M 레터마크 — 두껍고 라운드, 약간 아래 배치 -->
+  <path d="M100 380 L100 200 C100 192 106 186 114 186 L118 186
+           L180 300 L186 310 C190 317 198 317 202 310 L208 300
+           L256 218
+           L304 300 L310 310 C314 317 322 317 326 310 L332 300
+           L394 186 L398 186 C406 186 412 192 412 200 L412 380"
+        fill="none" stroke="white" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 해(sunrise) — M의 가운데 V 골짜기에서 떠오르는 반원 -->
+  <clipPath id="sunClip">
+    <rect x="190" y="160" width="132" height="68"/>
+  </clipPath>
+  <circle cx="256" cy="228" r="52" fill="url(#sun)" clip-path="url(#sunClip)"/>
+
+  <!-- 해 광선 (짧은 선들) -->
+  <g stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.7">
+    <line x1="256" y1="158" x2="256" y2="140"/>
+    <line x1="280" y1="162" x2="290" y2="146"/>
+    <line x1="232" y1="162" x2="222" y2="146"/>
+    <line x1="300" y1="174" x2="314" y2="162"/>
+    <line x1="212" y1="174" x2="198" y2="162"/>
+  </g>
+
+  <!-- 스파클 — 작은 악센트 -->
+  <path d="M420 150 L423 140 L426 150 L436 153 L426 156 L423 166 L420 156 L410 153Z" fill="white" opacity="0.8"/>
+  <path d="M96 320 L98 314 L100 320 L106 322 L100 324 L98 330 L96 324 L90 322Z" fill="white" opacity="0.5"/>
+</svg>
