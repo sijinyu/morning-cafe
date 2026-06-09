@@ -559,9 +559,9 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
         minLevel={4}
         gridSize={80}
         styles={[
-          { width: '52px', height: '52px', background: 'rgba(245,158,11,0.75)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '13px', lineHeight: '52px' },
-          { width: '56px', height: '56px', background: 'rgba(217,119,6,0.8)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '14px', lineHeight: '56px' },
-          { width: '66px', height: '66px', background: 'rgba(180,83,9,0.85)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '15px', lineHeight: '66px' },
+          { width: '52px', height: '52px', background: 'rgba(232,85,78,0.75)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '13px', lineHeight: '52px' },
+          { width: '56px', height: '56px', background: 'rgba(208,68,64,0.8)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '14px', lineHeight: '56px' },
+          { width: '66px', height: '66px', background: 'rgba(184,59,54,0.85)', borderRadius: '50%', color: '#fff', textAlign: 'center', fontWeight: '700', fontSize: '15px', lineHeight: '66px' },
         ]}
       >
         {visibleCafes.map((cafe) => {
@@ -688,7 +688,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
                       borderRadius: '50%',
                       border: isSelected ? '3px solid #B83B36' : '2.5px solid #fff',
                       boxShadow: isSelected
-                        ? '0 2px 8px rgba(180,83,9,0.4)'
+                        ? '0 2px 8px rgba(184,59,54,0.4)'
                         : '0 2px 6px rgba(0,0,0,0.2)',
                       overflow: 'hidden',
                       background: '#f5f5f4',
