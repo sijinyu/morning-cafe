@@ -102,7 +102,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-2 border-b border-border px-5 py-4">
+      <header className="flex items-center gap-2 border-b border-border px-5 py-4" style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}>
         <Bookmark className="h-5 w-5 text-red-500" />
         <h1 className="text-lg font-bold">찜</h1>
         <span className="text-sm text-muted-foreground">({favoriteCafes.length})</span>

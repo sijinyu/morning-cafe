@@ -81,7 +81,7 @@ export default function RecentPage() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <header className="flex items-center gap-2 border-b border-border px-5 py-4">
+      <header className="flex items-center gap-2 border-b border-border px-5 py-4" style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}>
         {editMode ? (
           <>
             <button

@@ -34,7 +34,7 @@ export default async function CafesIndexPage() {
   return (
     <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <header className="border-b border-border px-5 py-5">
+      <header className="border-b border-border px-5 py-5" style={{ paddingTop: 'calc(1.25rem + var(--safe-area-top))' }}>
         <div className="flex items-center gap-2">
           <Coffee className="h-5 w-5 text-red-500" />
           <h1 className="text-lg font-bold">서울 구별 아침 카페</h1>

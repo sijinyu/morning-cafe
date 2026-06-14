@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-12">
+    <div className="mx-auto max-w-2xl px-6 py-12" style={{ paddingTop: 'calc(3rem + var(--safe-area-top))' }}>
       <h1 className="text-2xl font-bold mb-8">개인정보처리방침</h1>
 
       <div className="space-y-6 text-sm text-muted-foreground leading-relaxed">

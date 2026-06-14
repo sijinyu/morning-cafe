@@ -164,7 +164,7 @@ export default async function CafePage({ params }: PageProps) {
       <JsonLd cafe={cafe} />
       <div className="flex h-full flex-col bg-background">
         {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-md px-4 py-3">
+        <header className="sticky z-10 border-b border-border bg-background/95 backdrop-blur-md px-4 py-3" style={{ top: 'var(--safe-area-top)', paddingTop: 'calc(0.75rem + var(--safe-area-top))' }}>
           <div className="flex items-center gap-3">
             <Link
               href="/"

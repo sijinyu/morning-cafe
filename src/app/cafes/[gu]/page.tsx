@@ -107,7 +107,7 @@ export default async function GuPage({ params }: PageProps) {
   return (
     <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <header className="border-b border-border px-5 py-5">
+      <header className="border-b border-border px-5 py-5" style={{ paddingTop: 'calc(1.25rem + var(--safe-area-top))' }}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">{decodedGu} 아침 카페</h1>
