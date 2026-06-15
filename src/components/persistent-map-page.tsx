@@ -16,6 +16,7 @@ import { CafeListView } from '@/components/map/cafe-list-view';
 import { CafeRoulette } from '@/components/map/cafe-roulette';
 // import { AiHubButton } from '@/components/ai/ai-hub-button'; // AI 유료 전환 후 복원
 import { MorningPick } from '@/components/morning-pick';
+import { SplashScreen } from '@/components/splash-screen';
 import { cn } from '@/lib/utils';
 
 import { trackEvent } from '@/lib/analytics';
@@ -146,6 +147,7 @@ export function PersistentMapPage() {
       className={cn('relative h-full w-full', !isMapRoute && 'invisible absolute inset-0 pointer-events-none')}
       aria-hidden={!isMapRoute}
     >
+      <SplashScreen ready={cafesReady} />
 
       {viewMode === 'map' ? (
         <>
