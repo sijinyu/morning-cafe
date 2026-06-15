@@ -11,6 +11,7 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { StatusBarConfig } from '@/components/native/status-bar-config';
 import { OfflineScreen } from '@/components/native/offline-screen';
 import { PushInit } from '@/components/native/push-init';
+import { SplashScreen } from '@/components/splash-screen';
 
 import './globals.css';
 
@@ -122,6 +123,7 @@ export default function RootLayout({
             </Script>
           </>
         )}
+        <SplashScreen />
         <ThemeProvider>
           <div className="flex h-full">
             <DesktopSidebar />
