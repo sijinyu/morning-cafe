@@ -107,9 +107,10 @@ const CHIP_BASE = 'flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font
 const CHIP_ACTIVE = `${CHIP_BASE} bg-foreground text-background shadow-sm`;
 const CHIP_INACTIVE = `${CHIP_BASE} bg-background/90 text-muted-foreground backdrop-blur-xl border border-border/60 hover:bg-background hover:border-foreground/15`;
 
-// ---- 서울 25구 중심 좌표 -----------------------------------------------------
+// ---- 서울 25구 + 경기도 주요 도시 중심 좌표 ------------------------------------
 
 const GU_CENTERS: Record<string, { lat: number; lng: number }> = {
+  // 서울 25구
   '강남구': { lat: 37.5172, lng: 127.0473 },
   '강동구': { lat: 37.5301, lng: 127.1238 },
   '강북구': { lat: 37.6396, lng: 127.0257 },
@@ -135,6 +136,32 @@ const GU_CENTERS: Record<string, { lat: number; lng: number }> = {
   '종로구': { lat: 37.5735, lng: 126.9790 },
   '중구': { lat: 37.5641, lng: 126.9979 },
   '중랑구': { lat: 37.6063, lng: 127.0928 },
+  // 경기도 주요 도시
+  '성남시 분당구': { lat: 37.3825, lng: 127.1195 },
+  '성남시 수정구': { lat: 37.4501, lng: 127.1457 },
+  '성남시 중원구': { lat: 37.4319, lng: 127.1194 },
+  '수원시 영통구': { lat: 37.2594, lng: 127.0466 },
+  '수원시 장안구': { lat: 37.3040, lng: 127.0107 },
+  '수원시 팔달구': { lat: 37.2821, lng: 127.0195 },
+  '수원시 권선구': { lat: 37.2574, lng: 126.9716 },
+  '용인시 수지구': { lat: 37.3219, lng: 127.0986 },
+  '용인시 기흥구': { lat: 37.2805, lng: 127.1150 },
+  '용인시 처인구': { lat: 37.2341, lng: 127.2010 },
+  '고양시 일산동구': { lat: 37.6687, lng: 126.7735 },
+  '고양시 일산서구': { lat: 37.6753, lng: 126.7505 },
+  '고양시 덕양구': { lat: 37.6376, lng: 126.8320 },
+  '부천시': { lat: 37.5034, lng: 126.7660 },
+  '안양시 동안구': { lat: 37.3943, lng: 126.9568 },
+  '안양시 만안구': { lat: 37.3866, lng: 126.9270 },
+  '하남시': { lat: 37.5393, lng: 127.2147 },
+  '광명시': { lat: 37.4786, lng: 126.8647 },
+  '과천시': { lat: 37.4292, lng: 126.9876 },
+  '의왕시': { lat: 37.3449, lng: 126.9685 },
+  '구리시': { lat: 37.5943, lng: 127.1295 },
+  '남양주시': { lat: 37.6360, lng: 127.2163 },
+  '파주시': { lat: 37.7598, lng: 126.7800 },
+  '김포시': { lat: 37.6153, lng: 126.7156 },
+  '화성시': { lat: 37.2000, lng: 126.8313 },
 };
 
 // ---- main component ---------------------------------------------------------
@@ -254,7 +281,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
         }
         align="left"
       >
-        <div className="w-36 max-h-60 overflow-y-auto">
+        <div className="w-44 max-h-60 overflow-y-auto">
           <button
             onClick={() => { trackEvent('filter_gu', { value: 'all' }); setGuFilter(null); setOpenDropdown(null); }}
             className={cn(
@@ -262,7 +289,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
               !guFilter ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
             )}
           >
-            서울 전체
+            전체 지역
           </button>
           {availableGus.map((gu) => (
             <button

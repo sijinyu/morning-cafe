@@ -7,20 +7,20 @@ import { formatOpeningTime } from '@/lib/cafe-utils';
 export const revalidate = 86400; // 24h ISR
 
 export const metadata: Metadata = {
-  title: '서울 구별 아침 카페 — 모닝카페',
+  title: '서울·경기 지역별 아침 카페 — 모닝카페',
   description:
-    '서울 각 구별 아침 일찍 여는 카페를 한눈에. 강남, 마포, 종로 등 구별 얼리버드 카페 목록.',
+    '서울·경기 지역별 아침 일찍 여는 카페를 한눈에. 강남, 마포, 판교, 분당 등 지역별 얼리버드 카페 목록.',
   openGraph: {
-    title: '서울 구별 아침 카페 — 모닝카페',
-    description: '서울 각 구별 아침 일찍 여는 카페를 한눈에.',
+    title: '서울·경기 지역별 아침 카페 — 모닝카페',
+    description: '서울·경기 지역별 아침 일찍 여는 카페를 한눈에.',
     type: 'website',
     locale: 'ko_KR',
     siteName: '모닝카페',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '서울 구별 아침 카페 — 모닝카페',
-    description: '서울 각 구별 아침 일찍 여는 카페를 한눈에.',
+    title: '서울·경기 지역별 아침 카페 — 모닝카페',
+    description: '서울·경기 지역별 아침 일찍 여는 카페를 한눈에.',
   },
   alternates: {
     canonical: '/cafes',
@@ -37,10 +37,10 @@ export default async function CafesIndexPage() {
       <header className="border-b border-border px-5 py-5" style={{ paddingTop: 'calc(1.25rem + var(--safe-area-top))' }}>
         <div className="flex items-center gap-2">
           <Coffee className="h-5 w-5 text-red-500" />
-          <h1 className="text-lg font-bold">서울 구별 아침 카페</h1>
+          <h1 className="text-lg font-bold">지역별 아침 카페</h1>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          서울 전역 {guStats.length}개 구, 총 {totalCount}곳
+          서울·경기 {guStats.length}개 지역, 총 {totalCount}곳
         </p>
       </header>
 

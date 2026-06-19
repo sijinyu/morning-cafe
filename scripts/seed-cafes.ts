@@ -1,5 +1,5 @@
 /**
- * Seoul Cafe Seeder v2 — Optimized for speed
+ * Cafe Seeder v3 — Seoul + Gyeonggi
  *
  * Key optimizations:
  * 1. Phase 1: 10 concurrent grid cell searches (was sequential)
@@ -7,6 +7,8 @@
  * 3. Batch upsert: 100 rows per request (was 1)
  * 4. Skip detail fetch for cafes already in DB with opening_time
  * 5. Minimal sleep between batches
+ *
+ * Coverage: 서울 + 경기도 주요 도시 (성남, 수원, 용인, 고양, 부천, 안양, 하남, 광명, 과천, 의왕, 구리, 남양주, 파주, 김포, 화성)
  *
  * Usage:  npx tsx scripts/seed-cafes.ts
  */
@@ -32,9 +34,15 @@ if (!KAKAO_REST_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
-const SEOUL_BOUNDS = { minLat: 37.428, maxLat: 37.701, minLng: 126.764, maxLng: 127.183 };
-const GRID_RADIUS = 500;
-const OVERLAP_FACTOR = 0.5;
+// 서울 + 경기도 주요 도시를 포함하는 확장 경계
+// 남쪽: 수원/화성(37.22) ~ 북쪽: 파주/양주(37.82)
+// 서쪽: 김포/부천(126.58) ~ 동쪽: 남양주/하남(127.25)
+const SEARCH_BOUNDS = { minLat: 37.22, maxLat: 37.82, minLng: 126.58, maxLng: 127.25 };
+
+// 서울+경기 주소 필터용 허용 키워드
+const ALLOWED_REGIONS = ['서울', '성남', '수원', '용인', '고양', '부천', '안양', '하남', '광명', '과천', '의왕', '구리', '남양주', '파주', '김포', '화성', '판교', '분당', '일산', '동탄'];
+const GRID_RADIUS = 600;
+const OVERLAP_FACTOR = 0.6;
 const EARTH_RADIUS_M = 6_371_000;
 const DEG_PER_M_LAT = 1 / ((Math.PI / 180) * EARTH_RADIUS_M);
 const EARLYBIRD_THRESHOLD = '08:00';
@@ -58,14 +66,14 @@ function generateGrid(): GridCell[] {
   const stepM = GRID_RADIUS * OVERLAP_FACTOR;
   const stepLat = stepM * DEG_PER_M_LAT;
   const cells: GridCell[] = [];
-  for (let lat = SEOUL_BOUNDS.minLat; lat <= SEOUL_BOUNDS.maxLat + stepLat; lat += stepLat) {
-    const cLat = Math.min(lat, SEOUL_BOUNDS.maxLat);
+  for (let lat = SEARCH_BOUNDS.minLat; lat <= SEARCH_BOUNDS.maxLat + stepLat; lat += stepLat) {
+    const cLat = Math.min(lat, SEARCH_BOUNDS.maxLat);
     const stepLng = metreToDegreeLng(stepM, cLat);
-    for (let lng = SEOUL_BOUNDS.minLng; lng <= SEOUL_BOUNDS.maxLng + stepLng; lng += stepLng) {
-      cells.push({ centerLng: Math.min(lng, SEOUL_BOUNDS.maxLng), centerLat: cLat, radius: GRID_RADIUS });
-      if (lng >= SEOUL_BOUNDS.maxLng) break;
+    for (let lng = SEARCH_BOUNDS.minLng; lng <= SEARCH_BOUNDS.maxLng + stepLng; lng += stepLng) {
+      cells.push({ centerLng: Math.min(lng, SEARCH_BOUNDS.maxLng), centerLat: cLat, radius: GRID_RADIUS });
+      if (lng >= SEARCH_BOUNDS.maxLng) break;
     }
-    if (lat >= SEOUL_BOUNDS.maxLat) break;
+    if (lat >= SEARCH_BOUNDS.maxLat) break;
   }
   return cells;
 }
@@ -291,7 +299,7 @@ async function runConcurrent<T, R>(
 
 async function main() {
   const startTime = Date.now();
-  console.log('=== Seoul Cafe Seeder v2 (Optimized) ===\n');
+  console.log('=== Cafe Seeder v3 (Seoul + Gyeonggi) ===\n');
 
   // Load existing IDs to skip redundant detail fetches
   console.log('Loading existing cafe IDs from DB...');
@@ -320,15 +328,17 @@ async function main() {
   });
 
   const phase1Time = ((Date.now() - startTime) / 1000).toFixed(0);
-  console.log(`\nPhase 1 done: ${allPlaces.size} unique cafes in ${phase1Time}s\n`);
+  console.log(`\nPhase 1 done: ${allPlaces.size} unique cafes in ${phase1Time}s (Seoul + Gyeonggi)\n`);
 
   // Phase 2: Detail fetch + upsert (parallel)
-  // Filter: Seoul only + skip already-detailed cafes
-  const places = [...allPlaces.values()].filter(p => p.address_name.includes('서울'));
+  // Filter: Seoul + Gyeonggi allowed regions + skip already-detailed cafes
+  const places = [...allPlaces.values()].filter(p =>
+    ALLOWED_REGIONS.some(region => p.address_name.includes(region))
+  );
   const needsDetail = places.filter(p => !existingIds.has(p.id));
   const alreadyHaveDetail = places.filter(p => existingIds.has(p.id));
 
-  console.log(`Phase 2: ${places.length} Seoul cafes`);
+  console.log(`Phase 2: ${places.length} Seoul + Gyeonggi cafes`);
   console.log(`  ${alreadyHaveDetail.length} already in DB (will upsert basic info only)`);
   console.log(`  ${needsDetail.length} need detail fetch (${PHASE2_CONCURRENCY} concurrent)\n`);
 
@@ -431,7 +441,7 @@ async function main() {
 
   const totalTime = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
   console.log(`\n=== Done in ${totalTime} min ===`);
-  console.log(`Total unique Seoul cafes found: ${places.length}`);
+  console.log(`Total cafes found (Seoul + Gyeonggi): ${places.length}`);
   console.log(`New cafes upserted: ${upserted}`);
   console.log(`New earlybirds: ${earlybirds}`);
   console.log(`Detail fetch failed: ${detailFailed}`);
@@ -445,7 +455,7 @@ async function main() {
       '',
       `| Metric | Value |`,
       `|--------|-------|`,
-      `| Total Seoul cafes found | ${places.length} |`,
+      `| Total cafes found (Seoul + Gyeonggi) | ${places.length} |`,
       `| New cafes upserted | ${upserted} |`,
       `| New earlybirds | ${earlybirds} |`,
       `| Detail fetch failed | ${detailFailed} |`,

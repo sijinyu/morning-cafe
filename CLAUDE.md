@@ -1,11 +1,11 @@
 @AGENTS.md
 
-# 모닝카페 — 서울 얼리버드 카페 지도
+# 모닝카페 — 서울·경기 얼리버드 카페 지도
 
 ## 프로젝트 개요
 
-서울에서 아침 일찍(6~8시) 여는 카페를 카카오 지도에서 찾아주는 모바일 우선 웹앱.
-3000+ 카페 데이터를 Supabase에 저장하고, 뷰포트 기반 마커 렌더링으로 성능 최적화.
+서울·경기에서 아침 일찍(6~8시) 여는 카페를 카카오 지도에서 찾아주는 모바일 우선 웹앱.
+서울 25구 + 경기도 15개 도시 카페 데이터를 Supabase에 저장하고, 뷰포트 기반 마커 렌더링으로 성능 최적화.
 
 - **배포**: Vercel
 - **DB**: Supabase (PostgreSQL)
@@ -172,9 +172,17 @@ ios/                                   # Capacitor iOS 프로젝트
 
 ## 핵심 아키텍처
 
+### 크롤링 커버리지
+
+- **서울**: 25개 구 전체
+- **경기도**: 성남(분당/판교), 수원, 용인, 고양(일산), 부천, 안양, 하남, 광명, 과천, 의왕, 구리, 남양주, 파주, 김포, 화성(동탄)
+- `seed-cafes.ts`: `SEARCH_BOUNDS` (37.22~37.82 / 126.58~127.25), 600m 그리드, `ALLOWED_REGIONS` 주소 필터
+- `extractGu()`: 서울 "강남구" + 경기 "성남시 분당구" / "하남시" 패턴 지원
+- DB 트리거: `007-gu-trigger-gyeonggi.sql`로 경기도 gu 자동 추출
+
 ### Zustand Store (`cafe-store.ts`)
 
-- `cafes: Cafe[]` — Supabase에서 로드한 전체 earlybird 카페 (3000+)
+- `cafes: Cafe[]` — Supabase에서 로드한 전체 earlybird 카페 (서울+경기)
 - `filteredCafes: Cafe[]` — **사전 계산된** 파생 상태 (함수 아님)
 - `availableGus: string[]` — **사전 계산된** 구 목록
 - 필터 변경 시 `recompute(get, set)` 호출로 파생 상태 즉시 갱신
@@ -256,7 +264,7 @@ Naver pstatic 이미지 프록시. Referer 제한 우회.
 - body: `{ type, cafe_name, content }`
 - type: `hours_correction` | `new_cafe` | `closed`
 - Supabase `reports` 테이블에 insert
-- Resend로 관리자 이메일 알림 (sijinyudev@gmail.com)
+- Resend로 관리자 이메일 알림 (morningcafeapp@gmail.com)
 - 서버 키 사용: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
 
 ### POST `/api/push-token`
@@ -320,7 +328,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 6. **검색바 듀얼 모드**: `mode='map'`(드롭다운 선택→panTo) / `mode='list'`(실시간 필터→onQueryChange). 모드 전환 시 query 초기화.
 7. **즐겨찾기 카드 클릭**: 카드 클릭 → `setSelectedCafe` + `router.push('/')` → 지도에서 해당 카페 표시. 외부 링크/하트 버튼은 `stopPropagation`.
 8. **상세보기 수직 간격**: 모든 상세 행(별점, 장점칩, 주차, 편의시설, 주소, 전화, 인스타)은 `space-y-0` 그룹 내 각 `py-2.5`로 통일.
-9. **저작자 정보**: 제보 페이지 하단 "커피를 좋아하는 사람 / 유시진 / sijinyudev@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 유시진 All rights reserved."
+9. **저작자 정보**: 제보 페이지 하단 "morningcafeapp@gmail.com". 메인 페이지 저작권 "ⓒ 2026. 모닝카페 All rights reserved."
 10. **바텀시트 아이콘**: 알림/하트/닫기 버튼은 `h-10 w-10`, 아이콘 `h-[18px] w-[18px]`. 터치 타겟 44px 확보.
 11. **스플래시 스크린**: 커피잔 SVG + 김 애니메이션 + "모닝카페" + "서울의 아침을 깨우는 카페". `cafes.length > 0`이면 0.5초 후 페이드아웃.
 12. **GA4 이벤트 트래킹**: `trackEvent(action, params)` — select_cafe, navigate, view_kakaomap, share, submit_report, toggle_favorite.
@@ -411,14 +419,20 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [x] AI 기능 주석 처리 — 무료 Gemini 불안정, 진입점만 숨김
 - [x] AI 429/503 감지 강화 — 5개 엔드포인트 통일
 - [x] App Store Connect 업로드 — Xcode 26.3, iOS 26 SDK
-- [ ] **iOS 빈 화면 해결** — Capacitor Remote URL WebView 로딩 이슈
-- [ ] **iOS TestFlight 테스트 통과 → 심사 제출**
+- [x] iOS 빈 화면 해결 — Capacitor Remote URL WebView 로딩 이슈
+- [x] iOS TestFlight 테스트 통과 → 심사 제출 (v1.0.1 출시)
+- [x] 경기도 확장 — 15개 도시 크롤링 + extractGu + 지도 경계 + 필터 (마이그레이션 007)
+- [x] 마케팅 실행 — 블라인드, 링크드인 iOS 팔로업, 지피터스 iOS 댓글, 인스타 프로필 완성
+- [x] 마케팅 문서 준비 — 지피터스, 링크드인, 인플루언서 DM, 채널 체크리스트, 카드뉴스 소재 25개 구
+- [x] 마케팅 문서 v2 — blind-post, linkedin-ios-followup, geekist-ios-followup, 인스타 브랜드가이드/캡션풀/릴스/카드뉴스
 - [ ] AI 카페 추천 복원 (Gemini 유료 전환 후)
 - [ ] 후원 버튼 활성화 (Buy Me a Coffee 계정 생성 후)
 - [ ] 구별 통계 Postgres materialized view (fetchGuStats 성능 최적화)
 - [ ] 사장님 카페 직접 등록 기능
 - [ ] 관리자 승인 프로세스 (스팸 방지)
-- [x] 마케팅 문서 준비 — 지피터스, 링크드인, 인플루언서 DM, 채널 체크리스트, 카드뉴스 소재 25개 구
+- [ ] 인스타 카드뉴스 시리즈 게시 (강남→마포→성수→서초→여의도)
+- [ ] 인스타 릴스 제작 (화면 녹화형 2개)
+- [ ] 수집 기능 MVP (사진 원형 크롭 + matter.js 물리엔진, 모바일 전용)
 - [x] Supabase 서버 쿼리 anon key fallback (SUPABASE_SERVICE_ROLE_KEY 미설정 대비)
 - [x] 도메인 `morning-cafe-phi.vercel.app`으로 전체 통일
 
