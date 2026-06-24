@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: '모닝카페',
   webDir: 'public',
   server: {
-    url: 'https://morning-cafe-phi.vercel.app',
+    url: 'https://morning-cafe-phi.vercel.app/?platform=app',
     cleartext: false,
   },
   ios: {

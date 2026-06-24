@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createServiceClient } from '@/lib/supabase/server';
 
-const ADMIN_EMAIL = 'sijinyudev@gmail.com';
+const ADMIN_EMAIL = 'morningcafeapp@gmail.com';
 const TYPE_LABELS: Record<string, string> = {
   hours_correction: '영업시간 수정',
   new_cafe: '새 카페 제보',

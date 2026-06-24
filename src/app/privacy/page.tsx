@@ -89,13 +89,13 @@ export default function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-foreground">8. 문의</h2>
           <p>
-            개인정보 관련 문의: <a href="mailto:sijinyudev@gmail.com" className="text-primary hover:underline">sijinyudev@gmail.com</a>
+            개인정보 관련 문의: <a href="mailto:morningcafeapp@gmail.com" className="text-primary hover:underline">morningcafeapp@gmail.com</a>
           </p>
         </section>
 
         <div className="border-t border-border pt-6 mt-8">
           <p className="text-xs text-muted-foreground">
-            &copy; 2026. 유시진 All rights reserved.
+            &copy; 2026. 모닝카페 All rights reserved.
           </p>
         </div>
       </div>
