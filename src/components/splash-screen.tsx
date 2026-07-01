@@ -12,12 +12,21 @@ export function SplashScreen() {
   const [visible, setVisible] = useState(!splashDismissed);
 
   useEffect(() => {
-    if (!cafesReady || splashDismissed) return;
-    const timer = setTimeout(() => {
+    if (splashDismissed) return;
+    // ponytail: 데이터 로드 완료 시 0.5초 후 dismiss, 최대 2초 강제 dismiss
+    const dismiss = () => {
       splashDismissed = true;
       setVisible(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    };
+    const maxTimer = setTimeout(dismiss, 2000);
+    let readyTimer: ReturnType<typeof setTimeout> | undefined;
+    if (cafesReady) {
+      readyTimer = setTimeout(dismiss, 500);
+    }
+    return () => {
+      clearTimeout(maxTimer);
+      if (readyTimer) clearTimeout(readyTimer);
+    };
   }, [cafesReady]);
 
   return (
