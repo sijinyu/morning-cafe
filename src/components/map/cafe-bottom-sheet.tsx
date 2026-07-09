@@ -201,7 +201,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const openStatus = is24h ? 'open' as const : getOpenStatus(cafe);
 
   const instagramHref = cafe.instagram_url
-    ? (cafe.instagram_url.startsWith('http') ? cafe.instagram_url : `https://instagram.com/${cafe.instagram_url}`)
+    ? (cafe.instagram_url.startsWith('https://') ? cafe.instagram_url : `https://instagram.com/${cafe.instagram_url}`)
     : `https://www.instagram.com/explore/tags/${encodeURIComponent(cafe.name)}/`;
 
   return (
@@ -647,21 +647,13 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 export function CafeBottomSheetWrapper() {
   const selectedCafe = useCafeStore((state) => state.selectedCafe);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
-  const [wasOpen, setWasOpen] = useState(false);
 
-  useEffect(() => {
-    if (selectedCafe) {
-      setWasOpen(true);
-    } else {
-      setWasOpen(false);
-    }
-  }, [selectedCafe]);
-
+  // ponytail: cafe.id를 key로 사용 — 다른 카페 선택 시 컴포넌트 재생성으로 이전 데이터 잔류 방지
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="popLayout">
       {selectedCafe && (
         <CafeBottomSheet
-          key={wasOpen ? 'sheet-stable' : selectedCafe.id}
+          key={selectedCafe.id}
           cafe={selectedCafe}
           onClose={() => setSelectedCafe(null)}
         />

@@ -390,7 +390,7 @@ export function getOpenStatus(cafe: Cafe): 'open' | 'closed' | 'unknown' {
   // 1) 요일별 영업시간 체크
   const todayHours = cafe.hours_by_day?.[dayKey ?? ''];
   if (todayHours) {
-    const match = todayHours.match(/^(\d{2}):(\d{2})~(\d{2}):(\d{2})$/);
+    const match = todayHours.match(/^(\d{1,2}):(\d{2})~(\d{1,2}):(\d{2})$/);
     if (match) {
       const openMin = parseInt(match[1]!, 10) * 60 + parseInt(match[2]!, 10);
       const closeMin = parseInt(match[3]!, 10) * 60 + parseInt(match[4]!, 10);
@@ -478,7 +478,7 @@ export function getOpeningTimeForDay(cafe: Cafe, dayFilter: DayFilter = 'today')
     // hours_by_day가 있으면 해당 요일 데이터만 사용 (없으면 null = 정보없음)
     const dayHours = cafe.hours_by_day[dayKey];
     if (!dayHours) return null;
-    const match = dayHours.match(/^(\d{2}:\d{2})~/);
+    const match = dayHours.match(/^(\d{1,2}:\d{2})~/);
     if (match) return match[1]!;
     return null;
   }
@@ -492,7 +492,7 @@ function getOpeningMinutesForDay(cafe: Cafe, dayKey: string): number | null {
     // hours_by_day가 있으면 해당 요일 데이터만 사용 (없으면 null = 정보없음)
     const dayHours = cafe.hours_by_day[dayKey];
     if (!dayHours) return null;
-    const match = dayHours.match(/^(\d{2}):(\d{2})~/);
+    const match = dayHours.match(/^(\d{1,2}):(\d{2})~/);
     if (match) return parseInt(match[1]!, 10) * 60 + parseInt(match[2]!, 10);
     return null;
   }

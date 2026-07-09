@@ -55,6 +55,7 @@ export default function ReportPage() {
         .slice(0, 5)
     : [];
 
+  const [cafeSearchFocused, setCafeSearchFocused] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit() {
@@ -157,16 +158,19 @@ export default function ReportPage() {
                           type="text"
                           value={cafeSearch}
                           onChange={(e) => setCafeSearch(e.target.value)}
+                          onFocus={() => setCafeSearchFocused(true)}
+                          onBlur={() => { setTimeout(() => setCafeSearchFocused(false), 150); }}
                           placeholder="카페명 또는 주소로 검색"
                           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
                         />
                       </div>
-                      {searchResults.length > 0 && (
+                      {cafeSearchFocused && searchResults.length > 0 && (
                         <div className="absolute top-full mt-1 w-full rounded-2xl border border-border bg-background shadow-lg z-10 overflow-hidden">
                           {searchResults.map((cafe, idx) => (
                             <button
                               key={cafe.id}
-                              onClick={() => { setSelectedCafe(cafe); setCafeSearch(cafe.name); }}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => { setSelectedCafe(cafe); setCafeSearch(cafe.name); setCafeSearchFocused(false); }}
                               className={cn(
                                 'flex w-full flex-col items-start px-4 py-2.5 hover:bg-muted/60 transition-colors text-left',
                                 idx !== 0 && 'border-t border-border/50',

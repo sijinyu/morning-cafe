@@ -4,12 +4,14 @@
  */
 import { isNativeApp } from '@/lib/capacitor';
 
+// ponytail: FNV-1a 32비트 해시 — 31-base보다 분산 균일, 충돌 감소
 function hashCafeId(cafeId: string): number {
-  let hash = 0;
+  let hash = 0x811c9dc5;
   for (let i = 0; i < cafeId.length; i++) {
-    hash = (hash * 31 + cafeId.charCodeAt(i)) | 0;
+    hash ^= cafeId.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
   }
-  return Math.abs(hash);
+  return (hash >>> 0) % 0x7FFFFFFF; // 양수 보장
 }
 
 function parseTime(time: string): { hours: number; minutes: number } | null {

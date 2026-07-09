@@ -7,8 +7,9 @@ import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { warmupConnections } from '@/lib/hooks/use-place-detail';
-import { isNewCafe } from '@/lib/cafe-utils';
+import { isNewCafe, isInServiceArea } from '@/lib/cafe-utils';
 import { CafeMap } from '@/components/map/cafe-map';
+import { MapErrorBoundary } from '@/components/map/map-error-boundary';
 import { TimeFilter } from '@/components/map/time-filter';
 import { MyLocationButton } from '@/components/map/my-location-button';
 import { SearchBar } from '@/components/map/search-bar';
@@ -50,6 +51,7 @@ export function PersistentMapPage() {
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 37.5665, lng: 126.978 });
   const deepLinkHandledRef = useRef<string | null>(null);
   const [listSeen, setListSeen] = useState(true); // SSR safe default
+  const [outOfAreaToast, setOutOfAreaToast] = useState(false);
   const newCafeCount = useMemo(() => filteredCafes.filter(isNewCafe).length, [filteredCafes]);
 
   useEffect(() => {
@@ -69,12 +71,11 @@ export function PersistentMapPage() {
     const cafeId = searchParams.get('cafeId');
     if (!cafeId || cafes.length === 0) return;
     if (deepLinkHandledRef.current === cafeId) return;
+    // ponytail: 한번 처리 시도한 cafeId는 즉시 마킹 — 미발견 시 무한 루프 방지
+    deepLinkHandledRef.current = cafeId;
     const target = cafes.find((c) => c.id === cafeId);
     if (target) {
-      deepLinkHandledRef.current = cafeId;
       setSelectedCafe(target);
-      // panTo retry: 카카오 SDK 초기화 전에 cafes가 먼저 로드되면
-      // panToRef가 아직 null일 수 있으므로 최대 5회 재시도
       let attempts = 0;
       const tryPanTo = () => {
         if (panToRef.current) {
@@ -125,7 +126,15 @@ export function PersistentMapPage() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         trackEvent('gps_result', { status: 'granted' });
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const { latitude: lat, longitude: lng } = pos.coords;
+        if (isInServiceArea(lat, lng)) {
+          setUserLocation({ lat, lng });
+        } else {
+          // ponytail: 서비스 지역 밖 → 서울시청 기본 위치 유지, 토스트만 표시
+          trackEvent('gps_result', { status: 'out_of_area' });
+          setOutOfAreaToast(true);
+          setTimeout(() => setOutOfAreaToast(false), 3000);
+        }
       },
       () => {
         trackEvent('gps_result', { status: 'denied' });
@@ -137,6 +146,11 @@ export function PersistentMapPage() {
   }, []);
 
   function handleLocationUpdate(lat: number, lng: number) {
+    if (!isInServiceArea(lat, lng)) {
+      setOutOfAreaToast(true);
+      setTimeout(() => setOutOfAreaToast(false), 3000);
+      return;
+    }
     setUserLocation({ lat, lng });
     plainPanToRef.current?.(lat, lng);
   }
@@ -148,12 +162,14 @@ export function PersistentMapPage() {
     >
       {viewMode === 'map' ? (
         <>
-          <CafeMap
-            onPanToReady={(fn) => { panToRef.current = fn; }}
-            onPlainPanToReady={(fn) => { plainPanToRef.current = fn; }}
-            userLocation={userLocation}
-            onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
-          />
+          <MapErrorBoundary>
+            <CafeMap
+              onPanToReady={(fn) => { panToRef.current = fn; }}
+              onPlainPanToReady={(fn) => { plainPanToRef.current = fn; }}
+              userLocation={userLocation}
+              onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
+            />
+          </MapErrorBoundary>
           <MyLocationButton onLocation={handleLocationUpdate} />
           <CafeRoulette
             mapCenter={mapCenter}
@@ -255,6 +271,13 @@ export function PersistentMapPage() {
             setTimeout(() => panToRef.current?.(cafe.latitude, cafe.longitude), 100);
           }}
         />
+      )}
+
+      {/* 서비스 지역 밖 GPS 토스트 */}
+      {outOfAreaToast && (
+        <div className="fixed top-20 left-1/2 z-[100] -translate-x-1/2 rounded-2xl bg-foreground/90 px-5 py-3 text-sm font-medium text-background shadow-lg backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          서울·경기 지역만 서비스 중입니다
+        </div>
       )}
     </div>
   );

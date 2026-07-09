@@ -127,7 +127,7 @@ export default function FavoritesPage() {
           <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <Bookmark className="h-10 w-10 stroke-1" />
             <p className="text-sm">찜한 카페가 없습니다</p>
-            <p className="text-xs">지도에서 북마크를 눌러 추가하세요</p>
+            <p className="text-xs">지도에서 찜 버튼을 눌러 추가하세요</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">

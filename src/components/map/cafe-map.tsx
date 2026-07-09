@@ -5,7 +5,7 @@ import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-m
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpeningTimeForDay, type Cafe } from '@/lib/store/cafe-store';
-import { is24HoursForDay } from '@/lib/cafe-utils';
+import { is24HoursForDay, SERVICE_BOUNDS, isInServiceArea } from '@/lib/cafe-utils';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { prefetchPlaceDetail, getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { trackEvent } from '@/lib/analytics';
@@ -17,13 +17,8 @@ const SEOUL_CITY_HALL = { lat: 37.5665, lng: 126.978 };
 // 위경도 근접 판정 임계값 (약 10m 이내 = 같은 건물)
 const OVERLAP_THRESHOLD = 0.0001;
 
-// 서울 + 경기도 경계 (팬 제한용, 여유 포함)
-const SEOUL_BOUNDS = {
-  swLat: 37.15,   // 남쪽 (화성/수원 남단)
-  swLng: 126.50,  // 서쪽 (김포/부천)
-  neLat: 37.85,   // 북쪽 (파주/양주)
-  neLng: 127.35,  // 동쪽 (남양주/하남)
-};
+// 서울 + 경기도 경계 (팬 제한용) — SERVICE_BOUNDS와 동일
+const SEOUL_BOUNDS = SERVICE_BOUNDS;
 
 // 줌아웃 최대 레벨 — 모바일은 화면이 작아 더 넓게 허용
 const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
@@ -117,11 +112,18 @@ function buildMarkerSvg(colors: MarkerColors, selected: boolean, fav: boolean): 
   </svg>`;
 }
 
-// Cache marker colors by cafe ID + chain status.
-// Key includes isChain because chain cafes use a different palette.
+// Cache marker colors by cafe ID + chain status + today's day.
+// ponytail: 날짜가 바뀌면 캐시 무효화 — 요일별 24시간/색상 변경 반영
+let colorCacheDay = new Date().getDay();
 const colorCache: Record<string, MarkerColors> = {};
 
 function getCachedMarkerColors(cafe: Cafe, isChain: boolean): MarkerColors {
+  const today = new Date().getDay();
+  if (today !== colorCacheDay) {
+    // 날짜 넘어감 → 전체 캐시 무효화
+    for (const k of Object.keys(colorCache)) delete colorCache[k];
+    colorCacheDay = today;
+  }
   const cacheKey = `${cafe.id}-${isChain}`;
   let colors = colorCache[cacheKey];
   if (!colors) {
@@ -404,6 +406,8 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
   // Auto-zoom to user location the first time a valid position arrives.
   useEffect(() => {
     if (!userLocation || hasAutoZoomedRef.current) return;
+    // ponytail: 서비스 지역 밖 좌표는 무시 — persistent-map-page에서 이미 필터링하지만 방어 코드
+    if (!isInServiceArea(userLocation.lat, userLocation.lng)) return;
     hasAutoZoomedRef.current = true;
 
     if (mapInstanceRef.current) {

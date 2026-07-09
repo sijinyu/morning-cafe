@@ -55,6 +55,22 @@ export function isNewCafe(cafe: Pick<Cafe, 'created_at'>): boolean {
   return Date.now() - new Date(cafe.created_at).getTime() < SEVEN_DAYS_MS;
 }
 
+/** 서비스 지역 (서울 + 경기) 경계 — cafe-map.tsx SEOUL_BOUNDS와 동일 */
+export const SERVICE_BOUNDS = {
+  swLat: 37.15,
+  swLng: 126.50,
+  neLat: 37.85,
+  neLng: 127.35,
+};
+
+/** 좌표가 서비스 지역(서울+경기) 내인지 판별 */
+export function isInServiceArea(lat: number, lng: number): boolean {
+  return (
+    lat >= SERVICE_BOUNDS.swLat && lat <= SERVICE_BOUNDS.neLat &&
+    lng >= SERVICE_BOUNDS.swLng && lng <= SERVICE_BOUNDS.neLng
+  );
+}
+
 /** Tailwind class string for the opening-time badge color. */
 export function getOpeningBadgeStyle(openingTime: string | null): string {
   if (!openingTime) return 'bg-muted text-muted-foreground';
