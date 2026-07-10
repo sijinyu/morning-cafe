@@ -1,14 +1,23 @@
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: '개인정보처리방침 — 모닝카페',
-  description: '모닝카페 앱의 개인정보처리방침',
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'privacy' });
+  return {
+    title: t('title'),
+    description: '모닝카페 앱의 개인정보처리방침',
+  };
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'privacy' });
+
   return (
     <div className="mx-auto max-w-2xl px-6 py-12" style={{ paddingTop: 'calc(3rem + var(--safe-area-top))' }}>
-      <h1 className="text-2xl font-bold mb-8">개인정보처리방침</h1>
+      <h1 className="text-2xl font-bold mb-8">{t('title')}</h1>
 
       <div className="space-y-6 text-sm text-muted-foreground leading-relaxed">
         <p className="text-foreground font-medium">

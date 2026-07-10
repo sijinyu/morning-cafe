@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface MyLocationButtonProps {
   onLocation: (lat: number, lng: number) => void;
 }
 
 export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
+  const t = useTranslations('cafe');
   const [locating, setLocating] = useState(false);
 
   function handleClick() {
@@ -39,7 +41,7 @@ export function MyLocationButton({ onLocation }: MyLocationButtonProps) {
         'transition-opacity disabled:opacity-60',
       ].join(' ')}
       style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}
-      aria-label="현재 위치로 이동"
+      aria-label={t('myLocation')}
     >
       <Navigation
         className={[

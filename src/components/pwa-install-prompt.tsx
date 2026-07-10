@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { X, Share, Plus, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { isNativeApp } from '@/lib/capacitor';
 
 const DISMISSED_KEY = 'pwa-install-dismissed';
@@ -36,6 +37,7 @@ function wasDismissedRecently(): boolean {
 }
 
 export function PwaInstallPrompt() {
+  const t = useTranslations('pwa');
   const [visible, setVisible] = useState(false);
   // Android: Chrome beforeinstallprompt 이벤트
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -100,7 +102,7 @@ export function PwaInstallPrompt() {
               type="button"
               onClick={dismiss}
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -108,20 +110,22 @@ export function PwaInstallPrompt() {
             {ios ? (
               /* iOS Safari 안내 */
               <div className="space-y-2.5 pr-6">
-                <p className="text-sm font-semibold">앱처럼 사용하기</p>
+                <p className="text-sm font-semibold">{t('useAsApp')}</p>
                 <div className="flex items-start gap-3 text-xs text-muted-foreground leading-relaxed">
                   <div className="space-y-1.5">
                     <p className="flex items-center gap-1.5">
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-muted">
                         <Share className="h-3 w-3" />
                       </span>
-                      하단 <span className="font-medium text-foreground">공유</span> 버튼 탭
+                      {t('iosStep1')}
                     </p>
                     <p className="flex items-center gap-1.5">
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-muted">
                         <Plus className="h-3 w-3" />
                       </span>
-                      <span className="font-medium text-foreground">홈 화면에 추가</span> 선택
+                      {t.rich('iosStep2Action', {
+                        b: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -129,22 +133,22 @@ export function PwaInstallPrompt() {
             ) : android ? (
               /* Android Chrome — 바로 설치 */
               <div className="space-y-3 pr-6">
-                <p className="text-sm font-semibold">앱으로 설치할 수 있어요</p>
+                <p className="text-sm font-semibold">{t('androidTitle')}</p>
                 <button
                   type="button"
                   onClick={handleInstall}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white hover:bg-red-600 transition-colors"
                 >
                   <Download className="h-4 w-4" />
-                  홈 화면에 추가
+                  {t('androidInstall')}
                 </button>
               </div>
             ) : (
               /* 기타 브라우저 */
               <div className="space-y-2 pr-6">
-                <p className="text-sm font-semibold">앱처럼 사용하기</p>
+                <p className="text-sm font-semibold">{t('useAsApp')}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  브라우저 메뉴에서 <span className="font-medium text-foreground">&quot;홈 화면에 추가&quot;</span> 또는 <span className="font-medium text-foreground">&quot;앱 설치&quot;</span>를 선택하세요.
+                  {t('genericStep')}
                 </p>
               </div>
             )}

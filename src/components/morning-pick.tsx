@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { MapPin, Clock, Navigation, X, RotateCcw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
@@ -42,6 +43,8 @@ function markSeen() {
 }
 
 export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningPickProps) {
+  const t = useTranslations('morningPick');
+  const tCafe = useTranslations('cafe');
   const { filteredCafes, chainCafeIds } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes, chainCafeIds: s.chainCafeIds })),
   );
@@ -190,7 +193,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
 
             {/* 헤더 라벨 */}
             <div className="absolute top-3 left-3 z-10 rounded-full bg-red-500 px-3 py-1">
-              <span className="text-xs font-bold text-white">오늘의 아침 카페</span>
+              <span className="text-xs font-bold text-white">{t('title')}</span>
             </div>
 
             {/* 썸네일 */}
@@ -216,7 +219,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
                   {todayOpenTime && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-400">
                       <Clock className="h-3 w-3" />
-                      {formatOpeningTime(todayOpenTime)} 오픈
+                      {t('opensAt', { time: formatOpeningTime(todayOpenTime) })}
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
@@ -225,7 +228,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
                   </span>
                   {isChain && (
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                      프랜차이즈
+                      {tCafe('franchise')}
                     </span>
                   )}
                 </div>
@@ -244,19 +247,19 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-border py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
                 >
                   <RotateCcw className="h-4 w-4" />
-                  다른 곳
+                  {t('next')}
                 </button>
                 <button
                   onClick={handleGo}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl bg-foreground py-3.5 text-sm font-bold text-background transition-colors hover:bg-foreground/90"
                 >
-                  여기로 출발!
+                  {t('go')}
                 </button>
               </div>
 
               {/* 스와이프 힌트 */}
               <p className="text-center text-[10px] text-muted-foreground/50">
-                ← 다른 곳 · 여기로 출발 →
+                {t('swipeHint')}
               </p>
             </div>
           </motion.div>

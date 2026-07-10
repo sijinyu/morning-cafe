@@ -1,0 +1,277 @@
+{
+  "nav": {
+    "map": "지도",
+    "favorites": "찜",
+    "recent": "최근",
+    "recentFull": "최근 본 카페",
+    "report": "제보",
+    "reportFull": "제보하기",
+    "mainNav": "메인 네비게이션"
+  },
+  "brand": {
+    "name": "모닝카페",
+    "copyright": "ⓒ 2026. 모닝카페 All rights reserved.",
+    "support": "응원하기"
+  },
+  "filter": {
+    "all": "전체",
+    "before6": "~6시",
+    "6to7": "6~7시",
+    "7to8": "7~8시",
+    "today": "오늘",
+    "dayLabel": "{day}요일",
+    "openTime": "오픈 시간",
+    "dayOfWeek": "요일",
+    "allAreas": "전체 지역",
+    "personal": "개인",
+    "exclude24h": "24h 제외",
+    "totalCount": "총 {count}개",
+    "days": {
+      "mon": "월",
+      "tue": "화",
+      "wed": "수",
+      "thu": "목",
+      "fri": "금",
+      "sat": "토",
+      "sun": "일"
+    }
+  },
+  "search": {
+    "placeholderMap": "카페명, 지역명 검색",
+    "placeholderList": "리스트에서 검색",
+    "clearQuery": "검색어 지우기",
+    "recentSearches": "최근 검색",
+    "delete": "삭제",
+    "clearHistory": "검색 기록 삭제"
+  },
+  "cafe": {
+    "open": "영업중",
+    "closed": "영업 전",
+    "hours24": "24시간",
+    "hours24Full": "24시간 영업",
+    "franchise": "프랜차이즈",
+    "noInfo": "정보 없음",
+    "openAt": "{day} {time} 오픈",
+    "reviewCount": "({count}개 리뷰)",
+    "parkingAvailable": "주차 가능",
+    "parkingUnavailable": "주차 불가",
+    "instagram": "인스타그램",
+    "instagramSearch": "인스타그램에서 검색",
+    "copyAddress": "주소 복사",
+    "copyPhone": "전화번호 복사",
+    "close": "닫기",
+    "addToCompareLabel": "비교함 담기",
+    "addedToCompareLabel": "비교함에 추가됨",
+    "addFavorite": "찜 추가",
+    "removeFavorite": "찜 해제",
+    "share": "공유하기",
+    "shareText": "{name} — 아침 {time} 오픈\n{address}",
+    "shareTextNoTime": "{name} — 아침 카페\n{address}",
+    "viewOnMorningCafe": "모닝카페에서 보기",
+    "kakaoMap": "카카오맵",
+    "directions": "길찾기",
+    "walkMinutes": "도보 {min}분",
+    "myLocation": "현재 위치로 이동",
+    "currentLocation": "현재 위치",
+    "storyCard": "감성 카드"
+  },
+  "map": {
+    "loadError": "지도를 불러올 수 없습니다",
+    "loadErrorHint": "카카오맵 서비스에 일시적인 문제가 있습니다",
+    "refresh": "새로고침",
+    "cafesAtLocation": "이 위치의 카페 {count}개"
+  },
+  "list": {
+    "toggle": "리스트",
+    "mapToggle": "지도",
+    "emptyState": "조건에 맞는 카페가 없습니다",
+    "newCafes": "신규 카페",
+    "last7Days": "최근 7일",
+    "nearby": "내 근처"
+  },
+  "hours": {
+    "title": "요일별 영업시간",
+    "noInfo": "영업시간 정보가 없습니다"
+  },
+  "menu": {
+    "title": "메뉴",
+    "noInfo": "메뉴 정보가 없습니다",
+    "viewOnKakao": "카카오맵에서 확인"
+  },
+  "review": {
+    "title": "리뷰",
+    "titleWithCount": "리뷰 {count}개",
+    "empty": "아직 리뷰가 없습니다",
+    "firstReview": "카카오맵에서 첫 리뷰 남기기",
+    "kakaoReviews": "카카오맵 리뷰",
+    "blogReviews": "블로그 리뷰",
+    "blogAuthorFallback": "블로그",
+    "viewOriginal": "원문 보기",
+    "collapse": "접기",
+    "viewAll": "리뷰 {count}개 전체보기",
+    "viewAllOnKakao": "카카오맵에서 전체 리뷰 보기"
+  },
+  "memo": {
+    "title": "내 메모",
+    "placeholder": "이 카페에 대한 메모를 남겨보세요...",
+    "save": "저장"
+  },
+  "quietScore": {
+    "workParadise": "작업 천국",
+    "workRecommend": "작업 추천",
+    "quiet": "조용한 편",
+    "average": "보통",
+    "noInfo": "정보 부족"
+  },
+  "photo": {
+    "viewOnKakao": "카카오맵 사진 보기",
+    "photoAlt": "{name} 사진 {index}",
+    "photoLightbox": "{name} 사진 {index} 크게 보기",
+    "photoCount": "{count}장",
+    "prev": "이전 사진",
+    "next": "다음 사진"
+  },
+  "toast": {
+    "outOfArea": "서울·경기 지역만 서비스 중입니다"
+  },
+  "swUpdate": {
+    "newVersion": "새 버전이 있습니다",
+    "update": "업데이트"
+  },
+  "pwa": {
+    "close": "닫기",
+    "useAsApp": "앱처럼 사용하기",
+    "iosStep1": "하단 '공유' 버튼 탭",
+    "iosShare": "공유",
+    "iosStep2": "홈 화면에 추가",
+    "iosStep2Action": "<b>홈 화면에 추가</b> 선택",
+    "androidTitle": "앱으로 설치할 수 있어요",
+    "androidInstall": "홈 화면에 추가",
+    "genericTitle": "앱처럼 사용하기",
+    "genericStep": "브라우저 메뉴에서 \"홈 화면에 추가\" 또는 \"앱 설치\"를 선택하세요."
+  },
+  "offline": {
+    "title": "인터넷 연결이 필요합니다",
+    "description": "Wi-Fi 또는 모바일 데이터를 확인해주세요",
+    "retry": "다시 시도"
+  },
+  "favorites": {
+    "title": "찜한 카페",
+    "metaDescription": "모닝카페에서 찜한 아침 카페 목록",
+    "empty": "아직 찜한 카페가 없어요",
+    "emptyHint": "마음에 드는 카페를 찜해보세요",
+    "shareAll": "전체 공유",
+    "shareTitle": "나의 모닝카페 찜 {count}곳",
+    "shareOpenAt": "{time} 오픈",
+    "shareSheetTitle": "나의 모닝카페 찜"
+  },
+  "recent": {
+    "title": "최근 본 카페",
+    "metaDescription": "모닝카페에서 최근 본 카페 목록",
+    "empty": "아직 본 카페가 없어요",
+    "emptyHint": "카페를 탐색해보세요",
+    "today": "오늘",
+    "yesterday": "어제",
+    "daysAgo": "{count}일 전",
+    "edit": "편집",
+    "done": "완료",
+    "selectAll": "전체 선택",
+    "deleteSelected": "{count}개 삭제",
+    "opensAt": "아침 {time} 오픈"
+  },
+  "report": {
+    "title": "카페 제보",
+    "metaDescription": "모닝카페에 카페 정보를 제보해주세요",
+    "hoursCorrection": "영업시간 수정",
+    "newCafe": "새로운 카페",
+    "closedCafe": "폐업",
+    "selectCafe": "카페 선택",
+    "cafeName": "카페 이름",
+    "details": "상세 내용",
+    "detailsPlaceholder": "수정할 영업시간 또는 제보 내용을 작성해주세요",
+    "submit": "제보하기",
+    "submitting": "제보 중...",
+    "success": "제보해주셔서 감사합니다!"
+  },
+  "stamp": {
+    "title": "구 정복 스탬프",
+    "metaDescription": "모닝카페 구 정복 스탬프",
+    "heading": "스탬프",
+    "conquered": "{count}/25구 정복",
+    "empty": "아직 스탬프가 없습니다",
+    "emptyHint": "카페 근처에서 체크인하면 스탬프가 찍혀요",
+    "conquestMap": "서울 25구 정복 지도",
+    "allConquered": "서울 25구를 모두 정복했습니다!",
+    "allConqueredSub": "진정한 얼리버드 정복자",
+    "progress": "{count}구 / 25구",
+    "recentCheckins": "최근 체크인",
+    "today": "오늘",
+    "yesterday": "어제",
+    "daysAgo": "{count}일 전",
+    "weeksAgo": "{count}주 전",
+    "monthsAgo": "{count}개월 전"
+  },
+  "privacy": {
+    "title": "개인정보처리방침"
+  },
+  "cafes": {
+    "indexTitle": "서울·경기 아침 카페",
+    "indexDescription": "서울·경기 지역별 아침 카페 목록",
+    "earliestOpen": "최빠른 오픈",
+    "cafeCount": "{count}곳",
+    "guTitle": "{gu} 아침 카페",
+    "guDescription": "{gu}에서 아침 일찍 여는 카페",
+    "featured": "인기 카페",
+    "before6": "6시 이전",
+    "between6and7": "6시~7시",
+    "between7and8": "7시~8시",
+    "viewOnMap": "지도에서 보기",
+    "otherDistricts": "다른 지역",
+    "earlybirdCafes": "곳의 얼리버드 카페",
+    "indexSubtitle": "서울·경기 {areas}개 지역, 총 {count}곳",
+    "cafeCountUnit": "곳",
+    "earliestOpenAt": "최초 {time} 오픈",
+    "guTitleWithCount": "{gu} 아침 카페 {count}곳",
+    "guDescriptionWithCount": "{gu}에서 아침 일찍 여는 카페 {count}곳. 6시, 7시 오픈 카페를 확인하세요.",
+    "guSubtitle": "아침 일찍 여는 카페 {count}곳",
+    "earlybirdSection": "얼리버드 카페",
+    "guEmpty": "{gu}에 등록된 아침 카페가 없습니다"
+  },
+  "cafeDetail": {
+    "title": "{name} — 아침 카페",
+    "description": "{name} ({gu}) — {time} 오픈. 주소, 영업시간, 메뉴를 확인하세요.",
+    "viewOnApp": "모닝카페에서 보기",
+    "hoursTable": "영업시간",
+    "notFound": "카페를 찾을 수 없습니다 — 모닝카페",
+    "openAt": "{time} 오픈",
+    "back": "뒤로가기",
+    "viewOnKakao": "카카오맵에서 보기"
+  },
+  "morningPick": {
+    "title": "오늘의 아침 카페",
+    "distance": "{km}km",
+    "opensAt": "{time} 오픈",
+    "next": "다른 곳",
+    "go": "여기로 출발!",
+    "swipeHint": "← 다른 곳 · 여기로 출발 →"
+  },
+  "roulette": {
+    "ariaLabel": "랜덤 카페 추천",
+    "noNearbyCafes": "반경 3km 내 카페가 없어요",
+    "button": "랜덤",
+    "spinning": "어디로 갈까...?",
+    "goToCafe": "이 카페로!",
+    "respin": "다시 돌리기"
+  },
+  "splash": {
+    "alt": "모닝카페"
+  },
+  "locale": {
+    "switchTo": "EN"
+  },
+  "metadata": {
+    "title": "모닝카페 — 서울·경기 아침 카페 지도",
+    "description": "서울·경기에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.",
+    "siteName": "모닝카페"
+  }
+}

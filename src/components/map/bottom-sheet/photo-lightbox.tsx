@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { X, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 
 interface PhotoLightboxProps {
@@ -104,6 +105,8 @@ function usePreloadAdjacentImages(photos: readonly string[], currentIndex: numbe
 }
 
 export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onClose }: PhotoLightboxProps) {
+  const t = useTranslations('photo');
+  const tCafe = useTranslations('cafe');
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     startIndex: initialIndex,
@@ -186,7 +189,7 @@ export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onCl
           type="button"
           onClick={onClose}
           className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-colors hover:bg-white/20"
-          aria-label="닫기"
+          aria-label={tCafe('close')}
         >
           <X className="h-5 w-5 text-white" />
         </button>
@@ -199,7 +202,7 @@ export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onCl
                 <LightboxImage
                   url={url}
                   thumbnailUrl={thumbnails[i]}
-                  alt={`${cafeName} 사진 ${i + 1}`}
+                  alt={t('photoAlt', { name: cafeName, index: i + 1 })}
                   eager={Math.abs(i - currentIndex) <= 1}
                 />
               </div>
@@ -214,7 +217,7 @@ export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onCl
               type="button"
               onClick={scrollPrev}
               className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/10 p-2 backdrop-blur-sm transition-colors hover:bg-white/20 md:flex"
-              aria-label="이전 사진"
+              aria-label={t('prev')}
             >
               <ChevronLeft className="h-6 w-6 text-white" />
             </button>
@@ -222,7 +225,7 @@ export function PhotoLightbox({ photos, thumbnails, initialIndex, cafeName, onCl
               type="button"
               onClick={scrollNext}
               className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/10 p-2 backdrop-blur-sm transition-colors hover:bg-white/20 md:flex"
-              aria-label="다음 사진"
+              aria-label={t('next')}
             >
               <ChevronRight className="h-6 w-6 text-white" />
             </button>

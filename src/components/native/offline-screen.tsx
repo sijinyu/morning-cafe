@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { isNativeApp } from '@/lib/capacitor';
 
 export function OfflineScreen() {
+  const t = useTranslations('offline');
   const [offline, setOffline] = useState(false);
 
   useEffect(() => {
@@ -38,9 +40,9 @@ export function OfflineScreen() {
         <WifiOff className="h-10 w-10 text-muted-foreground" />
       </div>
       <div className="text-center space-y-2">
-        <h2 className="text-lg font-bold text-foreground">인터넷 연결이 필요합니다</h2>
+        <h2 className="text-lg font-bold text-foreground">{t('title')}</h2>
         <p className="text-sm text-muted-foreground">
-          Wi-Fi 또는 모바일 데이터를 확인해주세요
+          {t('description')}
         </p>
       </div>
       <button
@@ -48,7 +50,7 @@ export function OfflineScreen() {
         className="flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
       >
         <RefreshCw className="h-4 w-4" />
-        다시 시도
+        {t('retry')}
       </button>
     </div>
   );

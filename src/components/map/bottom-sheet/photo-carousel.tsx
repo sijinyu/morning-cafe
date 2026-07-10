@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ImageIcon, ImageOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { PhotoLightbox } from './photo-lightbox';
 
 interface PhotoCarouselProps {
@@ -67,6 +68,7 @@ function SkeletonCards() {
 }
 
 export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }: PhotoCarouselProps) {
+  const t = useTranslations('photo');
   const [emblaRef, emblaApi] = useEmblaCarousel({
     dragFree: true,
     align: 'start',
@@ -93,7 +95,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
         className="flex h-40 w-full flex-col items-center justify-center gap-1 rounded-xl bg-muted/50"
       >
         <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-        <span className="text-xs text-muted-foreground">카카오맵 사진 보기</span>
+        <span className="text-xs text-muted-foreground">{t('viewOnKakao')}</span>
       </a>
     );
   }
@@ -107,7 +109,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
               key={url}
               role="button"
               tabIndex={0}
-              aria-label={`${cafeName} 사진 ${i + 1} 크게 보기`}
+              aria-label={t('photoLightbox', { name: cafeName, index: i + 1 })}
               onClick={() => setLightboxIndex(i)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -119,7 +121,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
             >
               <SlideImage
                 url={url}
-                alt={`${cafeName} 사진 ${i + 1}`}
+                alt={t('photoAlt', { name: cafeName, index: i + 1 })}
                 eager={i < 3}
               />
             </div>
@@ -135,7 +137,7 @@ export function PhotoCarousel({ photos, photosHd, loading, cafeName, placeUrl }:
           className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] text-white backdrop-blur-sm"
         >
           <ImageIcon className="h-3 w-3" />
-          {photos.length}장
+          {t('photoCount', { count: photos.length })}
         </a>
       )}
 

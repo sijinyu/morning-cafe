@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/capacitor';
 
 export function SwUpdatePrompt() {
+  const t = useTranslations('swUpdate');
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
   useEffect(() => {
@@ -63,12 +65,12 @@ export function SwUpdatePrompt() {
       )}
     >
       <RefreshCw className="h-4 w-4 flex-shrink-0" />
-      <span className="text-sm font-medium">새 버전이 있습니다</span>
+      <span className="text-sm font-medium">{t('newVersion')}</span>
       <button
         onClick={handleUpdate}
         className="rounded-full bg-background text-foreground px-3 py-1 text-xs font-semibold hover:opacity-90 transition-opacity"
       >
-        업데이트
+        {t('update')}
       </button>
     </div>
   );

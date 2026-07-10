@@ -1,0 +1,277 @@
+{
+  "nav": {
+    "map": "地図",
+    "favorites": "保存",
+    "recent": "最近",
+    "recentFull": "最近見たカフェ",
+    "report": "報告",
+    "reportFull": "カフェを報告",
+    "mainNav": "メインナビゲーション"
+  },
+  "brand": {
+    "name": "モーニングカフェ",
+    "copyright": "ⓒ 2026. モーニングカフェ All rights reserved.",
+    "support": "応援する"
+  },
+  "filter": {
+    "all": "すべて",
+    "before6": "~6時",
+    "6to7": "6~7時",
+    "7to8": "7~8時",
+    "today": "今日",
+    "dayLabel": "{day}",
+    "openTime": "オープン時間",
+    "dayOfWeek": "曜日",
+    "allAreas": "全エリア",
+    "personal": "個人店",
+    "exclude24h": "24h除く",
+    "totalCount": "{count}件",
+    "days": {
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土",
+      "sun": "日"
+    }
+  },
+  "search": {
+    "placeholderMap": "カフェ名・エリアで検索",
+    "placeholderList": "リストから検索",
+    "clearQuery": "検索をクリア",
+    "recentSearches": "最近の検索",
+    "delete": "削除",
+    "clearHistory": "検索履歴を削除"
+  },
+  "cafe": {
+    "open": "営業中",
+    "closed": "開店前",
+    "hours24": "24時間",
+    "hours24Full": "24時間営業",
+    "franchise": "チェーン店",
+    "noInfo": "情報なし",
+    "openAt": "{day} {time} オープン",
+    "reviewCount": "(レビュー{count}件)",
+    "parkingAvailable": "駐車可能",
+    "parkingUnavailable": "駐車不可",
+    "instagram": "Instagram",
+    "instagramSearch": "Instagramで検索",
+    "copyAddress": "住所をコピー",
+    "copyPhone": "電話番号をコピー",
+    "close": "閉じる",
+    "addToCompareLabel": "比較に追加",
+    "addedToCompareLabel": "比較に追加済み",
+    "addFavorite": "保存",
+    "removeFavorite": "保存を解除",
+    "share": "シェア",
+    "shareText": "{name} — 朝{time}オープン\n{address}",
+    "shareTextNoTime": "{name} — 朝のカフェ\n{address}",
+    "viewOnMorningCafe": "モーニングカフェで見る",
+    "kakaoMap": "カカオマップ",
+    "directions": "経路案内",
+    "walkMinutes": "徒歩{min}分",
+    "myLocation": "現在地へ移動",
+    "currentLocation": "現在地",
+    "storyCard": "ストーリーカード"
+  },
+  "map": {
+    "loadError": "地図を読み込めません",
+    "loadErrorHint": "カカオマップサービスに一時的な問題が発生しています",
+    "refresh": "再読み込み",
+    "cafesAtLocation": "この場所のカフェ{count}件"
+  },
+  "list": {
+    "toggle": "リスト",
+    "mapToggle": "地図",
+    "emptyState": "条件に合うカフェがありません",
+    "newCafes": "新着カフェ",
+    "last7Days": "直近7日",
+    "nearby": "近く"
+  },
+  "hours": {
+    "title": "曜日別の営業時間",
+    "noInfo": "営業時間の情報がありません"
+  },
+  "menu": {
+    "title": "メニュー",
+    "noInfo": "メニュー情報がありません",
+    "viewOnKakao": "カカオマップで確認"
+  },
+  "review": {
+    "title": "レビュー",
+    "titleWithCount": "レビュー{count}件",
+    "empty": "まだレビューがありません",
+    "firstReview": "カカオマップで最初のレビューを書く",
+    "kakaoReviews": "カカオマップのレビュー",
+    "blogReviews": "ブログレビュー",
+    "blogAuthorFallback": "ブログ",
+    "viewOriginal": "原文を見る",
+    "collapse": "閉じる",
+    "viewAll": "レビュー{count}件をすべて見る",
+    "viewAllOnKakao": "カカオマップですべてのレビューを見る"
+  },
+  "memo": {
+    "title": "マイメモ",
+    "placeholder": "このカフェについてメモを残す...",
+    "save": "保存"
+  },
+  "quietScore": {
+    "workParadise": "作業天国",
+    "workRecommend": "作業向き",
+    "quiet": "静か",
+    "average": "普通",
+    "noInfo": "情報不足"
+  },
+  "photo": {
+    "viewOnKakao": "カカオマップで写真を見る",
+    "photoAlt": "{name} 写真{index}",
+    "photoLightbox": "{name} 写真{index}を拡大表示",
+    "photoCount": "{count}枚",
+    "prev": "前の写真",
+    "next": "次の写真"
+  },
+  "toast": {
+    "outOfArea": "ソウル・京畿道エリアのみ対応しています"
+  },
+  "swUpdate": {
+    "newVersion": "新しいバージョンがあります",
+    "update": "アップデート"
+  },
+  "pwa": {
+    "close": "閉じる",
+    "useAsApp": "アプリのように使う",
+    "iosStep1": "下部の「共有」ボタンをタップ",
+    "iosShare": "共有",
+    "iosStep2": "ホーム画面に追加",
+    "iosStep2Action": "<b>ホーム画面に追加</b>を選択",
+    "androidTitle": "アプリとしてインストールできます",
+    "androidInstall": "ホーム画面に追加",
+    "genericTitle": "アプリのように使う",
+    "genericStep": "ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。"
+  },
+  "offline": {
+    "title": "インターネット接続が必要です",
+    "description": "Wi-Fiまたはモバイルデータをご確認ください",
+    "retry": "再試行"
+  },
+  "favorites": {
+    "title": "保存したカフェ",
+    "metaDescription": "モーニングカフェで保存した朝カフェのリスト",
+    "empty": "保存したカフェはまだありません",
+    "emptyHint": "気に入ったカフェを保存しましょう",
+    "shareAll": "すべてシェア",
+    "shareTitle": "私の保存カフェ{count}件",
+    "shareOpenAt": "{time}オープン",
+    "shareSheetTitle": "私のモーニングカフェ"
+  },
+  "recent": {
+    "title": "最近見たカフェ",
+    "metaDescription": "モーニングカフェで最近見たカフェのリスト",
+    "empty": "まだ見たカフェがありません",
+    "emptyHint": "カフェを探してみましょう",
+    "today": "今日",
+    "yesterday": "昨日",
+    "daysAgo": "{count}日前",
+    "edit": "編集",
+    "done": "完了",
+    "selectAll": "すべて選択",
+    "deleteSelected": "{count}件削除",
+    "opensAt": "朝{time}オープン"
+  },
+  "report": {
+    "title": "カフェを報告",
+    "metaDescription": "モーニングカフェにカフェ情報を報告する",
+    "hoursCorrection": "営業時間の修正",
+    "newCafe": "新しいカフェ",
+    "closedCafe": "閉店",
+    "selectCafe": "カフェを選択",
+    "cafeName": "カフェ名",
+    "details": "詳細",
+    "detailsPlaceholder": "修正する営業時間や報告内容をご記入ください",
+    "submit": "報告する",
+    "submitting": "送信中...",
+    "success": "ご報告ありがとうございます！"
+  },
+  "stamp": {
+    "title": "区制覇スタンプ",
+    "metaDescription": "モーニングカフェ 区制覇スタンプ",
+    "heading": "スタンプ",
+    "conquered": "{count}/25区 制覇",
+    "empty": "まだスタンプがありません",
+    "emptyHint": "カフェの近くでチェックインするとスタンプが押されます",
+    "conquestMap": "ソウル25区 制覇マップ",
+    "allConquered": "ソウル25区をすべて制覇しました！",
+    "allConqueredSub": "真のアーリーバード征服者",
+    "progress": "{count}区 / 25区",
+    "recentCheckins": "最近のチェックイン",
+    "today": "今日",
+    "yesterday": "昨日",
+    "daysAgo": "{count}日前",
+    "weeksAgo": "{count}週間前",
+    "monthsAgo": "{count}ヶ月前"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー"
+  },
+  "cafes": {
+    "indexTitle": "ソウル・京畿道の朝カフェ",
+    "indexDescription": "ソウル・京畿道のエリア別 朝カフェ一覧",
+    "earliestOpen": "最速オープン",
+    "cafeCount": "{count}件",
+    "guTitle": "{gu}の朝カフェ",
+    "guDescription": "{gu}で朝早くオープンするカフェ",
+    "featured": "人気カフェ",
+    "before6": "6時以前",
+    "between6and7": "6時~7時",
+    "between7and8": "7時~8時",
+    "viewOnMap": "地図で見る",
+    "otherDistricts": "他のエリア",
+    "earlybirdCafes": "件のアーリーバードカフェ",
+    "indexSubtitle": "ソウル・京畿道 {areas}エリア、計{count}件",
+    "cafeCountUnit": "件",
+    "earliestOpenAt": "最速{time}オープン",
+    "guTitleWithCount": "{gu}の朝カフェ{count}件",
+    "guDescriptionWithCount": "{gu}で朝早くオープンするカフェ{count}件。6時・7時オープンのカフェをチェック。",
+    "guSubtitle": "朝早くオープンするカフェ{count}件",
+    "earlybirdSection": "アーリーバードカフェ",
+    "guEmpty": "{gu}に登録された朝カフェはまだありません"
+  },
+  "cafeDetail": {
+    "title": "{name} — 朝カフェ",
+    "description": "{name}（{gu}）— {time}オープン。住所・営業時間・メニューをチェック。",
+    "viewOnApp": "モーニングカフェで見る",
+    "hoursTable": "営業時間",
+    "notFound": "カフェが見つかりません — モーニングカフェ",
+    "openAt": "{time}オープン",
+    "back": "戻る",
+    "viewOnKakao": "カカオマップで見る"
+  },
+  "morningPick": {
+    "title": "今日の朝カフェ",
+    "distance": "{km}km",
+    "opensAt": "{time}オープン",
+    "next": "他のカフェ",
+    "go": "ここへ行く！",
+    "swipeHint": "← 他のカフェ · ここへ行く →"
+  },
+  "roulette": {
+    "ariaLabel": "ランダムカフェおすすめ",
+    "noNearbyCafes": "半径3km以内にカフェがありません",
+    "button": "ランダム",
+    "spinning": "どこへ行こう...？",
+    "goToCafe": "ここへ行く！",
+    "respin": "もう一度回す"
+  },
+  "splash": {
+    "alt": "モーニングカフェ"
+  },
+  "locale": {
+    "switchTo": "한"
+  },
+  "metadata": {
+    "title": "モーニングカフェ — ソウル・京畿道 朝カフェマップ",
+    "description": "ソウル・京畿道で朝早くオープンするカフェを一目で！6時・7時オープンのカフェを地図ですぐに見つけよう。",
+    "siteName": "モーニングカフェ"
+  }
+}

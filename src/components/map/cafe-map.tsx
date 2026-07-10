@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import useKakaoLoader from '@/lib/hooks/use-kakao-loader';
 import { useShallow } from 'zustand/react/shallow';
@@ -281,6 +282,8 @@ function panToWithOffset(map: kakao.maps.Map, lat: number, lng: number) {
 }
 
 export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCenterChange }: CafeMapProps) {
+  const t = useTranslations('map');
+  const tCafe = useTranslations('cafe');
   const { loading, error } = useKakaoLoader();
   const { favorites } = useFavorites();
 
@@ -544,7 +547,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
   if (error) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted/30 px-4 text-center">
-        <p className="text-sm font-medium text-destructive">지도를 불러올 수 없습니다</p>
+        <p className="text-sm font-medium text-destructive">{t('loadError')}</p>
         <p className="text-xs text-muted-foreground">{String(error)}</p>
       </div>
     );
@@ -808,7 +811,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
             }}
           >
             <div style={{ padding: '4px 12px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--muted-foreground, #6b7280)' }}>
-              이 위치의 카페 {overlapPopup.cafes.length}개
+              {t('cafesAtLocation', { count: overlapPopup.cafes.length })}
             </div>
             {overlapPopup.cafes.map((cafe) => (
               <button
@@ -850,7 +853,7 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
       {userLocation && (
         <MapMarker
           position={{ lat: userLocation.lat, lng: userLocation.lng }}
-          title="현재 위치"
+          title={tCafe('currentLocation')}
           zIndex={200}
           image={{
             src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(USER_DOT_SVG)}`,

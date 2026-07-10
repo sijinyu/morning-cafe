@@ -4,6 +4,7 @@ import { useMemo, useRef, useCallback, type MouseEvent as ReactMouseEvent } from
 import { MapPin, Clock, Navigation, Sparkles } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
+import { useTranslations } from 'next-intl';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
@@ -59,6 +60,8 @@ interface CafeListViewProps {
 }
 
 export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
+  const t = useTranslations('list');
+  const tCafe = useTranslations('cafe');
   const { filteredCafes, dayFilter, chainCafeIds } = useCafeStore(
     useShallow((state) => ({
       filteredCafes: state.filteredCafes,
@@ -122,7 +125,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
         <MapPin className="h-10 w-10 stroke-1" />
-        <p className="text-sm">조건에 맞는 카페가 없습니다</p>
+        <p className="text-sm">{t('emptyState')}</p>
       </div>
     );
   }
@@ -137,8 +140,8 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
             <section>
               <div className="flex items-center gap-1.5 mb-2">
                 <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
-                <h3 className="text-xs font-semibold text-foreground">신규 카페</h3>
-                <span className="text-[10px] text-muted-foreground">최근 7일</span>
+                <h3 className="text-xs font-semibold text-foreground">{t('newCafes')}</h3>
+                <span className="text-[10px] text-muted-foreground">{t('last7Days')}</span>
               </div>
               <div
                 ref={newDrag.ref}
@@ -168,7 +171,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
             <section>
               <div className="flex items-center gap-1.5 mb-2">
                 <Navigation className="h-3.5 w-3.5 text-blue-500" />
-                <h3 className="text-xs font-semibold text-foreground">내 근처</h3>
+                <h3 className="text-xs font-semibold text-foreground">{t('nearby')}</h3>
               </div>
               <div
                 ref={nearbyDrag.ref}
@@ -243,12 +246,12 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     )}
                     {isChain && (
                       <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-                        프랜차이즈
+                        {tCafe('franchise')}
                       </span>
                     )}
                     {cafe24h && (
                       <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                        24시간
+                        {tCafe('hours24')}
                       </span>
                     )}
                     {openStatus !== 'unknown' && !cafe24h && (
@@ -264,7 +267,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                           'inline-block h-1 w-1 rounded-full',
                           openStatus === 'open' ? 'bg-emerald-500' : 'bg-gray-400'
                         )} />
-                        {openStatus === 'open' ? '영업중' : '영업 전'}
+                        {openStatus === 'open' ? tCafe('open') : tCafe('closed')}
                       </span>
                     )}
                     {(() => {

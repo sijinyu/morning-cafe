@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Store, ChevronDown, RotateCcw } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
+import { useTranslations } from 'next-intl';
 import {
   useCafeStore,
   type TimeFilter as TimeFilterType,
@@ -14,23 +15,33 @@ import { trackEvent } from '@/lib/analytics';
 
 // ---- data -------------------------------------------------------------------
 
-const TIME_OPTIONS: { value: TimeFilterType; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'before6', label: '~6시' },
-  { value: '6to7', label: '6~7시' },
-  { value: '7to8', label: '7~8시' },
-];
+const TIME_OPTIONS: { value: TimeFilterType; labelKey: string }[] = [
+  { value: 'all', labelKey: 'all' },
+  { value: 'before6', labelKey: 'before6' },
+  { value: '6to7', labelKey: '6to7' },
+  { value: '7to8', labelKey: '7to8' },
+] as const;
 
-const DAY_OPTIONS: { value: DayFilter; label: string }[] = [
-  { value: 'today', label: '오늘' },
-  { value: '월', label: '월' },
-  { value: '화', label: '화' },
-  { value: '수', label: '수' },
-  { value: '목', label: '목' },
-  { value: '금', label: '금' },
-  { value: '토', label: '토' },
-  { value: '일', label: '일' },
-];
+const DAY_OPTIONS: { value: DayFilter; labelKey: string }[] = [
+  { value: 'today', labelKey: 'today' },
+  { value: '월', labelKey: 'days.mon' },
+  { value: '화', labelKey: 'days.tue' },
+  { value: '수', labelKey: 'days.wed' },
+  { value: '목', labelKey: 'days.thu' },
+  { value: '금', labelKey: 'days.fri' },
+  { value: '토', labelKey: 'days.sat' },
+  { value: '일', labelKey: 'days.sun' },
+] as const;
+
+const DAY_KEY_MAP: Record<string, string> = {
+  '월': 'mon',
+  '화': 'tue',
+  '수': 'wed',
+  '목': 'thu',
+  '금': 'fri',
+  '토': 'sat',
+  '일': 'sun',
+};
 
 // ---- dropdown helper --------------------------------------------------------
 
@@ -189,6 +200,7 @@ interface TimeFilterProps {
 }
 
 export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
+  const t = useTranslations('filter');
   const { timeFilter, dayFilter, guFilter, hideChains, hide24h, availableGus } = useCafeStore(
     useShallow((s) => ({
       timeFilter: s.timeFilter,
@@ -221,8 +233,8 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
 
   const [openDropdown, setOpenDropdown] = useState<'time' | 'area' | null>(null);
 
-  const timeLabel = TIME_OPTIONS.find((o) => o.value === timeFilter)?.label ?? '전체';
-  const dayLabel = dayFilter === 'today' ? '오늘' : `${dayFilter}요일`;
+  const timeLabel = t(TIME_OPTIONS.find((o) => o.value === timeFilter)?.labelKey ?? 'all');
+  const dayLabel = dayFilter === 'today' ? t('today') : t(`days.${DAY_KEY_MAP[dayFilter] ?? dayFilter}`);
 
   function toggleDropdown(key: 'time' | 'area') {
     setOpenDropdown((prev) => (prev === key ? null : key));
@@ -248,9 +260,9 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
       >
         <div className="w-52">
           {/* 시간 */}
-          <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">오픈 시간</p>
+          <p className="px-2 pt-1 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t('openTime')}</p>
           <div className="flex flex-wrap gap-1 px-1 pb-2">
-            {TIME_OPTIONS.map(({ value, label }) => (
+            {TIME_OPTIONS.map(({ value, labelKey }) => (
               <button
                 key={value}
                 onClick={() => { trackEvent('filter_time', { value }); setTimeFilter(value); }}
@@ -259,15 +271,15 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
                   timeFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
-                {label}
+                {t(labelKey)}
               </button>
             ))}
           </div>
           <div className="h-px bg-border mx-1" />
           {/* 요일 */}
-          <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">요일</p>
+          <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{t('dayOfWeek')}</p>
           <div className="flex flex-wrap gap-1 px-1 pb-1.5">
-            {DAY_OPTIONS.map(({ value, label }) => (
+            {DAY_OPTIONS.map(({ value, labelKey }) => (
               <button
                 key={value}
                 onClick={() => { trackEvent('filter_day', { value }); setDayFilter(value); }}
@@ -276,7 +288,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
                   dayFilter === value ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
                 )}
               >
-                {label}
+                {t(labelKey)}
               </button>
             ))}
           </div>
@@ -293,7 +305,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
             guFilter ? CHIP_ACTIVE : CHIP_INACTIVE,
           )}>
             <MapPin className="h-3 w-3" />
-            <span>{guFilter ?? '전체'}</span>
+            <span>{guFilter ?? t('all')}</span>
             <ChevronDown className="h-3 w-3 opacity-60" />
           </div>
         }
@@ -307,7 +319,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
               !guFilter ? 'bg-foreground text-background' : 'hover:bg-muted text-muted-foreground',
             )}
           >
-            전체 지역
+            {t('allAreas')}
           </button>
           {availableGus.map((gu) => (
             <button
@@ -336,7 +348,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
         className={hideChains ? CHIP_ACTIVE : CHIP_INACTIVE}
       >
         <Store className="h-3 w-3" />
-        {hideChains ? '개인' : '전체'}
+        {hideChains ? t('personal') : t('all')}
       </button>
 
       {/* 24시간 토글 */}
@@ -345,7 +357,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
           onClick={() => setHide24h(false)}
           className={CHIP_ACTIVE}
         >
-          24h 제외
+          {t('exclude24h')}
         </button>
       )}
 
@@ -357,7 +369,7 @@ export function TimeFilter({ onPanToGu }: TimeFilterProps = {}) {
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
         className="rounded-full bg-foreground/90 px-2.5 py-1.5 text-[10px] font-semibold text-background shadow-sm backdrop-blur-sm whitespace-nowrap"
       >
-        총 {filteredCount.toLocaleString()}개
+        {t('totalCount', { count: filteredCount.toLocaleString() })}
       </motion.span>
 
       {/* 초기화 */}

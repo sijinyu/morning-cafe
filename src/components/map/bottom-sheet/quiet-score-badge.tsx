@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Leaf } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { calculateQuietScore, type QuietScoreResult } from '@/lib/quiet-score';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +19,17 @@ const SCORE_STYLES: Record<string, string> = {
   '보통': 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
 };
 
+const LABEL_KEY_MAP: Record<string, string> = {
+  '작업 천국': 'workParadise',
+  '작업 추천': 'workRecommend',
+  '조용한 편': 'quiet',
+  '보통': 'average',
+  '정보 부족': 'noInfo',
+  '정보 없음': 'noInfo',
+};
+
 export function QuietScoreBadge({ strengths, facilities, reviews }: QuietScoreBadgeProps) {
+  const t = useTranslations('quietScore');
   const result: QuietScoreResult = useMemo(
     () => calculateQuietScore(strengths, facilities, reviews),
     [strengths, facilities, reviews],
@@ -34,7 +45,7 @@ export function QuietScoreBadge({ strengths, facilities, reviews }: QuietScoreBa
       <div className="flex items-center gap-2">
         <Leaf className="h-4 w-4 text-emerald-500 flex-shrink-0" />
         <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold', badgeStyle)}>
-          {result.label}
+          {t(LABEL_KEY_MAP[result.label] ?? 'average')}
         </span>
         <span className="text-xs text-muted-foreground">{result.score.toFixed(1)}/5</span>
       </div>

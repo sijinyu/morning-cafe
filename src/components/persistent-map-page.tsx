@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { Map as MapIcon, List } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
@@ -32,6 +34,9 @@ type ViewMode = 'map' | 'list';
 export function PersistentMapPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations('list');
+  const tBrand = useTranslations('brand');
+  const tToast = useTranslations('toast');
   const isMapRoute = pathname === '/';
 
   const { fetchCafes, cafes, filteredCafes, setSelectedCafe, userLocation, setUserLocation } = useCafeStore(
@@ -238,12 +243,12 @@ export function PersistentMapPage() {
             {viewMode === 'map' ? (
               <>
                 <List className="h-4 w-4" />
-                리스트
+                {t('toggle')}
               </>
             ) : (
               <>
                 <MapIcon className="h-4 w-4" />
-                지도
+                {t('mapToggle')}
               </>
             )}
           </motion.button>
@@ -256,7 +261,7 @@ export function PersistentMapPage() {
             href="mailto:morningcafeapp@gmail.com"
             className="rounded-full bg-background/60 px-3 py-1 text-[10px] text-muted-foreground/50 backdrop-blur-sm hover:text-muted-foreground transition-colors"
           >
-            ⓒ 2026. 모닝카페 All rights reserved.
+            {tBrand('copyright')}
           </a>
         </div>
       )}
@@ -276,7 +281,7 @@ export function PersistentMapPage() {
       {/* 서비스 지역 밖 GPS 토스트 */}
       {outOfAreaToast && (
         <div className="fixed top-20 left-1/2 z-[100] -translate-x-1/2 rounded-2xl bg-foreground/90 px-5 py-3 text-sm font-medium text-background shadow-lg backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-300">
-          서울·경기 지역만 서비스 중입니다
+          {tToast('outOfArea')}
         </div>
       )}
     </div>

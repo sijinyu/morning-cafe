@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Share2, Check } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { formatOpeningTime } from '@/lib/cafe-utils';
@@ -26,11 +27,15 @@ interface CafeShareButtonProps {
 
 export function CafeShareButton({ cafe }: CafeShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  const t = useTranslations('cafe');
 
   const shareUrl = `${BASE_URL}/cafe/${cafe.id}`;
   const openTime = cafe.opening_time ? formatOpeningTime(cafe.opening_time) : null;
+  const address = cafe.road_address ?? cafe.address;
   const shareTitle = cafe.name;
-  const shareText = `${cafe.name} — ${openTime ? `아침 ${openTime} 오픈` : '아침 카페'}\n${cafe.road_address ?? cafe.address}`;
+  const shareText = openTime
+    ? t('shareText', { name: cafe.name, time: openTime, address })
+    : t('shareTextNoTime', { name: cafe.name, address });
 
   const handleShare = useCallback(async () => {
     trackEvent('share_cafe', {
@@ -63,7 +68,7 @@ export function CafeShareButton({ cafe }: CafeShareButtonProps) {
           },
           buttons: [
             {
-              title: '모닝카페에서 보기',
+              title: t('viewOnMorningCafe'),
               link: {
                 mobileWebUrl: shareUrl,
                 webUrl: shareUrl,
@@ -99,13 +104,13 @@ export function CafeShareButton({ cafe }: CafeShareButtonProps) {
     } catch {
       // Final fallback: do nothing
     }
-  }, [cafe.id, cafe.name, cafe.road_address, cafe.address, cafe.opening_time, shareTitle, shareText, shareUrl]);
+  }, [cafe.id, cafe.name, shareTitle, shareText, shareUrl, t]);
 
   return (
     <button
       onClick={handleShare}
       className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-      aria-label="공유하기"
+      aria-label={t('share')}
     >
       {copied ? (
         <Check className="h-4 w-4 text-green-500" />

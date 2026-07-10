@@ -1,18 +1,6 @@
-import type { Metadata, Viewport } from 'next';
-import { Suspense } from 'react';
+import type { Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import Script from 'next/script';
-import { ThemeProvider } from '@/components/layout/theme-provider';
-import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
-import { BottomNav } from '@/components/layout/bottom-nav';
-import { PersistentMapPage } from '@/components/persistent-map-page';
-import { SwUpdatePrompt } from '@/components/sw-update-prompt';
-import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
-import { StatusBarConfig } from '@/components/native/status-bar-config';
-import { OfflineScreen } from '@/components/native/offline-screen';
-import { PushInit } from '@/components/native/push-init';
-import { SplashScreen } from '@/components/splash-screen';
-
 import './globals.css';
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -22,38 +10,6 @@ const geistSans = Geist({
   variable: '--font-sans',
   subsets: ['latin'],
 });
-
-export const metadata: Metadata = {
-  metadataBase: new URL('https://morning-cafe-phi.vercel.app'),
-  title: '모닝카페 — 서울·경기 아침 카페 지도',
-  description: '서울·경기에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.',
-  keywords: ['아침 카페', '새벽 카페', '서울 카페', '경기 카페', '판교 카페', '분당 카페', '얼리버드 카페', '카페 오픈 시간', '모닝카페'],
-  openGraph: {
-    title: '모닝카페 — 서울·경기 아침 카페 지도',
-    description: '서울·경기에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.',
-    type: 'website',
-    locale: 'ko_KR',
-    siteName: '모닝카페',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: '모닝카페 — 서울·경기 아침 카페 지도',
-    description: '서울·경기에서 아침 일찍 여는 카페를 한눈에!',
-  },
-  verification: {
-    google: 'google9e17854a21ef9763',
-    other: {
-      'naver-site-verification': 'b4928168a48b4c0705f4e7ded72513a7f235f4df',
-    },
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  alternates: {
-    canonical: '/',
-  },
-};
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -69,16 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
+    <html className={`${geistSans.variable} h-full`} suppressHydrationWarning>
       <head>
-        {/* CDN preconnect — DNS + TCP + TLS 사전 연결 */}
+        {/* CDN preconnect */}
         <link rel="preconnect" href="https://t1.daumcdn.net" />
         <link rel="preconnect" href="https://dapi.kakao.com" />
         <link rel="preconnect" href="https://map.daumcdn.net" />
         <link rel="preconnect" href="https://img1.kakaocdn.net" />
         <link rel="preconnect" href="https://t1.kakaocdn.net" crossOrigin="anonymous" />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''} />
-        {/* dns-prefetch fallback (preconnect 미지원 브라우저) */}
         <link rel="dns-prefetch" href="https://t1.daumcdn.net" />
         <link rel="dns-prefetch" href="https://dapi.kakao.com" />
         <link rel="dns-prefetch" href="https://map.daumcdn.net" />
@@ -127,22 +82,7 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        <SplashScreen />
-        <ThemeProvider>
-          <div className="flex h-full">
-            <DesktopSidebar />
-            <main className="relative flex-1 overflow-hidden pb-14 md:pb-0">
-              <Suspense><PersistentMapPage /></Suspense>
-              {children}
-            </main>
-          </div>
-          <BottomNav />
-          <StatusBarConfig />
-          <OfflineScreen />
-          <SwUpdatePrompt />
-          <PwaInstallPrompt />
-          <PushInit />
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

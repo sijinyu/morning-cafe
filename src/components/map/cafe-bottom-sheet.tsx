@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   X,
@@ -75,6 +76,9 @@ interface CafeBottomSheetProps {
 }
 
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
+  const t = useTranslations('cafe');
+  const tFilter = useTranslations('filter');
+
   const { dayFilter, chainCafeIds, userLocation, compareSlots, addToCompare } = useCafeStore(
     useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds, userLocation: s.userLocation, compareSlots: s.compareSlots, addToCompare: s.addToCompare })),
   );
@@ -196,7 +200,10 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const displayAddress = cafe.road_address ?? cafe.address;
   const is24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const todayOpeningTime = getOpeningTimeForDay(cafe, dayFilter);
-  const openingFormatted = is24h ? '24시간' : formatOpeningTime(todayOpeningTime);
+  const openingFormatted = is24h ? t('hours24') : formatOpeningTime(todayOpeningTime);
+
+  const DAY_KEY_MAP: Record<string, string> = { '월': 'mon', '화': 'tue', '수': 'wed', '목': 'thu', '금': 'fri', '토': 'sat', '일': 'sun' };
+  const translatedDayLabel = dayFilter === 'today' ? tFilter('today') : tFilter(`days.${DAY_KEY_MAP[dayFilter] ?? 'mon'}`);
   const badgeStyle = is24h ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : getOpeningBadgeStyle(todayOpeningTime);
   const openStatus = is24h ? 'open' as const : getOpenStatus(cafe);
 
@@ -239,7 +246,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             )}
             {isChain && (
               <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-nowrap">
-                프랜차이즈
+                {t('franchise')}
               </span>
             )}
             {cafe.category && (
@@ -262,7 +269,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   'inline-block h-1.5 w-1.5 rounded-full',
                   openStatus === 'open' ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
                 )} />
-                {openStatus === 'open' ? '영업중' : '영업 전'}
+                {openStatus === 'open' ? t('open') : t('closed')}
               </span>
             )}
             {(cafe.opening_time || is24h) && (
@@ -272,7 +279,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   badgeStyle
                 )}
               >
-                {is24h ? '24시간 영업' : `${getDayLabel(dayFilter)} ${openingFormatted} 오픈`}
+                {is24h ? t('hours24Full') : t('openAt', { day: translatedDayLabel, time: openingFormatted })}
               </span>
             )}
           </div>
@@ -302,7 +309,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
               'flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors',
               isInCompare && 'opacity-40',
             )}
-            aria-label={isInCompare ? '비교함에 추가됨' : '비교함 담기'}
+            aria-label={isInCompare ? t('addedToCompareLabel') : t('addToCompareLabel')}
             disabled={!canAddToCompare && !isInCompare}
           >
             <GitCompareArrows
@@ -336,7 +343,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
             animate={{ scale: favorited ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.25 }}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
-            aria-label={favorited ? '찜 해제' : '찜 추가'}
+            aria-label={favorited ? t('removeFavorite') : t('addFavorite')}
           >
             <Bookmark
               className={cn(
@@ -348,7 +355,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
           <button
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
-            aria-label="닫기"
+            aria-label={t('close')}
           >
             <X className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
@@ -381,7 +388,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-semibold text-foreground">{rating.score.toFixed(1)}</span>
                     {rating.count > 0 && (
-                      <span className="text-xs text-muted-foreground">({rating.count.toLocaleString()}개 리뷰)</span>
+                      <span className="text-xs text-muted-foreground">{t('reviewCount', { count: rating.count.toLocaleString() })}</span>
                     )}
                   </div>
                 </div>
@@ -407,7 +414,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   <Car className={cn('h-4 w-4 flex-shrink-0 mt-0.5', parking.available ? 'text-emerald-500' : 'text-muted-foreground')} />
                   <div className="flex-1 min-w-0">
                     <span className={cn('text-sm', parking.available ? 'text-foreground' : 'text-muted-foreground')}>
-                      {parking.available ? '주차 가능' : '주차 불가'}
+                      {parking.available ? t('parkingAvailable') : t('parkingUnavailable')}
                     </span>
                     {parking.summary && (
                       <p className="text-xs text-muted-foreground leading-snug mt-0.5">{parking.summary}</p>
@@ -434,7 +441,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 <button
                   onClick={handleCopyAddress}
                   className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
-                  aria-label="주소 복사"
+                  aria-label={t('copyAddress')}
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-green-500" />
@@ -457,7 +464,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   <button
                     onClick={handleCopyPhone}
                     className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted transition-colors"
-                    aria-label="전화번호 복사"
+                    aria-label={t('copyPhone')}
                   >
                     {phoneCopied ? (
                       <Check className="h-3.5 w-3.5 text-green-500" />
@@ -482,7 +489,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
-                  {cafe.instagram_url ? '인스타그램' : '인스타그램에서 검색'}
+                  {cafe.instagram_url ? t('instagram') : t('instagramSearch')}
                 </a>
               </div>
             </div>
@@ -513,7 +520,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   )}
                 >
                   <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                  카카오맵
+                  {t('kakaoMap')}
                 </a>
               )}
               <a
@@ -527,10 +534,10 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   'text-sm font-medium text-foreground',
                   'hover:bg-muted transition-colors'
                 )}
-                aria-label="길찾기"
+                aria-label={t('directions')}
               >
                 <Navigation className="h-4 w-4" />
-                길찾기
+                {t('directions')}
                 {(() => {
                   if (!userLocation) return null;
                   const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
@@ -538,7 +545,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   const min = estimateWalkMinutes(km);
                   return (
                     <span className="text-xs text-muted-foreground">
-                      도보 {min}분
+                      {t('walkMinutes', { min })}
                     </span>
                   );
                 })()}
@@ -582,7 +589,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 onClick={() => {
                   trackEvent('share_cafe', { cafe_name: cafe.name, cafe_id: cafe.id });
                   const shareUrl = `https://morning-cafe-phi.vercel.app/cafe/${cafe.id}`;
-                  const shareText = `${cafe.name} — 아침 ${openingFormatted} 오픈\n${displayAddress}`;
+                  const shareText = t('shareText', { name: cafe.name, time: openingFormatted, address: displayAddress });
 
                   // 0. Native share (Capacitor)
                   if (isNativeApp()) {
@@ -609,7 +616,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                             imageUrl: 'https://morning-cafe-phi.vercel.app/icons/icon-512x512.png',
                             link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
                           },
-                          buttons: [{ title: '모닝카페에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+                          buttons: [{ title: t('viewOnMorningCafe'), link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
                         });
                         return;
                       } catch { /* fallback */ }
@@ -630,7 +637,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   'text-sm font-medium text-foreground',
                   'hover:bg-muted transition-colors'
                 )}
-                aria-label="공유하기"
+                aria-label={t('share')}
               >
                 <Share2 className="h-4 w-4" />
               </button>

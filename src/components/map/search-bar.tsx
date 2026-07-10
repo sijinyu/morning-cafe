@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
@@ -18,6 +19,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchBarProps) {
+  const t = useTranslations('search');
   const cafes = useCafeStore((state) => state.filteredCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
@@ -127,7 +129,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
-          placeholder={isListMode ? '리스트에서 검색' : '카페명, 지역명 검색'}
+          placeholder={isListMode ? t('placeholderList') : t('placeholderMap')}
           className={cn(
             'flex-1 bg-transparent text-[15px] text-foreground',
             'placeholder:text-muted-foreground/40',
@@ -144,7 +146,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
               transition={{ duration: 0.15 }}
               onClick={handleClear}
               className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/15 transition-colors"
-              aria-label="검색어 지우기"
+              aria-label={t('clearQuery')}
             >
               <X className="h-3 w-3 text-muted-foreground" />
             </motion.button>
@@ -170,7 +172,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
             {showHistory && (
               <>
                 <div className="px-4 pt-3 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  최근 검색
+                  {t('recentSearches')}
                 </div>
                 {history.map((h, idx) => (
                   <div
@@ -193,7 +195,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => removeSearch(h)}
                       className="flex h-8 w-8 items-center justify-center flex-shrink-0 rounded-full hover:bg-muted transition-colors"
-                      aria-label="삭제"
+                      aria-label={t('delete')}
                     >
                       <X className="h-3 w-3 text-muted-foreground" />
                     </button>
@@ -205,7 +207,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
                   className="flex w-full items-center justify-center gap-1 px-4 py-2.5 border-t border-border/50 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Trash2 className="h-3 w-3" />
-                  검색 기록 삭제
+                  {t('clearHistory')}
                 </button>
               </>
             )}

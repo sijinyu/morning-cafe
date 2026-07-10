@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Clock, ExternalLink, Map, Sparkles } from 'lucide-react';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
@@ -11,7 +12,7 @@ const MAX_FEATURED = 8;
 export const revalidate = 86400; // 24h ISR
 
 interface PageProps {
-  params: Promise<{ gu: string }>;
+  params: Promise<{ locale: string; gu: string }>;
 }
 
 export async function generateStaticParams() {
@@ -20,13 +21,16 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { gu } = await params;
+  const { locale, gu } = await params;
   const decodedGu = decodeURIComponent(gu);
   const cafes = await fetchCafesByGu(decodedGu);
   const count = cafes.length;
 
-  const title = `${decodedGu} 아침 카페 ${count}곳 — 모닝카페`;
-  const description = `${decodedGu}에서 아침 일찍 여는 카페 ${count}곳. 6시, 7시 오픈 카페를 확인하세요.`;
+  const t = await getTranslations({ locale, namespace: 'cafes' });
+  const tMeta = await getTranslations({ locale, namespace: 'metadata' });
+
+  const title = `${t('guTitleWithCount', { gu: decodedGu, count })} — ${tMeta('siteName')}`;
+  const description = t('guDescriptionWithCount', { gu: decodedGu, count });
 
   return {
     title,
@@ -35,8 +39,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: 'website',
-      locale: 'ko_KR',
-      siteName: '모닝카페',
+      locale: locale === 'ja' ? 'ja_JP' : locale === 'en' ? 'en_US' : 'ko_KR',
+      siteName: tMeta('siteName'),
     },
     twitter: {
       card: 'summary_large_image',
@@ -56,8 +60,10 @@ function parseMinutes(openingTime: string | null): number | null {
   return parseInt(parts[0] ?? '0', 10) * 60 + parseInt(parts[1] ?? '0', 10);
 }
 
+type TimeGroupKey = 'before6' | 'between6and7' | 'between7and8';
+
 interface TimeGroup {
-  label: string;
+  key: TimeGroupKey;
   cafes: Cafe[];
 }
 
@@ -79,15 +85,19 @@ function groupByTime(cafes: Cafe[]): TimeGroup[] {
   }
 
   const groups: TimeGroup[] = [];
-  if (before6.length > 0) groups.push({ label: '6시 이전 오픈', cafes: before6 });
-  if (sixToSeven.length > 0) groups.push({ label: '6시~7시 오픈', cafes: sixToSeven });
-  if (sevenToEight.length > 0) groups.push({ label: '7시~8시 오픈', cafes: sevenToEight });
+  if (before6.length > 0) groups.push({ key: 'before6', cafes: before6 });
+  if (sixToSeven.length > 0) groups.push({ key: 'between6and7', cafes: sixToSeven });
+  if (sevenToEight.length > 0) groups.push({ key: 'between7and8', cafes: sevenToEight });
 
   return groups;
 }
 
 export default async function GuPage({ params }: PageProps) {
-  const { gu } = await params;
+  const { locale, gu } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'cafes' });
+  const tCafe = await getTranslations({ locale, namespace: 'cafe' });
+
   const decodedGu = decodeURIComponent(gu);
   const cafes = await fetchCafesByGu(decodedGu);
   const allGus = await fetchAllGus();
@@ -110,9 +120,9 @@ export default async function GuPage({ params }: PageProps) {
       <header className="border-b border-border px-5 py-5" style={{ paddingTop: 'calc(1.25rem + var(--safe-area-top))' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">{decodedGu} 아침 카페</h1>
+            <h1 className="text-xl font-bold">{t('guTitle', { gu: decodedGu })}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              아침 일찍 여는 카페 {cafes.length}곳
+              {t('guSubtitle', { count: cafes.length })}
             </p>
           </div>
           <Link
@@ -120,7 +130,7 @@ export default async function GuPage({ params }: PageProps) {
             className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600"
           >
             <Map className="h-4 w-4" />
-            지도에서 보기
+            {t('viewOnMap')}
           </Link>
         </div>
       </header>
@@ -132,7 +142,7 @@ export default async function GuPage({ params }: PageProps) {
           <section className="px-5 py-4">
             <div className="flex items-center gap-1.5 mb-3">
               <Sparkles className="h-4 w-4 text-red-500" />
-              <h2 className="text-sm font-semibold text-foreground">얼리버드 카페</h2>
+              <h2 className="text-sm font-semibold text-foreground">{t('earlybirdSection')}</h2>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
               {featuredCafes.map((cafe) => (
@@ -144,18 +154,18 @@ export default async function GuPage({ params }: PageProps) {
         {cafes.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
             <MapPin className="h-10 w-10 stroke-1" />
-            <p className="text-sm">{decodedGu}에 등록된 아침 카페가 없습니다</p>
+            <p className="text-sm">{t('guEmpty', { gu: decodedGu })}</p>
           </div>
         ) : (
           <div className="divide-y divide-border">
             {timeGroups.map((group) => (
-              <section key={group.label} className="py-4">
+              <section key={group.key} className="py-4">
                 <h2 className="mb-3 px-5 text-sm font-semibold text-muted-foreground">
-                  {group.label} ({group.cafes.length})
+                  {t(group.key)} ({group.cafes.length})
                 </h2>
                 <ul className="divide-y divide-border/50">
                   {group.cafes.map((cafe) => (
-                    <CafeCard key={cafe.id} cafe={cafe} />
+                    <CafeCard key={cafe.id} cafe={cafe} kakaoMapLabel={tCafe('kakaoMap')} />
                   ))}
                 </ul>
               </section>
@@ -167,7 +177,7 @@ export default async function GuPage({ params }: PageProps) {
         {otherGus.length > 0 && (
           <section className="border-t border-border px-5 py-6">
             <h2 className="mb-3 text-sm font-semibold text-muted-foreground">
-              다른 구 둘러보기
+              {t('otherDistricts')}
             </h2>
             <div className="flex flex-wrap gap-2">
               {otherGus.map((g) => (
@@ -215,7 +225,7 @@ function FeaturedCafeCard({ cafe }: { cafe: Cafe }) {
   );
 }
 
-function CafeCard({ cafe }: { cafe: Cafe }) {
+function CafeCard({ cafe, kakaoMapLabel }: { cafe: Cafe; kakaoMapLabel: string }) {
   const displayAddress = cafe.road_address ?? cafe.address;
 
   return (
@@ -246,7 +256,7 @@ function CafeCard({ cafe }: { cafe: Cafe }) {
           {cafe.place_url && (
             <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
               <ExternalLink className="h-3 w-3" />
-              카카오맵
+              {kakaoMapLabel}
             </span>
           )}
         </div>

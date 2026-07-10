@@ -1,25 +1,25 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Map, Bookmark, Send, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
-  { href: '/', label: '지도', icon: Map },
-  { href: '/favorites', label: '찜', icon: Bookmark },
-  // { href: '/stamp', label: '스탬프', icon: Award },
-  { href: '/recent', label: '최근', icon: Clock },
-  { href: '/report', label: '제보', icon: Send },
-] as const;
+  { href: '/' as const, labelKey: 'map' as const, icon: Map },
+  { href: '/favorites' as const, labelKey: 'favorites' as const, icon: Bookmark },
+  { href: '/recent' as const, labelKey: 'recent' as const, icon: Clock },
+  { href: '/report' as const, labelKey: 'report' as const, icon: Send },
+];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations('nav');
 
   return (
-    <nav aria-label="메인 네비게이션" className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl md:hidden" style={{ paddingBottom: 'var(--safe-area-bottom)' }}>
+    <nav aria-label={t('mainNav')} className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl md:hidden" style={{ paddingBottom: 'var(--safe-area-bottom)' }}>
       <div className="flex h-14 items-center justify-around">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, labelKey, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
@@ -31,7 +31,7 @@ export function BottomNav() {
               )}
             >
               <Icon className={cn('h-5 w-5', active && 'stroke-[2.5px]')} />
-              <span className={cn(active && 'font-semibold')}>{label}</span>
+              <span className={cn(active && 'font-semibold')}>{t(labelKey)}</span>
             </Link>
           );
         })}

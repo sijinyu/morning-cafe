@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { Dices, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
@@ -20,6 +21,9 @@ interface CafeRouletteProps {
 }
 
 export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
+  const t = useTranslations('roulette');
+  const tCafe = useTranslations('cafe');
+  const tMorningPick = useTranslations('morningPick');
   const { filteredCafes, userLocation } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes, userLocation: s.userLocation })),
   );
@@ -54,7 +58,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
 
     const nearby = getNearbyCafes();
     if (nearby.length === 0) {
-      showToast('반경 3km 내 카페가 없어요');
+      showToast(t('noNearbyCafes'));
       return;
     }
 
@@ -80,7 +84,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
         setShowResult(true);
       }
     }, SLOT_INTERVAL);
-  }, [spinning, getNearbyCafes, showToast]);
+  }, [spinning, getNearbyCafes, showToast, t]);
 
   const handleGoToCafe = useCallback(() => {
     if (!resultCafe) return;
@@ -126,7 +130,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
           'transition-opacity disabled:opacity-60',
         ].join(' ')}
         style={{ bottom: 'calc(var(--bottom-nav-height) + 1rem)' }}
-        aria-label="근처 카페 랜덤 추천"
+        aria-label={t('ariaLabel')}
       >
         <Dices
           className={[
@@ -134,7 +138,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
             spinning ? 'animate-spin' : '',
           ].join(' ')}
         />
-        랜덤
+        {t('button')}
         <span className="text-[10px] text-muted-foreground font-normal">3km</span>
       </motion.button>
 
@@ -190,7 +194,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                 <div className="mb-1 text-center">
                   {spinning && (
                     <p className="text-xs text-muted-foreground mb-2 animate-pulse">
-                      어디로 갈까...?
+                      {t('spinning')}
                     </p>
                   )}
                   <h3 className={[
@@ -211,7 +215,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                       <div className="flex items-center justify-center gap-2 text-sm">
                         {displayCafe.opening_time && (
                           <span className="text-red-600 font-medium">
-                            {formatOpeningTime(displayCafe.opening_time)} 오픈
+                            {tMorningPick('opensAt', { time: formatOpeningTime(displayCafe.opening_time) })}
                           </span>
                         )}
                         {distanceText && (
@@ -252,13 +256,13 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                       onClick={handleClose}
                       className="flex-1 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted"
                     >
-                      닫기
+                      {tCafe('close')}
                     </button>
                     <button
                       onClick={handleGoToCafe}
                       className="flex-1 rounded-xl bg-foreground py-3 text-sm font-bold text-background transition-colors hover:bg-foreground/90"
                     >
-                      이 카페로!
+                      {t('goToCafe')}
                     </button>
                   </motion.div>
                 )}
@@ -276,7 +280,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                     }}
                     className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    다시 돌리기
+                    {t('respin')}
                   </motion.button>
                 )}
               </div>

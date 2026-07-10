@@ -1,0 +1,277 @@
+{
+  "nav": {
+    "map": "Map",
+    "favorites": "Saved",
+    "recent": "Recent",
+    "recentFull": "Recent cafes",
+    "report": "Report",
+    "reportFull": "Report a cafe",
+    "mainNav": "Main navigation"
+  },
+  "brand": {
+    "name": "Morning Cafe",
+    "copyright": "ⓒ 2026. Morning Cafe All rights reserved.",
+    "support": "Support us"
+  },
+  "filter": {
+    "all": "All",
+    "before6": "~6AM",
+    "6to7": "6~7AM",
+    "7to8": "7~8AM",
+    "today": "Today",
+    "dayLabel": "{day}",
+    "openTime": "Open time",
+    "dayOfWeek": "Day",
+    "allAreas": "All areas",
+    "personal": "Indie",
+    "exclude24h": "No 24h",
+    "totalCount": "{count} cafes",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "search": {
+    "placeholderMap": "Search cafe or area",
+    "placeholderList": "Search in list",
+    "clearQuery": "Clear search",
+    "recentSearches": "Recent searches",
+    "delete": "Delete",
+    "clearHistory": "Clear search history"
+  },
+  "cafe": {
+    "open": "Open",
+    "closed": "Not yet open",
+    "hours24": "24h",
+    "hours24Full": "Open 24 hours",
+    "franchise": "Chain",
+    "noInfo": "No info",
+    "openAt": "{day} {time} open",
+    "reviewCount": "({count} reviews)",
+    "parkingAvailable": "Parking available",
+    "parkingUnavailable": "No parking",
+    "instagram": "Instagram",
+    "instagramSearch": "Search on Instagram",
+    "copyAddress": "Copy address",
+    "copyPhone": "Copy phone number",
+    "close": "Close",
+    "addToCompareLabel": "Add to compare",
+    "addedToCompareLabel": "Already in compare",
+    "addFavorite": "Save",
+    "removeFavorite": "Unsave",
+    "share": "Share",
+    "shareText": "{name} — opens at {time}\n{address}",
+    "shareTextNoTime": "{name} — morning cafe\n{address}",
+    "viewOnMorningCafe": "View on Morning Cafe",
+    "kakaoMap": "Kakao Map",
+    "directions": "Directions",
+    "walkMinutes": "{min} min walk",
+    "myLocation": "My location",
+    "currentLocation": "Current location",
+    "storyCard": "Story card"
+  },
+  "map": {
+    "loadError": "Unable to load map",
+    "loadErrorHint": "Kakao Map service is temporarily unavailable",
+    "refresh": "Refresh",
+    "cafesAtLocation": "{count} cafes at this spot"
+  },
+  "list": {
+    "toggle": "List",
+    "mapToggle": "Map",
+    "emptyState": "No cafes match your filters",
+    "newCafes": "New cafes",
+    "last7Days": "Last 7 days",
+    "nearby": "Nearby"
+  },
+  "hours": {
+    "title": "Hours by day",
+    "noInfo": "No hours info available"
+  },
+  "menu": {
+    "title": "Menu",
+    "noInfo": "No menu info available",
+    "viewOnKakao": "View on Kakao Map"
+  },
+  "review": {
+    "title": "Reviews",
+    "titleWithCount": "{count} reviews",
+    "empty": "No reviews yet",
+    "firstReview": "Write the first review on Kakao Map",
+    "kakaoReviews": "Kakao Map reviews",
+    "blogReviews": "Blog reviews",
+    "blogAuthorFallback": "Blog",
+    "viewOriginal": "View original",
+    "collapse": "Collapse",
+    "viewAll": "View all {count} reviews",
+    "viewAllOnKakao": "View all reviews on Kakao Map"
+  },
+  "memo": {
+    "title": "My notes",
+    "placeholder": "Write a note about this cafe...",
+    "save": "Save"
+  },
+  "quietScore": {
+    "workParadise": "Work paradise",
+    "workRecommend": "Work friendly",
+    "quiet": "Quiet",
+    "average": "Average",
+    "noInfo": "Not enough info"
+  },
+  "photo": {
+    "viewOnKakao": "View photos on Kakao Map",
+    "photoAlt": "{name} photo {index}",
+    "photoLightbox": "View {name} photo {index} full size",
+    "photoCount": "{count} photos",
+    "prev": "Previous photo",
+    "next": "Next photo"
+  },
+  "toast": {
+    "outOfArea": "Service available in Seoul & Gyeonggi only"
+  },
+  "swUpdate": {
+    "newVersion": "New version available",
+    "update": "Update"
+  },
+  "pwa": {
+    "close": "Close",
+    "useAsApp": "Use as an app",
+    "iosStep1": "Tap the Share button below",
+    "iosShare": "Share",
+    "iosStep2": "Add to Home Screen",
+    "iosStep2Action": "Select <b>Add to Home Screen</b>",
+    "androidTitle": "Install as an app",
+    "androidInstall": "Add to Home Screen",
+    "genericTitle": "Use as an app",
+    "genericStep": "Select \"Add to Home Screen\" or \"Install app\" from the browser menu."
+  },
+  "offline": {
+    "title": "Internet connection required",
+    "description": "Please check your Wi-Fi or mobile data",
+    "retry": "Try again"
+  },
+  "favorites": {
+    "title": "Saved cafes",
+    "metaDescription": "My saved morning cafes on Morning Cafe",
+    "empty": "No saved cafes yet",
+    "emptyHint": "Save cafes you like",
+    "shareAll": "Share all",
+    "shareTitle": "My {count} saved Morning Cafes",
+    "shareOpenAt": "opens at {time}",
+    "shareSheetTitle": "My Morning Cafes"
+  },
+  "recent": {
+    "title": "Recently viewed",
+    "metaDescription": "Recently viewed cafes on Morning Cafe",
+    "empty": "No cafes viewed yet",
+    "emptyHint": "Explore some cafes",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{count} days ago",
+    "edit": "Edit",
+    "done": "Done",
+    "selectAll": "Select all",
+    "deleteSelected": "Delete {count}",
+    "opensAt": "Opens at {time}"
+  },
+  "report": {
+    "title": "Report a cafe",
+    "metaDescription": "Report cafe information to Morning Cafe",
+    "hoursCorrection": "Hours correction",
+    "newCafe": "New cafe",
+    "closedCafe": "Permanently closed",
+    "selectCafe": "Select cafe",
+    "cafeName": "Cafe name",
+    "details": "Details",
+    "detailsPlaceholder": "Please describe the correction or new cafe info",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "success": "Thank you for your report!"
+  },
+  "stamp": {
+    "title": "District stamps",
+    "metaDescription": "Morning Cafe district stamps",
+    "heading": "Stamps",
+    "conquered": "{count}/25 districts",
+    "empty": "No stamps yet",
+    "emptyHint": "Check in near a cafe to earn a stamp",
+    "conquestMap": "Seoul 25 districts map",
+    "allConquered": "You've conquered all 25 Seoul districts!",
+    "allConqueredSub": "A true early bird conqueror",
+    "progress": "{count} / 25 districts",
+    "recentCheckins": "Recent check-ins",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{count} days ago",
+    "weeksAgo": "{count} weeks ago",
+    "monthsAgo": "{count} months ago"
+  },
+  "privacy": {
+    "title": "Privacy policy"
+  },
+  "cafes": {
+    "indexTitle": "Seoul & Gyeonggi morning cafes",
+    "indexDescription": "Morning cafes by district in Seoul & Gyeonggi",
+    "earliestOpen": "Earliest open",
+    "cafeCount": "{count} cafes",
+    "guTitle": "{gu} morning cafes",
+    "guDescription": "Early morning cafes in {gu}",
+    "featured": "Featured",
+    "before6": "Before 6AM",
+    "between6and7": "6AM~7AM",
+    "between7and8": "7AM~8AM",
+    "viewOnMap": "View on map",
+    "otherDistricts": "Other districts",
+    "earlybirdCafes": "earlybird cafes",
+    "indexSubtitle": "{count} cafes across {areas} areas in Seoul & Gyeonggi",
+    "cafeCountUnit": "cafes",
+    "earliestOpenAt": "Opens as early as {time}",
+    "guTitleWithCount": "{count} morning cafes in {gu}",
+    "guDescriptionWithCount": "{count} early morning cafes in {gu}. Find cafes opening at 6AM and 7AM.",
+    "guSubtitle": "{count} early morning cafes",
+    "earlybirdSection": "Early bird cafes",
+    "guEmpty": "No morning cafes registered in {gu} yet"
+  },
+  "cafeDetail": {
+    "title": "{name} — Morning cafe",
+    "description": "{name} ({gu}) — opens at {time}. View address, hours, and menu.",
+    "viewOnApp": "View on Morning Cafe",
+    "hoursTable": "Hours",
+    "notFound": "Cafe not found — Morning Cafe",
+    "openAt": "Opens at {time}",
+    "back": "Back",
+    "viewOnKakao": "View on Kakao Map"
+  },
+  "morningPick": {
+    "title": "Today's morning cafe",
+    "distance": "{km}km",
+    "opensAt": "Opens at {time}",
+    "next": "Another",
+    "go": "Let's go!",
+    "swipeHint": "← Another · Let's go →"
+  },
+  "roulette": {
+    "ariaLabel": "Random cafe pick",
+    "noNearbyCafes": "No cafes within 3km",
+    "button": "Random",
+    "spinning": "Where to go...?",
+    "goToCafe": "Go here!",
+    "respin": "Spin again"
+  },
+  "splash": {
+    "alt": "Morning Cafe"
+  },
+  "locale": {
+    "switchTo": "한"
+  },
+  "metadata": {
+    "title": "Morning Cafe — Seoul & Gyeonggi early bird cafe map",
+    "description": "Find early morning cafes in Seoul & Gyeonggi at a glance! Discover cafes opening at 6AM and 7AM on the map.",
+    "siteName": "Morning Cafe"
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Star, ThumbsUp, MessageCircle, ExternalLink, ChevronDown, ChevronUp, Newspaper } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReviewItem, BlogReviewItem } from '@/app/api/place-detail/route';
 
 interface ReviewSectionProps {
@@ -39,11 +40,12 @@ function KakaoReviewCard({ review }: { readonly review: ReviewItem }) {
 }
 
 function BlogReviewCard({ review }: { readonly review: BlogReviewItem }) {
+  const t = useTranslations('review');
   return (
     <div>
       <div className="flex items-center gap-2">
         <Newspaper className="h-3 w-3 text-emerald-500 flex-shrink-0" />
-        <span className="text-xs font-medium text-foreground truncate flex-1">{review.author || '블로그'}</span>
+        <span className="text-xs font-medium text-foreground truncate flex-1">{review.author || t('blogAuthorFallback')}</span>
         {review.date && (
           <span className="text-[11px] text-muted-foreground flex-shrink-0">{review.date}</span>
         )}
@@ -59,7 +61,7 @@ function BlogReviewCard({ review }: { readonly review: BlogReviewItem }) {
           rel="noopener noreferrer"
           className="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline"
         >
-          원문 보기
+          {t('viewOriginal')}
           <ExternalLink className="h-2.5 w-2.5" />
         </a>
       )}
@@ -68,6 +70,7 @@ function BlogReviewCard({ review }: { readonly review: BlogReviewItem }) {
 }
 
 export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionProps) {
+  const t = useTranslations('review');
   const [expanded, setExpanded] = useState(false);
   const totalCount = reviews.length + blogReviews.length;
 
@@ -76,11 +79,11 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
       <div>
         <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
           <MessageCircle className="h-4 w-4" />
-          <span>리뷰</span>
+          <span>{t('title')}</span>
         </div>
         <div className="rounded-2xl bg-muted/50 px-4 py-5 text-center">
           <MessageCircle className="mx-auto h-5 w-5 text-muted-foreground/50" />
-          <p className="mt-1.5 text-sm text-muted-foreground">아직 리뷰가 없습니다</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{t('empty')}</p>
           {placeUrl && (
             <a
               href={placeUrl}
@@ -88,7 +91,7 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
               rel="noopener noreferrer"
               className="mt-1 inline-block text-xs text-primary hover:underline"
             >
-              카카오맵에서 첫 리뷰 남기기
+              {t('firstReview')}
             </a>
           )}
         </div>
@@ -104,7 +107,7 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
     <div>
       <div className="flex items-center gap-2 py-2 text-sm font-medium text-muted-foreground">
         <MessageCircle className="h-4 w-4" />
-        <span>리뷰 {totalCount}개</span>
+        <span>{t('titleWithCount', { count: totalCount })}</span>
       </div>
       <div className="rounded-2xl bg-muted/50 px-4 py-3 space-y-3">
         {/* 프리뷰 (항상 표시) */}
@@ -119,7 +122,7 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
           <>
             {reviews.length > 0 && (
               <div className="space-y-3">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">카카오맵 리뷰</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{t('kakaoReviews')}</p>
                 {reviews.map((review, i) => (
                   <div key={`k-${i}`} className={i > 0 ? 'border-t border-border/50 pt-3' : ''}>
                     <KakaoReviewCard review={review} />
@@ -129,7 +132,7 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
             )}
             {blogReviews.length > 0 && (
               <div className={`space-y-3 ${reviews.length > 0 ? 'border-t border-border/50 pt-3' : ''}`}>
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">블로그 리뷰</p>
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{t('blogReviews')}</p>
                 {blogReviews.map((review, i) => (
                   <div key={`b-${i}`} className={i > 0 ? 'border-t border-border/50 pt-3' : ''}>
                     <BlogReviewCard review={review} />
@@ -148,9 +151,9 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
             className="flex w-full items-center justify-center gap-1 pt-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             {expanded ? (
-              <>접기 <ChevronUp className="h-3 w-3" /></>
+              <>{t('collapse')} <ChevronUp className="h-3 w-3" /></>
             ) : (
-              <>리뷰 {totalCount}개 전체보기 <ChevronDown className="h-3 w-3" /></>
+              <>{t('viewAll', { count: totalCount })} <ChevronDown className="h-3 w-3" /></>
             )}
           </button>
         )}
@@ -163,7 +166,7 @@ export function ReviewSection({ reviews, blogReviews, placeUrl }: ReviewSectionP
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors pt-1"
           >
-            카카오맵에서 전체 리뷰 보기
+            {t('viewAllOnKakao')}
             <ExternalLink className="h-3 w-3" />
           </a>
         )}

@@ -1,19 +1,19 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
   MapPin,
   Clock,
   Phone,
   ExternalLink,
   Map,
-  Share2,
   ChevronLeft,
 } from 'lucide-react';
 import { fetchCafeById } from '@/lib/supabase/queries';
 import { is24Hours, formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
-import type { Cafe } from '@/lib/types/cafe';
+import { extractGu, type Cafe } from '@/lib/types/cafe';
 import { CafeShareButton } from './share-button';
 
 // SSR — revalidate every 24h
@@ -22,22 +22,42 @@ export const revalidate = 86400;
 const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
+}
+
+/** JSON-LD addressLocality: 주소 첫 토큰에서 도시/특별시 레벨 지역명 추출 */
+function extractLocality(cafe: Cafe): string {
+  const address = cafe.road_address ?? cafe.address;
+  const firstToken = address.trim().split(/\s+/)[0] ?? '';
+  // 서울특별시, 서울시, 서울 → 서울
+  if (firstToken.startsWith('서울')) return '서울';
+  // 경기도, 경기 → extractGu로 시명 추출 (예: "성남시 분당구" → "성남", "하남시" → "하남")
+  if (firstToken.startsWith('경기')) {
+    const gu = extractGu(address);
+    if (gu) {
+      const city = gu.split(/\s+/)[0] ?? gu; // "성남시 분당구" → "성남시"
+      return city.replace(/[시군]$/, '');
+    }
+    return '경기';
+  }
+  // 기타: 첫 토큰에서 시/도 접미사 제거 (예: "인천광역시" → "인천")
+  return firstToken.replace(/(특별시|광역시|특별자치시|특별자치도|도|시|군)$/, '') || firstToken;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'cafeDetail' });
+  const tMeta = await getTranslations({ locale, namespace: 'metadata' });
   const cafe = await fetchCafeById(id);
 
   if (!cafe) {
-    return { title: '카페를 찾을 수 없습니다 — 모닝카페' };
+    return { title: t('notFound') };
   }
 
-  const openTime = cafe.opening_time
-    ? `아침 ${formatOpeningTime(cafe.opening_time)} 오픈`
-    : '아침 카페';
-  const title = `${cafe.name} — ${openTime} | 모닝카페`;
-  const description = `${cafe.name} — ${cafe.road_address ?? cafe.address}. ${openTime}. 모닝카페에서 서울 아침 카페를 찾아보세요.`;
+  const openTime = cafe.opening_time ? formatOpeningTime(cafe.opening_time) : '';
+  const gu = extractGu(cafe.road_address ?? cafe.address) ?? '';
+  const title = t('title', { name: cafe.name });
+  const description = t('description', { name: cafe.name, gu, time: openTime });
   const url = `${BASE_URL}/cafe/${id}`;
 
   return {
@@ -47,8 +67,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: 'article',
-      locale: 'ko_KR',
-      siteName: '모닝카페',
+      locale: locale === 'ja' ? 'ja_JP' : locale === 'en' ? 'en_US' : 'ko_KR',
+      siteName: tMeta('siteName'),
       url,
     },
     twitter: {
@@ -62,20 +82,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+// 요일 데이터 상수: hours_by_day 룩업 키(DB값, 건드리지 않음) → i18n 라벨 키 매핑
+const DAY_KEYS = ['월', '화', '수', '목', '금', '토', '일'] as const;
+const DAY_LABEL_KEYS: Record<string, string> = {
+  월: 'mon',
+  화: 'tue',
+  수: 'wed',
+  목: 'thu',
+  금: 'fri',
+  토: 'sat',
+  일: 'sun',
+};
+
+interface HoursTableTranslators {
+  title: string;
+  noInfo: string;
+  dayLabel: (dayKey: string) => string;
+}
+
 /** Render opening hours table from hours_by_day */
-function HoursTable({ hoursByDay }: { hoursByDay: Record<string, string> | null }) {
+function HoursTable({
+  hoursByDay,
+  t,
+}: {
+  hoursByDay: Record<string, string> | null;
+  t: HoursTableTranslators;
+}) {
   if (!hoursByDay || Object.keys(hoursByDay).length === 0) return null;
 
-  const days = ['월', '화', '수', '목', '금', '토', '일'];
   const now = new Date();
   const todayIdx = now.getDay(); // 0=Sun
   const todayLabel = ['일', '월', '화', '수', '목', '금', '토'][todayIdx];
 
   return (
     <div className="space-y-1">
-      <h3 className="text-sm font-semibold text-foreground">영업시간</h3>
+      <h3 className="text-sm font-semibold text-foreground">{t.title}</h3>
       <div className="space-y-0.5">
-        {days.map((day) => {
+        {DAY_KEYS.map((day) => {
           const hours = hoursByDay[day];
           const isToday = day === todayLabel;
           return (
@@ -87,10 +130,10 @@ function HoursTable({ hoursByDay }: { hoursByDay: Record<string, string> | null 
               )}
             >
               <span className={cn('w-6 text-center', isToday ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground')}>
-                {day}
+                {t.dayLabel(day)}
               </span>
               <span className={isToday ? 'text-foreground' : 'text-muted-foreground'}>
-                {hours ?? '정보 없음'}
+                {hours ?? t.noInfo}
               </span>
             </div>
           );
@@ -121,7 +164,7 @@ function JsonLd({ cafe }: { cafe: Cafe }) {
     address: {
       '@type': 'PostalAddress',
       streetAddress: cafe.road_address ?? cafe.address,
-      addressLocality: '서울',
+      addressLocality: extractLocality(cafe),
       addressCountry: 'KR',
     },
     geo: {
@@ -143,7 +186,11 @@ function JsonLd({ cafe }: { cafe: Cafe }) {
 }
 
 export default async function CafePage({ params }: PageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'cafeDetail' });
+  const tCafe = await getTranslations({ locale, namespace: 'cafe' });
+  const tFilter = await getTranslations({ locale, namespace: 'filter' });
   const cafe = await fetchCafeById(id);
 
   if (!cafe) {
@@ -152,7 +199,11 @@ export default async function CafePage({ params }: PageProps) {
 
   const displayAddress = cafe.road_address ?? cafe.address;
   const is24h = is24Hours(cafe);
-  const openingFormatted = is24h ? '24시간 영업' : cafe.opening_time ? `${formatOpeningTime(cafe.opening_time)} 오픈` : null;
+  const openingFormatted = is24h
+    ? tCafe('hours24Full')
+    : cafe.opening_time
+      ? t('openAt', { time: formatOpeningTime(cafe.opening_time) })
+      : null;
   const badgeStyle = is24h
     ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     : getOpeningBadgeStyle(cafe.opening_time);
@@ -169,7 +220,7 @@ export default async function CafePage({ params }: PageProps) {
             <Link
               href="/"
               className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-              aria-label="뒤로가기"
+              aria-label={t('back')}
             >
               <ChevronLeft className="h-5 w-5" />
             </Link>
@@ -223,7 +274,14 @@ export default async function CafePage({ params }: PageProps) {
             )}
 
             {/* Opening hours */}
-            <HoursTable hoursByDay={cafe.hours_by_day} />
+            <HoursTable
+              hoursByDay={cafe.hours_by_day}
+              t={{
+                title: t('hoursTable'),
+                noInfo: tCafe('noInfo'),
+                dayLabel: (dayKey) => tFilter(`days.${DAY_LABEL_KEYS[dayKey]}`),
+              }}
+            />
 
             {/* Kakao Map link */}
             {cafe.place_url && (
@@ -234,7 +292,7 @@ export default async function CafePage({ params }: PageProps) {
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="h-4 w-4" />
-                카카오맵에서 보기
+                {t('viewOnKakao')}
               </a>
             )}
 
@@ -252,7 +310,7 @@ export default async function CafePage({ params }: PageProps) {
                 )}
               >
                 <Map className="h-4 w-4" />
-                모닝카페에서 보기
+                {t('viewOnApp')}
               </Link>
               {cafe.place_url && (
                 <a
@@ -267,7 +325,7 @@ export default async function CafePage({ params }: PageProps) {
                   )}
                 >
                   <ExternalLink className="h-4 w-4" />
-                  카카오맵
+                  {tCafe('kakaoMap')}
                 </a>
               )}
             </div>

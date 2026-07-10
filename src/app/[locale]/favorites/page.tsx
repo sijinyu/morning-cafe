@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { Bookmark, MapPin, Clock, ExternalLink, Share2, Check } from 'lucide-react';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useCafeStore, getOpenStatus, type Cafe } from '@/lib/store/cafe-store';
@@ -12,6 +13,8 @@ import { isNativeApp } from '@/lib/capacitor';
 import { trackEvent } from '@/lib/analytics';
 
 export default function FavoritesPage() {
+  const t = useTranslations('favorites');
+  const tCafe = useTranslations('cafe');
   const { favorites, toggleFavorite } = useFavorites();
   const cafes = useCafeStore((state) => state.cafes);
   const chainCafeIds = useCafeStore((state) => state.chainCafeIds);
@@ -45,9 +48,9 @@ export default function FavoritesPage() {
     // Build text list
     const textList = favoriteCafes.map((c) => {
       const time = c.opening_time ? formatOpeningTime(c.opening_time) : '';
-      return `☕ ${c.name}${time ? ` (${time} 오픈)` : ''}`;
+      return `☕ ${c.name}${time ? ` (${t('shareOpenAt', { time })})` : ''}`;
     }).join('\n');
-    const shareText = `나의 모닝카페 찜 ${favoriteCafes.length}곳\n\n${textList}`;
+    const shareText = `${t('shareTitle', { count: favoriteCafes.length })}\n\n${textList}`;
     const shareUrl = `${BASE_URL}/favorites`;
 
     // 1. Kakao ListFeed
@@ -56,12 +59,12 @@ export default function FavoritesPage() {
         const Kakao = (window as any).Kakao;
         Kakao.Share.sendDefault({
           objectType: 'list',
-          headerTitle: `나의 모닝카페 찜 ${cafesToShare.length}곳`,
+          headerTitle: t('shareTitle', { count: cafesToShare.length }),
           headerLink: { mobileWebUrl: shareUrl, webUrl: shareUrl },
           contents: cafesToShare.map((c) => ({
             title: c.name,
             description: c.opening_time
-              ? `${formatOpeningTime(c.opening_time)} 오픈 · ${(c.road_address ?? c.address).replace(/서울\S*\s+/, '')}`
+              ? `${t('shareOpenAt', { time: formatOpeningTime(c.opening_time) })} · ${(c.road_address ?? c.address).replace(/서울\S*\s+/, '')}`
               : (c.road_address ?? c.address).replace(/서울\S*\s+/, ''),
             imageUrl: `${BASE_URL}/icons/icon-512x512.png`,
             link: {
@@ -69,7 +72,7 @@ export default function FavoritesPage() {
               webUrl: `${BASE_URL}/cafe/${c.id}`,
             },
           })),
-          buttons: [{ title: '모닝카페에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
+          buttons: [{ title: tCafe('viewOnMorningCafe'), link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }],
         });
         return;
       } catch { /* fallback */ }
@@ -79,7 +82,7 @@ export default function FavoritesPage() {
     if (isNativeApp()) {
       try {
         const { Share } = await import('@capacitor/share');
-        await Share.share({ title: '나의 모닝카페 찜', text: shareText, url: shareUrl });
+        await Share.share({ title: t('shareSheetTitle'), text: shareText, url: shareUrl });
         return;
       } catch { /* fallback */ }
     }
@@ -87,7 +90,7 @@ export default function FavoritesPage() {
     // 3. Web Share API
     if (navigator.share) {
       try {
-        await navigator.share({ title: '나의 모닝카페 찜', text: shareText, url: shareUrl });
+        await navigator.share({ title: t('shareSheetTitle'), text: shareText, url: shareUrl });
         return;
       } catch { /* fallback */ }
     }
@@ -104,14 +107,14 @@ export default function FavoritesPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-2 border-b border-border px-5 py-4" style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}>
         <Bookmark className="h-5 w-5 text-red-500" />
-        <h1 className="text-lg font-bold">찜</h1>
+        <h1 className="text-lg font-bold">{t('title')}</h1>
         <span className="text-sm text-muted-foreground">({favoriteCafes.length})</span>
         <div className="flex-1" />
         {favoriteCafes.length > 0 && (
           <button
             onClick={handleShareAll}
             className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors"
-            aria-label="찜 공유"
+            aria-label={t('shareAll')}
           >
             {shareCopied ? (
               <Check className="h-4 w-4 text-green-500" />
@@ -126,8 +129,8 @@ export default function FavoritesPage() {
         {favoriteCafes.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <Bookmark className="h-10 w-10 stroke-1" />
-            <p className="text-sm">찜한 카페가 없습니다</p>
-            <p className="text-xs">지도에서 찜 버튼을 눌러 추가하세요</p>
+            <p className="text-sm">{t('empty')}</p>
+            <p className="text-xs">{t('emptyHint')}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -148,6 +151,7 @@ export default function FavoritesPage() {
 }
 
 function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChain: boolean; onCardClick: () => void; onRemove: () => void }) {
+  const tCafe = useTranslations('cafe');
   const displayAddress = cafe.road_address ?? cafe.address;
   const cafe24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const openStatus = cafe24h ? 'open' as const : getOpenStatus(cafe);
@@ -174,12 +178,12 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
           <span className="font-semibold truncate">{cafe.name}</span>
           {isChain && (
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-              프랜차이즈
+              {tCafe('franchise')}
             </span>
           )}
           {cafe24h && (
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-              24시간
+              {tCafe('hours24')}
             </span>
           )}
           {openStatus !== 'unknown' && !cafe24h && (
@@ -195,7 +199,7 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
                 'inline-block h-1.5 w-1.5 rounded-full',
                 openStatus === 'open' ? 'bg-emerald-500' : 'bg-gray-400'
               )} />
-              {openStatus === 'open' ? '영업중' : '영업 전'}
+              {openStatus === 'open' ? tCafe('open') : tCafe('closed')}
             </span>
           )}
           {cafe.opening_time && (
@@ -223,14 +227,14 @@ function CafeItem({ cafe, isChain, onCardClick, onRemove }: { cafe: Cafe; isChai
             className="inline-flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <ExternalLink className="h-3 w-3" />
-            카카오맵
+            {tCafe('kakaoMap')}
           </a>
         )}
       </div>
       <button
         onClick={(e) => { e.stopPropagation(); onRemove(); }}
         className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-colors"
-        aria-label="찜 해제"
+        aria-label={tCafe('removeFavorite')}
       >
         <Bookmark className="h-4 w-4 fill-red-500 stroke-red-500" />
       </button>

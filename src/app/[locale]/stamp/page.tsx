@@ -1,21 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Award, CheckCircle2, MapPin } from 'lucide-react';
 import { useStamps, SEOUL_GUS } from '@/lib/hooks/use-stamps';
 import { cn } from '@/lib/utils';
 
-function relativeTime(isoStr: string): string {
+function relativeTime(isoStr: string, t: ReturnType<typeof useTranslations>): string {
   const diff = Date.now() - new Date(isoStr).getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days === 0) return '오늘';
-  if (days === 1) return '어제';
-  if (days < 7) return `${days}일 전`;
-  if (days < 30) return `${Math.floor(days / 7)}주 전`;
-  return `${Math.floor(days / 30)}개월 전`;
+  if (days === 0) return t('today');
+  if (days === 1) return t('yesterday');
+  if (days < 7) return t('daysAgo', { count: days });
+  if (days < 30) return t('weeksAgo', { count: Math.floor(days / 7) });
+  return t('monthsAgo', { count: Math.floor(days / 30) });
 }
 
 export default function StampPage() {
+  const t = useTranslations('stamp');
   const { stamps, conqueredGus, totalStamps, allConquered } = useStamps();
   const [mounted, setMounted] = useState(false);
 
@@ -32,11 +34,11 @@ export default function StampPage() {
       {/* Header */}
       <header className="flex items-center gap-2 border-b border-border px-5 py-4" style={{ paddingTop: 'calc(1rem + var(--safe-area-top))' }}>
         <Award className="h-5 w-5 text-red-500" />
-        <h1 className="text-lg font-bold">스탬프</h1>
+        <h1 className="text-lg font-bold">{t('heading')}</h1>
         <span className="text-sm text-muted-foreground">({totalStamps})</span>
         <div className="flex-1" />
         <span className="text-sm font-medium text-red-600 dark:text-red-400">
-          {conqueredGus.size}/25구 정복
+          {t('conquered', { count: conqueredGus.size })}
         </span>
       </header>
 
@@ -46,22 +48,22 @@ export default function StampPage() {
           /* Empty state */
           <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <Award className="h-10 w-10 stroke-1" />
-            <p className="text-sm">아직 스탬프가 없습니다</p>
-            <p className="text-xs">카페 근처에서 체크인하면 스탬프가 찍혀요</p>
+            <p className="text-sm">{t('empty')}</p>
+            <p className="text-xs">{t('emptyHint')}</p>
           </div>
         ) : (
           <div className="pb-6">
             {/* 25구 conquest grid */}
             <section className="px-4 pt-5 pb-4">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">서울 25구 정복 지도</h2>
+              <h2 className="mb-3 text-sm font-semibold text-foreground">{t('conquestMap')}</h2>
 
               {allConquered && (
                 <div className="mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-center">
                   <p className="text-sm font-bold text-red-700 dark:text-red-400">
-                    서울 25구를 모두 정복했습니다!
+                    {t('allConquered')}
                   </p>
                   <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-500/80">
-                    진정한 얼리버드 정복자
+                    {t('allConqueredSub')}
                   </p>
                 </div>
               )}
@@ -100,7 +102,7 @@ export default function StampPage() {
               </div>
 
               <p className="mt-3 text-right text-xs text-muted-foreground">
-                {conqueredGus.size}구 / 25구
+                {t('progress', { count: conqueredGus.size })}
               </p>
             </section>
 
@@ -109,7 +111,7 @@ export default function StampPage() {
 
             {/* Recent stamps list */}
             <section className="pt-4">
-              <h2 className="mb-1 px-5 text-sm font-semibold text-foreground">최근 체크인</h2>
+              <h2 className="mb-1 px-5 text-sm font-semibold text-foreground">{t('recentCheckins')}</h2>
               <ul className="divide-y divide-border">
                 {recentStamps.map((stamp, index) => (
                   <li
@@ -133,7 +135,7 @@ export default function StampPage() {
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">
-                          {relativeTime(stamp.checkedAt)}
+                          {relativeTime(stamp.checkedAt, t)}
                         </span>
                       </div>
                     </div>

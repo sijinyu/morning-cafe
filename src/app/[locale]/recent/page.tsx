@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, MapPin, Trash2, CheckCircle2, Circle, X } from 'lucide-react';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
@@ -11,6 +12,8 @@ import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay } from '@/lib/
 import { cn } from '@/lib/utils';
 
 export default function RecentPage() {
+  const t = useTranslations('recent');
+  const tCafe = useTranslations('cafe');
   const { recentIds, clearRecent, removeMultiple } = useRecentCafes();
   const cafes = useCafeStore((state) => state.cafes);
   const chainCafeIds = useCafeStore((state) => state.chainCafeIds);
@@ -87,19 +90,19 @@ export default function RecentPage() {
             <button
               onClick={handleExitEdit}
               className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-              aria-label="편집 취소"
+              aria-label={t('done')}
             >
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
             <span className="text-sm font-medium text-foreground">
-              {selectedIds.size > 0 ? `${selectedIds.size}개 선택` : '항목 선택'}
+              {selectedIds.size > 0 ? t('deleteSelected', { count: selectedIds.size }) : t('edit')}
             </span>
             <div className="flex-1" />
             <button
               onClick={handleSelectAll}
               className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
             >
-              {allSelected ? '선택 해제' : '전체 선택'}
+              {t('selectAll')}
             </button>
             <button
               onClick={handleDeleteSelected}
@@ -112,20 +115,20 @@ export default function RecentPage() {
               )}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              삭제
+              {t('deleteSelected', { count: selectedIds.size })}
             </button>
           </>
         ) : (
           <>
             <Clock className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-lg font-bold">최근 본 카페</h1>
+            <h1 className="text-lg font-bold">{t('title')}</h1>
             <span className="text-sm text-muted-foreground">({recentCafes.length})</span>
             <div className="flex-1" />
             {recentCafes.length > 0 && (
               <button
                 onClick={() => setEditMode(true)}
                 className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-colors"
-                aria-label="편집"
+                aria-label={t('edit')}
               >
                 <Trash2 className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -139,8 +142,8 @@ export default function RecentPage() {
         {recentCafes.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <Clock className="h-10 w-10 stroke-1" />
-            <p className="text-sm">아직 본 카페가 없어요</p>
-            <p className="text-xs">지도에서 카페를 탭해보세요</p>
+            <p className="text-sm">{t('empty')}</p>
+            <p className="text-xs">{t('emptyHint')}</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -183,7 +186,7 @@ export default function RecentPage() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500 py-3.5 text-sm font-bold text-white transition-colors hover:bg-red-600"
             >
               <Trash2 className="h-4 w-4" />
-              {selectedIds.size}개 삭제
+              {t('deleteSelected', { count: selectedIds.size })}
             </button>
           </motion.div>
         )}
@@ -207,10 +210,12 @@ function RecentCafeItem({
   onSelect: () => void;
   onToggle: () => void;
 }) {
+  const t = useTranslations('recent');
+  const tCafe = useTranslations('cafe');
   const displayAddress = cafe.road_address ?? cafe.address;
   const cafe24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const openStatus = cafe24h ? ('open' as const) : getOpenStatus(cafe);
-  const openingFormatted = cafe24h ? '24시간' : formatOpeningTime(cafe.opening_time);
+  const openingFormatted = cafe24h ? tCafe('hours24') : formatOpeningTime(cafe.opening_time);
   const badgeStyle = cafe24h
     ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     : getOpeningBadgeStyle(cafe.opening_time);
@@ -258,7 +263,7 @@ function RecentCafeItem({
           <span className="font-semibold truncate">{cafe.name}</span>
           {isChain && (
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-              프랜차이즈
+              {tCafe('franchise')}
             </span>
           )}
           {openStatus !== 'unknown' && (
@@ -276,7 +281,7 @@ function RecentCafeItem({
                   openStatus === 'open' ? 'bg-emerald-500' : 'bg-gray-400'
                 )}
               />
-              {openStatus === 'open' ? '영업중' : '영업 전'}
+              {openStatus === 'open' ? tCafe('open') : tCafe('closed')}
             </span>
           )}
           {(cafe.opening_time || cafe24h) && (
@@ -287,7 +292,7 @@ function RecentCafeItem({
               )}
             >
               <Clock className="h-2.5 w-2.5" />
-              {cafe24h ? '24시간 영업' : `아침 ${openingFormatted} 오픈`}
+              {cafe24h ? tCafe('hours24Full') : t('opensAt', { time: openingFormatted })}
             </span>
           )}
         </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StickyNote, ChevronDown, ChevronUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface MemoSectionProps {
   cafeId: string;
@@ -11,6 +12,7 @@ interface MemoSectionProps {
 }
 
 export function MemoSection({ cafeId, getMemo, setMemo }: MemoSectionProps) {
+  const t = useTranslations('memo');
   const [memoOpen, setMemoOpen] = useState(false);
   const [memoText, setMemoText] = useState(() => getMemo(cafeId));
 
@@ -22,7 +24,7 @@ export function MemoSection({ cafeId, getMemo, setMemo }: MemoSectionProps) {
       >
         <div className="flex items-center gap-2">
           <StickyNote className="h-4 w-4" />
-          <span>내 메모</span>
+          <span>{t('title')}</span>
           {getMemo(cafeId) && !memoOpen && (
             <span className="text-xs text-foreground/60 truncate max-w-[160px]">{getMemo(cafeId)}</span>
           )}
@@ -44,7 +46,7 @@ export function MemoSection({ cafeId, getMemo, setMemo }: MemoSectionProps) {
                 value={memoText}
                 onChange={(e) => setMemoText(e.target.value)}
                 onBlur={() => setMemo(cafeId, memoText)}
-                placeholder="이 카페에 대한 메모를 남겨보세요..."
+                placeholder={t('placeholder')}
                 className="w-full resize-none rounded-xl bg-background px-3 py-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
                 rows={3}
               />
@@ -56,7 +58,7 @@ export function MemoSection({ cafeId, getMemo, setMemo }: MemoSectionProps) {
                   }}
                   className="rounded-lg bg-foreground px-3 py-1 text-xs font-medium text-background"
                 >
-                  저장
+                  {t('save')}
                 </button>
               </div>
             </div>

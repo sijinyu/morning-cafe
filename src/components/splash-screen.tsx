@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useCafeStore } from '@/lib/store/cafe-store';
 
 // 모듈 레벨 — 한 번 dismiss되면 페이지 이동해도 다시 안 뜸
 let splashDismissed = false;
 
 export function SplashScreen() {
+  const t = useTranslations('splash');
   const cafesReady = useCafeStore((s) => s.cafes.length > 0);
   const [visible, setVisible] = useState(!splashDismissed);
 
@@ -40,7 +42,7 @@ export function SplashScreen() {
         >
           <img
             src="/splash-character.png"
-            alt="모닝카페"
+            alt={t('alt')}
             width={160}
             height={160}
             style={{ width: 160, height: 160, objectFit: 'contain' }}
