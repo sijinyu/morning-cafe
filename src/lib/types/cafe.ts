@@ -33,5 +33,9 @@ export function extractGu(address: string): string | null {
   const gyeonggiCityMatch = address.match(/경기\S*\s+(\S+시)/);
   if (gyeonggiCityMatch?.[1]) return gyeonggiCityMatch[1];
 
+  // 경기도 (군): "경기 양평군" → "양평군"
+  const gunMatch = address.match(/경기\S*\s+(\S+군)/);
+  if (gunMatch?.[1]) return gunMatch[1];
+
   return null;
 }
