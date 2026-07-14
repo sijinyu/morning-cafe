@@ -203,7 +203,13 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const displayAddress = romanizeAddress(cafe.road_address ?? cafe.address, locale);
   const is24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const todayOpeningTime = getOpeningTimeForDay(cafe, dayFilter);
-  const openingFormatted = is24h ? t('hours24') : formatOpeningTime(todayOpeningTime);
+  // todayOpeningTime null → formatOpeningTime이 한글 '정보 없음' 반환 → en/ja 화면 누출.
+  // i18n된 t('noInfo')로 대체.
+  const openingFormatted = is24h
+    ? t('hours24')
+    : todayOpeningTime
+      ? formatOpeningTime(todayOpeningTime)
+      : t('noInfo');
 
   const DAY_KEY_MAP: Record<string, string> = { '월': 'mon', '화': 'tue', '수': 'wed', '목': 'thu', '금': 'fri', '토': 'sat', '일': 'sun' };
   const translatedDayLabel = dayFilter === 'today' ? tFilter('today') : tFilter(`days.${DAY_KEY_MAP[dayFilter] ?? 'mon'}`);

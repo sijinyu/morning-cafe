@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Clock, ExternalLink, Map, Sparkles } from 'lucide-react';
+import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
@@ -47,9 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
     },
-    alternates: {
-      canonical: `/cafes/${encodeURIComponent(decodedGu)}`,
-    },
+    alternates: localeAlternates(`/cafes/${encodeURIComponent(decodedGu)}`, locale),
   };
 }
 

@@ -111,14 +111,16 @@ export function useStamps() {
     );
   }, [stamps]);
 
-  /** 정복한 구 Set */
-  const conqueredGus = new Set(stamps.map((s) => s.gu).filter(Boolean));
+  /** 정복한 구 Set — "서울 25구 정복" 컨셉이므로 서울 구만 집계.
+   *  경기 카페 체크인(gu="성남시 분당구" 등)은 그리드에 없어 카운트/그리드 불일치를 유발하므로 제외. */
+  const seoulGuSet = new Set<string>(SEOUL_GUS);
+  const conqueredGus = new Set(stamps.map((s) => s.gu).filter((gu) => seoulGuSet.has(gu)));
 
-  /** 총 스탬프 수 */
+  /** 총 스탬프 수 (경기 포함, 방문 기록 전체) */
   const totalStamps = stamps.length;
 
-  /** 25구 정복 완료 여부 */
-  const allConquered = conqueredGus.size >= 25;
+  /** 서울 25구 정복 완료 여부 */
+  const allConquered = conqueredGus.size >= SEOUL_GUS.length;
 
   return { stamps, addStamp, hasCheckedInToday, conqueredGus, totalStamps, allConquered };
 }

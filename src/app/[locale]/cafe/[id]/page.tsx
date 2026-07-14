@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import {
   MapPin,
@@ -77,9 +78,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
     },
-    alternates: {
-      canonical: url,
-    },
+    alternates: localeAlternates(`/cafe/${id}`, locale),
   };
 }
 
