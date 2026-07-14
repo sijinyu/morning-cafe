@@ -513,8 +513,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                 href={
                   locale === 'ko'
                     ? `https://map.kakao.com/link/to/${encodeURIComponent(cafe.name)},${cafe.latitude},${cafe.longitude}`
-                    : // 외국인은 카카오맵을 안 씀 → Google Maps로 길찾기
-                      `https://www.google.com/maps/dir/?api=1&destination=${cafe.latitude},${cafe.longitude}`
+                    : // 외국인은 카카오맵을 안 씀 → Google Maps로 길찾기.
+                      // "카페명 좌표"를 destination에 함께 넣으면 구글맵이 좌표로 핀을 찍고 이름도 표시.
+                      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${cafe.name} ${cafe.latitude},${cafe.longitude}`)}&travelmode=walking`
                 }
                 target="_blank"
                 rel="noopener noreferrer"
