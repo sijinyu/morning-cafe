@@ -507,39 +507,27 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
 
             <div className="h-px bg-border" />
 
-            {/* Action buttons */}
+            {/* Action buttons — 길찾기(출발)가 앱의 핵심 행동이므로 주 버튼. 지도 보기는 보조. */}
             <div className="flex gap-2">
-              {cafe.place_url && (
-                <a
-                  href={cafe.place_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name })}
-                  className={cn(
-                    'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
-                    'bg-foreground text-background py-3.5',
-                    'text-sm font-semibold whitespace-nowrap',
-                    'hover:opacity-90 transition-opacity'
-                  )}
-                >
-                  <ExternalLink className="h-4 w-4 flex-shrink-0" />
-                  {t('kakaoMap')}
-                </a>
-              )}
               <a
-                href={`https://map.kakao.com/link/to/${encodeURIComponent(cafe.name)},${cafe.latitude},${cafe.longitude}`}
+                href={
+                  locale === 'ko'
+                    ? `https://map.kakao.com/link/to/${encodeURIComponent(cafe.name)},${cafe.latitude},${cafe.longitude}`
+                    : // 외국인은 카카오맵을 안 씀 → Google Maps로 길찾기
+                      `https://www.google.com/maps/dir/?api=1&destination=${cafe.latitude},${cafe.longitude}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => trackEvent('navigate', { cafe_name: cafe.name })}
+                onClick={() => trackEvent('navigate', { cafe_name: cafe.name, locale })}
                 className={cn(
-                  'flex items-center justify-center gap-1.5 rounded-2xl',
-                  'border border-border py-3.5 px-4',
-                  'text-sm font-medium text-foreground',
-                  'hover:bg-muted transition-colors'
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-2xl',
+                  'bg-foreground text-background py-3.5',
+                  'text-sm font-semibold whitespace-nowrap',
+                  'hover:opacity-90 transition-opacity'
                 )}
                 aria-label={t('directions')}
               >
-                <Navigation className="h-4 w-4" />
+                <Navigation className="h-4 w-4 flex-shrink-0" />
                 {t('directions')}
                 {(() => {
                   if (!userLocation) return null;
@@ -547,12 +535,30 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   if (km > MAX_WALK_DISTANCE_KM) return null;
                   const min = estimateWalkMinutes(km);
                   return (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-background/70">
                       {t('walkMinutes', { min })}
                     </span>
                   );
                 })()}
               </a>
+              {cafe.place_url && (
+                <a
+                  href={cafe.place_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('view_kakaomap', { cafe_name: cafe.name })}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 rounded-2xl',
+                    'border border-border py-3.5 px-4',
+                    'text-sm font-medium text-foreground whitespace-nowrap',
+                    'hover:bg-muted transition-colors'
+                  )}
+                  aria-label={t('kakaoMap')}
+                >
+                  <ExternalLink className="h-4 w-4 flex-shrink-0" />
+                  {t('kakaoMap')}
+                </a>
+              )}
               {/* Checkin button — 방문 인증 → 스탬프(구 정복). 500m 이내 활성 */}
               <button
                 onClick={handleCheckin}
