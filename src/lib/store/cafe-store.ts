@@ -41,7 +41,7 @@ const CHAIN_KEYWORDS = [
   '할리스', 'HOLLYS',
   '탐앤탐스', '탐탐',
   '카페베네', '엔제리너스',
-  '폴바셋', 'PAUL BASSETT',
+  // 폴바셋(PAUL BASSETT)은 스페셜티 계열 — 유저 의도로 체인 필터에서 제외 (2026-07-14)
   // 저가 프랜차이즈
   '메가커피', '메가MGC', '메가엠지씨', 'MEGA',
   '컴포즈', '컴포즈커피', 'COMPOSE',
@@ -370,13 +370,17 @@ const CHAIN_KEYWORDS = [
   '크레이지빙수',
   '아메리칸트레일러',
   '로스터리락온',
+  // 2026-07-14 추가 — GA4 누수 케이스 + 체크리스트 누락 프랜차이즈
+  '로아스토어카페', '로아스토어', '이차이', '2CHAI', '그라찌에', 'GRAZIE', '엔젤리너스',
 ] as const;
 
-const CHAIN_KEYWORDS_LOWER = CHAIN_KEYWORDS.map((kw) => kw.toLowerCase());
+// 공백 제거 + 소문자화로 정규화 — "메가커피"/"메가 커피" 같은 띄어쓰기 변형을 한 번에 매칭.
+const normalizeChainName = (s: string) => s.toLowerCase().replace(/\s+/g, '');
+const CHAIN_KEYWORDS_NORM = CHAIN_KEYWORDS.map(normalizeChainName);
 
 export function isChainCafe(name: string): boolean {
-  const lower = name.toLowerCase();
-  return CHAIN_KEYWORDS_LOWER.some((kw) => lower.includes(kw));
+  const norm = normalizeChainName(name);
+  return CHAIN_KEYWORDS_NORM.some((kw) => norm.includes(kw));
 }
 
 // 요일 매핑 (Date.getDay() → Korean day key in hours_by_day)
