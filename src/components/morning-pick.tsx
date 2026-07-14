@@ -3,10 +3,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 import { MapPin, Clock, Navigation, X, RotateCcw } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
+import { romanizeAddress } from '@/lib/romanize';
 import { getOpeningTimeForDay } from '@/lib/store/cafe-store';
 import { trackEvent } from '@/lib/analytics';
 import { type Cafe } from '@/lib/types/cafe';
@@ -45,6 +46,7 @@ function markSeen() {
 export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningPickProps) {
   const t = useTranslations('morningPick');
   const tCafe = useTranslations('cafe');
+  const locale = useLocale();
   const { filteredCafes, chainCafeIds } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes, chainCafeIds: s.chainCafeIds })),
   );
@@ -236,7 +238,7 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
 
               <p className="flex items-center gap-1 text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                {cafe.road_address ?? cafe.address}
+                {romanizeAddress(cafe.road_address ?? cafe.address, locale)}
               </p>
 
               {/* 액션 버튼 */}

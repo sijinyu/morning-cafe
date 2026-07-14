@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useCafeStore, type Cafe } from '@/lib/store/cafe-store';
+import { romanizeAddress } from '@/lib/romanize';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 import { useSearchHistory } from '@/lib/hooks/use-search-history';
@@ -20,6 +21,7 @@ interface SearchBarProps {
 
 export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchBarProps) {
   const t = useTranslations('search');
+  const locale = useLocale();
   const cafes = useCafeStore((state) => state.filteredCafes);
   const setSelectedCafe = useCafeStore((state) => state.setSelectedCafe);
 
@@ -230,7 +232,7 @@ export function SearchBar({ onSelectCafe, onQueryChange, mode = 'map' }: SearchB
                   {cafe.name}
                 </span>
                 <span className="text-xs text-muted-foreground mt-0.5 truncate w-full">
-                  {cafe.road_address ?? cafe.address}
+                  {romanizeAddress(cafe.road_address ?? cafe.address, locale)}
                 </span>
               </button>
             ))}

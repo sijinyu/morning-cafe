@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   X,
@@ -24,6 +24,7 @@ import {
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { is24HoursForDay, isNewCafe } from '@/lib/cafe-utils';
+import { romanizeAddress } from '@/lib/romanize';
 import { useFavorites } from '@/lib/hooks/use-favorites';
 // import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
@@ -78,6 +79,7 @@ interface CafeBottomSheetProps {
 function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const t = useTranslations('cafe');
   const tFilter = useTranslations('filter');
+  const locale = useLocale();
 
   const { dayFilter, chainCafeIds, userLocation, compareSlots, addToCompare } = useCafeStore(
     useShallow((s) => ({ dayFilter: s.dayFilter, chainCafeIds: s.chainCafeIds, userLocation: s.userLocation, compareSlots: s.compareSlots, addToCompare: s.addToCompare })),
@@ -197,7 +199,7 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     }).catch(() => {});
   }
 
-  const displayAddress = cafe.road_address ?? cafe.address;
+  const displayAddress = romanizeAddress(cafe.road_address ?? cafe.address, locale);
   const is24h = is24HoursForDay(cafe, (['일', '월', '화', '수', '목', '금', '토'] as const)[new Date().getDay()]!);
   const todayOpeningTime = getOpeningTimeForDay(cafe, dayFilter);
   const openingFormatted = is24h ? t('hours24') : formatOpeningTime(todayOpeningTime);

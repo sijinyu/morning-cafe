@@ -4,10 +4,11 @@ import { useMemo, useRef, useCallback, type MouseEvent as ReactMouseEvent } from
 import { MapPin, Clock, Navigation, Sparkles } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useShallow } from 'zustand/react/shallow';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useCafeStore, getOpenStatus, getOpeningTimeForDay, getDayLabel, type Cafe } from '@/lib/store/cafe-store';
 import { getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
+import { romanizeAddress } from '@/lib/romanize';
 import { cn } from '@/lib/utils';
 
 /** 웹에서 마우스 드래그 가로 스크롤 지원 — moved flag로 드래그 후 클릭 차단 */
@@ -62,6 +63,7 @@ interface CafeListViewProps {
 export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: CafeListViewProps) {
   const t = useTranslations('list');
   const tCafe = useTranslations('cafe');
+  const locale = useLocale();
   const { filteredCafes, dayFilter, chainCafeIds } = useCafeStore(
     useShallow((state) => ({
       filteredCafes: state.filteredCafes,
@@ -286,7 +288,7 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
                     })()}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
-                    {cafe.road_address ?? cafe.address}
+                    {romanizeAddress(cafe.road_address ?? cafe.address, locale)}
                   </p>
                 </div>
                 {distance !== null && (
@@ -315,6 +317,7 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ cafe, onSelect, wasDragging, badge, badgeColor, userLocation, showDistance }: FeatureCardProps) {
+  const locale = useLocale();
   const distance = userLocation
     ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
     : null;
@@ -361,7 +364,7 @@ function FeatureCard({ cafe, onSelect, wasDragging, badge, badgeColor, userLocat
       </div>
       <p className="font-bold text-xs truncate">{cafe.name}</p>
       <p className="mt-0.5 text-[10px] text-muted-foreground truncate">
-        {(cafe.road_address ?? cafe.address).replace(/서울\S*\s+\S+구\s*/, '')}
+        {romanizeAddress((cafe.road_address ?? cafe.address).replace(/서울\S*\s+\S+구\s*/, ''), locale)}
       </p>
       </div>
     </button>

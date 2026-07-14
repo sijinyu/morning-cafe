@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { fetchCafeById } from '@/lib/supabase/queries';
 import { is24Hours, formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
+import { romanizeAddress } from '@/lib/romanize';
 import { cn } from '@/lib/utils';
 import { extractGu, type Cafe } from '@/lib/types/cafe';
 import { CafeShareButton } from './share-button';
@@ -197,7 +198,7 @@ export default async function CafePage({ params }: PageProps) {
     notFound();
   }
 
-  const displayAddress = cafe.road_address ?? cafe.address;
+  const displayAddress = romanizeAddress(cafe.road_address ?? cafe.address, locale);
   const is24h = is24Hours(cafe);
   const openingFormatted = is24h
     ? tCafe('hours24Full')

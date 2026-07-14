@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Dices, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useCafeStore } from '@/lib/store/cafe-store';
 import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
+import { romanizeAddress } from '@/lib/romanize';
 import { trackEvent } from '@/lib/analytics';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { type Cafe } from '@/lib/types/cafe';
@@ -24,6 +25,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
   const t = useTranslations('roulette');
   const tCafe = useTranslations('cafe');
   const tMorningPick = useTranslations('morningPick');
+  const locale = useLocale();
   const { filteredCafes, userLocation } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes, userLocation: s.userLocation })),
   );
@@ -210,7 +212,7 @@ export function CafeRoulette({ mapCenter, onSelectCafe }: CafeRouletteProps) {
                       className="mt-2 space-y-1"
                     >
                       <p className="text-sm text-muted-foreground">
-                        {displayCafe.road_address || displayCafe.address}
+                        {romanizeAddress(displayCafe.road_address || displayCafe.address, locale)}
                       </p>
                       <div className="flex items-center justify-center gap-2 text-sm">
                         {displayCafe.opening_time && (
