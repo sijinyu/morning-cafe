@@ -30,7 +30,7 @@ import { useFavorites } from '@/lib/hooks/use-favorites';
 import { useRecentCafes } from '@/lib/hooks/use-recent-cafes';
 import { usePlaceDetail } from '@/lib/hooks/use-place-detail';
 import { useCafeMemos } from '@/lib/hooks/use-cafe-memos';
-// import { useStamps } from '@/lib/hooks/use-stamps';
+import { useStamps } from '@/lib/hooks/use-stamps';
 import { extractGu } from '@/lib/types/cafe';
 import { formatOpeningTime, getOpeningBadgeStyle, haversineKm } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
@@ -95,9 +95,9 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
   const { addRecent } = useRecentCafes();
   const { photos, photosHd, menu, rating, parking, facilities, strengths, reviews, blogReviews, loading: photosLoading } = usePlaceDetail(cafe.kakao_place_id);
   const { getMemo, setMemo } = useCafeMemos();
-  // const { addStamp, hasCheckedInToday } = useStamps();
+  const { addStamp, hasCheckedInToday } = useStamps();
   const favorited = isFavorite(cafe.id);
-  // const checkedIn = hasCheckedInToday(cafe.id);
+  const checkedIn = hasCheckedInToday(cafe.id);
   // const reminded = hasReminder(cafe.id);
   // const canRemind = !is24Hours(cafe) && cafe.opening_time !== null;
 
@@ -146,17 +146,18 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     }
   }, [cafe.id, cafe.name, cardLoading]);
 
-  // const CHECKIN_RADIUS_KM = 0.1; // 100m
-  // const handleCheckin = useCallback(() => {
-  //   if (checkedIn || !userLocation) return;
-  //   const km = haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude);
-  //   if (km > CHECKIN_RADIUS_KM) return;
-  //   const gu = extractGu(cafe.address) ?? '';
-  //   addStamp(cafe.id, cafe.name, gu);
-  // }, [checkedIn, userLocation, cafe, addStamp]);
-  // const canCheckin = userLocation
-  //   ? !checkedIn && haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude) <= CHECKIN_RADIUS_KM
-  //   : false;
+  // ponytail: 100m → 500m 완화. 웹 유저 대다수가 데스크탑이라 100m면 아무도 체크인 못 해 스탬프 루프가 안 돎.
+  // 500m = 도보권. 실제 방문자만 스탬프, 어뷰징은 하루 1회 제한(useStamps)으로 방지.
+  const CHECKIN_RADIUS_KM = 0.5;
+  const checkinDistanceKm = userLocation
+    ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
+    : null;
+  const canCheckin = checkinDistanceKm !== null && !checkedIn && checkinDistanceKm <= CHECKIN_RADIUS_KM;
+  const handleCheckin = useCallback(() => {
+    if (checkedIn || checkinDistanceKm === null || checkinDistanceKm > CHECKIN_RADIUS_KM) return;
+    const gu = extractGu(cafe.address) ?? '';
+    addStamp(cafe.id, cafe.name, gu);
+  }, [checkedIn, checkinDistanceKm, cafe, addStamp]);
 
   useEffect(() => {
     setSheetState('half');
@@ -552,10 +553,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                   );
                 })()}
               </a>
-              {/* Checkin button — 비활성 (스탬프 시스템 보류) */}
-              {/* <button
+              {/* Checkin button — 방문 인증 → 스탬프(구 정복). 500m 이내 활성 */}
+              <button
                 onClick={handleCheckin}
                 disabled={!canCheckin && !checkedIn}
+                title={!canCheckin && !checkedIn ? t('checkinHint') : undefined}
                 className={cn(
                   'flex items-center justify-center gap-1.5 rounded-2xl',
                   'py-3.5 px-4 text-sm font-medium transition-colors',
@@ -565,13 +567,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
                       ? 'border border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                       : 'border border-border text-muted-foreground opacity-50',
                 )}
-                aria-label={checkedIn ? '체크인 완료' : '체크인'}
+                aria-label={checkedIn ? t('checkinDone') : t('checkin')}
               >
                 <Award className="h-4 w-4" />
-                {checkedIn ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : null}
-              </button> */}
+                {checkedIn ? <Check className="h-3.5 w-3.5" /> : null}
+              </button>
               {/* 감성 카드 버튼 — 보류 */}
               {/* <button
                 onClick={handleStoryCard}

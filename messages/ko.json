@@ -73,7 +73,10 @@
     "walkMinutes": "도보 {min}분",
     "myLocation": "현재 위치로 이동",
     "currentLocation": "현재 위치",
-    "storyCard": "감성 카드"
+    "storyCard": "감성 카드",
+    "checkin": "체크인",
+    "checkinDone": "체크인 완료",
+    "checkinHint": "카페 근처(500m)에서 체크인하면 스탬프가 찍혀요"
   },
   "map": {
     "loadError": "지도를 불러올 수 없습니다",

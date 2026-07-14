@@ -73,7 +73,10 @@
     "walkMinutes": "徒歩{min}分",
     "myLocation": "現在地へ移動",
     "currentLocation": "現在地",
-    "storyCard": "ストーリーカード"
+    "storyCard": "ストーリーカード",
+    "checkin": "チェックイン",
+    "checkinDone": "チェックイン済み",
+    "checkinHint": "カフェの近く（500m以内）でチェックインするとスタンプが押されます"
   },
   "map": {
     "loadError": "地図を読み込めません",

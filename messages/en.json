@@ -73,7 +73,10 @@
     "walkMinutes": "{min} min walk",
     "myLocation": "My location",
     "currentLocation": "Current location",
-    "storyCard": "Story card"
+    "storyCard": "Story card",
+    "checkin": "Check in",
+    "checkinDone": "Checked in",
+    "checkinHint": "Check in within 500m of the cafe to earn a stamp"
   },
   "map": {
     "loadError": "Unable to load map",
