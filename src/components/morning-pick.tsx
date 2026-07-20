@@ -10,6 +10,7 @@ import { haversineKm, formatOpeningTime } from '@/lib/cafe-utils';
 import { romanizeAddress } from '@/lib/romanize';
 import { getOpeningTimeForDay } from '@/lib/store/cafe-store';
 import { trackEvent } from '@/lib/analytics';
+import { getBriefing, WEATHER_EMOJI, type Briefing } from '@/lib/morning-briefing';
 import { type Cafe } from '@/lib/types/cafe';
 
 const PICK_STORAGE_KEY = 'morning-pick';
@@ -46,7 +47,9 @@ function markSeen() {
 export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningPickProps) {
   const t = useTranslations('morningPick');
   const tCafe = useTranslations('cafe');
+  const tBrief = useTranslations('briefing');
   const locale = useLocale();
+  const [briefing, setBriefing] = useState<Briefing | null>(null);
   const { filteredCafes, chainCafeIds } = useCafeStore(
     useShallow((s) => ({ filteredCafes: s.filteredCafes, chainCafeIds: s.chainCafeIds })),
   );
@@ -114,6 +117,18 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
     const timer = setTimeout(() => setVisible(true), 800);
     return () => clearTimeout(timer);
   }, [cafesReady, userLocation, candidates.length]);
+
+  // 브리핑 — 카드가 뜰 때 1회 로드 (하루 1회 캐시, GPS 없으면 서울시청 fallback).
+  // 실패해도 null → 브리핑 스트립만 안 뜨고 카드는 정상.
+  useEffect(() => {
+    if (!visible || briefing) return;
+    getBriefing(userLocation).then((b) => {
+      if (b) {
+        setBriefing(b);
+        trackEvent('morning_briefing_view', { weather: b.weather });
+      }
+    });
+  }, [visible, briefing, userLocation]);
 
   const currentPick = candidates[pickIndex] ?? null;
 
@@ -197,6 +212,19 @@ export function MorningPick({ userLocation, onSelectCafe, cafesReady }: MorningP
             <div className="absolute top-3 left-3 z-10 rounded-full bg-red-500 px-3 py-1">
               <span className="text-xs font-bold text-white">{t('title')}</span>
             </div>
+
+            {/* 오늘의 아침 브리핑 — 매일 바뀌는 날씨·일출·문구 (재방문 이유) */}
+            {briefing && (
+              <div className="bg-gradient-to-br from-[#FFF4EC] to-[#FFEDE3] px-5 pt-9 pb-3 dark:from-[#2a1a14] dark:to-[#241511]">
+                <p className="text-sm font-semibold leading-snug text-[#C43D38] dark:text-[#F4807A]">
+                  {WEATHER_EMOJI[briefing.weather]} {tBrief(`nudge.${briefing.nudgeKey}` as Parameters<typeof tBrief>[0])}
+                </p>
+                <p className="mt-1 text-[11px] font-medium text-[#C43D38]/60 dark:text-[#F4807A]/60">
+                  {tBrief('sunrise', { time: briefing.sunrise })}
+                  {briefing.tempC !== null && ` · ${briefing.tempC}°`}
+                </p>
+              </div>
+            )}
 
             {/* 썸네일 */}
             {cafe.thumbnail_url ? (

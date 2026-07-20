@@ -259,6 +259,29 @@
     "go": "Let's go!",
     "swipeHint": "← Another · Let's go →"
   },
+  "briefing": {
+    "sunrise": "Sunrise {time}",
+    "nudge": {
+      "clear0": "Clear morning — a window seat kind of day",
+      "clear1": "Sunny out. How about a cafe with a terrace?",
+      "clear2": "Cloudless sky, a morning for the early riser",
+      "clear3": "Crisp air — pick somewhere worth the walk",
+      "clear4": "Clear skies. A coffee in the morning sun is perfect",
+      "cloudy0": "Overcast morning — cozy indoor cafe weather",
+      "cloudy1": "Cloudy skies, a warm latte kind of day",
+      "cloudy2": "A calm morning to start slow at a quiet cafe",
+      "cloudy3": "Grey out. Perfect for lingering by the window",
+      "cloudy4": "Under grey skies, let's find you a snug spot",
+      "rain0": "Rainy morning — a window with the sound of rain?",
+      "rain1": "Bring an umbrella. Picked warm cafes to duck into",
+      "rain2": "Raindrops falling, coffee smells even richer today",
+      "rain3": "Wet morning. On rainy days, closer is better",
+      "rain4": "Rain. Showing the nearest morning cafes first",
+      "snow0": "Snowy morning — a warm cup is calling",
+      "snow1": "White morning. Watch your step, staying close",
+      "snow2": "Snow outside the window, a special indoor morning"
+    }
+  },
   "roulette": {
     "ariaLabel": "Random cafe pick",
     "noNearbyCafes": "No cafes within 3km",
