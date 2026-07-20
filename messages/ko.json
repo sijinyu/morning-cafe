@@ -79,6 +79,7 @@
     "checkinHint": "카페 근처(500m)에서 체크인하면 스탬프가 찍혀요"
   },
   "map": {
+    "loadingMap": "지도를 준비하고 있어요",
     "loadError": "지도를 불러올 수 없습니다",
     "loadErrorHint": "카카오맵 서비스에 일시적인 문제가 있습니다",
     "refresh": "새로고침",

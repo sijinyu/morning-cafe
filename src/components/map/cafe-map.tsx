@@ -537,9 +537,20 @@ export function CafeMap({ onPanToReady, onPlainPanToReady, userLocation, onCente
   }
 
   if (loading) {
+    // 스플래시(크림 배경 + 캐릭터)와 이어지는 로딩 화면 — 지도 SDK 대기 중 빈 스피너로 이탈 방지
     return (
-      <div className="flex h-full w-full items-center justify-center bg-muted/30">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[#FFF8F0]">
+        <img
+          src="/splash-character.png"
+          alt=""
+          width={96}
+          height={96}
+          style={{ width: 96, height: 96, objectFit: 'contain' }}
+        />
+        <div className="flex items-center gap-2 text-sm font-medium text-[#E8554E]">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#E8554E] border-t-transparent" />
+          {t('loadingMap')}
+        </div>
       </div>
     );
   }

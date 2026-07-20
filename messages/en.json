@@ -79,6 +79,7 @@
     "checkinHint": "Check in within 500m of the cafe to earn a stamp"
   },
   "map": {
+    "loadingMap": "Getting the map ready",
     "loadError": "Unable to load map",
     "loadErrorHint": "Kakao Map service is temporarily unavailable",
     "refresh": "Refresh",

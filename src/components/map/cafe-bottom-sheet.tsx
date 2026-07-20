@@ -146,9 +146,11 @@ function CafeBottomSheet({ cafe, onClose }: CafeBottomSheetProps) {
     }
   }, [cafe.id, cafe.name, cardLoading]);
 
-  // ponytail: 100m → 500m 완화. 웹 유저 대다수가 데스크탑이라 100m면 아무도 체크인 못 해 스탬프 루프가 안 돎.
-  // 500m = 도보권. 실제 방문자만 스탬프, 어뷰징은 하루 1회 제한(useStamps)으로 방지.
-  const CHECKIN_RADIUS_KM = 0.5;
+  // ponytail: 500m → 2km 완화. checkin 이벤트 0건(GA 확인) — 도심 유저 대다수가 집·회사에서 지도만 봐서
+  // 500m 안에 든 적이 없어 루프가 안 돎. 2km = 생활권. GPS는 유지(정복 무결성 위해 클릭 어뷰징 차단),
+  // 반경만 완화해 병목이 반경인지 검증. 어뷰징은 하루 1회 제한(useStamps)으로 방지.
+  // 여전히 0건이면 다음 처방은 GPS 재요청 or 수동 '가봤어요' 구분형.
+  const CHECKIN_RADIUS_KM = 2.0;
   const checkinDistanceKm = userLocation
     ? haversineKm(userLocation.lat, userLocation.lng, cafe.latitude, cafe.longitude)
     : null;
