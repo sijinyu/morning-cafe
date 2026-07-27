@@ -42,6 +42,7 @@ KAKAO_REST_API_KEY=              # 카카오 REST API 키 (place-detail API)
 RESEND_API_KEY=                  # Resend 이메일 API 키 (제보 알림)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=   # Google Analytics 4 측정 ID (G-XXXXXXX)
 GOOGLE_GEMINI_API_KEY=           # Google Gemini API 키 (AI 카페 추천)
+NEXT_PUBLIC_ADFIT_UNIT_GU=       # 카카오 AdFit 광고단위 ID (구별 SEO 페이지 배너, 미설정 시 광고 숨김)
 ```
 
 카카오 Maps JS SDK 키는 `src/lib/hooks/use-kakao-loader.ts`에서 로드.
@@ -367,6 +368,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
 46. **앱 아이콘**: 젠지 컨셉 — 통통한 머그컵 + 라떼아트 하트 + 스파클 3개 + 글래스모피즘 배경 원. `public/icons/icon.svg` → 모든 사이즈 PNG + `favicon.ico` + `apple-touch-icon.png` + `kakao-app-icon.png`. 코랄 그라데이션(`#F7908B`→`#E8554E`→`#C43D38`).
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
+48. **AdFit 광고 배너**: `AdFitBanner` (`src/components/adfit-banner.tsx`). `unit` 미설정이면 no-op, `isNativeApp()`이면 렌더 안 함 (WebView 웹광고 노출 = AdFit 정책 위반). 현재 지면: 구별 SEO 페이지(`/cafes/[gu]`)만, `NEXT_PUBLIC_ADFIT_UNIT_GU`. 지면 추가 시 AdFit에서 광고단위 별도 발급 + env 추가. 지도 화면에는 달지 않는다 (North Star 훼손).
 
 ### 커밋 메시지
 
