@@ -1,14 +1,14 @@
 'use client';
 
-import { Map, Bookmark, Send, Clock } from 'lucide-react';
+import { Map, Bookmark, Send, Clock, BookOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { href: '/' as const, labelKey: 'map' as const, icon: Map },
+  { href: '/guides' as const, labelKey: 'guides' as const, icon: BookOpen },
   { href: '/favorites' as const, labelKey: 'favorites' as const, icon: Bookmark },
-  { href: '/recent' as const, labelKey: 'recent' as const, icon: Clock },
   { href: '/report' as const, labelKey: 'report' as const, icon: Send },
 ];
 
