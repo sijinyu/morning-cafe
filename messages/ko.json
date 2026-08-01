@@ -144,11 +144,9 @@
   },
   "pwa": {
     "close": "닫기",
-    "useAsApp": "앱처럼 사용하기",
-    "iosStep1": "하단 '공유' 버튼 탭",
-    "iosShare": "공유",
-    "iosStep2": "홈 화면에 추가",
-    "iosStep2Action": "<b>홈 화면에 추가</b> 선택",
+    "installApp": "앱 설치하기",
+    "installDescription": "더 빠르고 편리하게 아침 카페를 찾아보세요",
+    "goToAppStore": "App Store에서 설치",
     "androidTitle": "앱으로 설치할 수 있어요",
     "androidInstall": "홈 화면에 추가",
     "genericTitle": "앱처럼 사용하기",
@@ -240,6 +238,45 @@
     "guSubtitle": "아침 일찍 여는 카페 {count}곳",
     "earlybirdSection": "얼리버드 카페",
     "guEmpty": "{gu}에 등록된 아침 카페가 없습니다"
+  },
+  "guides": {
+    "indexTitle": "아침 카페 가이드",
+    "indexDescription": "서울·경기 아침 카페를 테마별로 한눈에. 새벽 오픈, 24시간, 주말 카페 가이드.",
+    "indexSubtitle": "테마별로 찾는 아침 카페",
+    "guideCount": "{count}개 가이드",
+    "cafeCount": "{count}곳",
+    "districtCount": "{count}개 지역",
+    "viewOnMap": "지도에서 보기",
+    "viewCafe": "카페 상세보기",
+    "allGuides": "전체 가이드",
+    "before-6am": {
+      "title": "새벽 6시 전 오픈 카페",
+      "titleWithCount": "서울·경기 새벽 6시 전 오픈 카페 {count}곳",
+      "description": "새벽부터 문을 여는 카페를 찾고 계신가요? 서울·경기에서 오전 6시 전에 오픈하는 얼리버드 카페를 정리했습니다.",
+      "intro": "출근 전 커피 한 잔, 새벽 러닝 후 브런치, 이른 아침 미팅... 6시 전에 여는 카페가 필요한 순간은 의외로 많습니다. 서울·경기 {count}개 지역에서 새벽부터 불을 켜는 카페들을 모았습니다.",
+      "tip": "새벽 카페는 요일에 따라 오픈 시간이 다를 수 있어요. 방문 전 영업시간을 꼭 확인하세요."
+    },
+    "24h-cafes": {
+      "title": "24시간 카페 모음",
+      "titleWithCount": "서울·경기 24시간 카페 {count}곳",
+      "description": "밤새 작업하거나 새벽에 커피가 필요할 때! 서울·경기에서 24시간 영업하는 카페를 모았습니다.",
+      "intro": "시험 기간 밤샘 공부, 야근 후 늦은 커피, 새벽 감성 카페 타임. 시간 제약 없이 언제든 갈 수 있는 24시간 카페 {count}곳을 정리했습니다.",
+      "tip": "24시간 카페도 주말이나 공휴일에는 영업시간이 달라질 수 있습니다."
+    },
+    "new-cafes": {
+      "title": "새로 등록된 카페",
+      "titleWithCount": "이번 주 새로 등록된 아침 카페 {count}곳",
+      "description": "최근 7일 이내 새로 등록된 아침 카페를 확인하세요.",
+      "intro": "모닝카페에 새로 등록된 카페들을 소개합니다. 새로운 아침 루틴을 만들어보는 건 어떨까요?",
+      "tip": "새로 등록된 카페는 아직 리뷰가 없을 수 있어요. 직접 방문해서 첫 리뷰를 남겨보세요!"
+    },
+    "weekend-morning": {
+      "title": "주말 아침 카페",
+      "titleWithCount": "주말에도 일찍 여는 카페 {count}곳",
+      "description": "주말에도 아침 일찍 문을 여는 서울·경기 카페를 모았습니다.",
+      "intro": "주말 아침, 여유롭게 일어나 동네 카페에서 커피 한 잔. 토요일·일요일에도 아침 8시 전에 여는 카페 {count}곳을 찾았습니다.",
+      "tip": "주말 영업시간은 평일과 다른 경우가 많습니다. 토/일 각각의 시간을 확인하세요."
+    }
   },
   "cafeDetail": {
     "title": "{name} — 아침 카페",

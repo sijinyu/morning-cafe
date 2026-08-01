@@ -144,11 +144,9 @@
   },
   "pwa": {
     "close": "Close",
-    "useAsApp": "Use as an app",
-    "iosStep1": "Tap the Share button below",
-    "iosShare": "Share",
-    "iosStep2": "Add to Home Screen",
-    "iosStep2Action": "Select <b>Add to Home Screen</b>",
+    "installApp": "Get the app",
+    "installDescription": "Find morning cafes faster and easier",
+    "goToAppStore": "Download on App Store",
     "androidTitle": "Install as an app",
     "androidInstall": "Add to Home Screen",
     "genericTitle": "Use as an app",
@@ -240,6 +238,45 @@
     "guSubtitle": "{count} early morning cafes",
     "earlybirdSection": "Early bird cafes",
     "guEmpty": "No morning cafes registered in {gu} yet"
+  },
+  "guides": {
+    "indexTitle": "Morning Cafe Guides",
+    "indexDescription": "Browse Seoul & Gyeonggi morning cafes by theme. Early openers, 24h cafes, weekend spots.",
+    "indexSubtitle": "Morning cafes by theme",
+    "guideCount": "{count} guides",
+    "cafeCount": "{count} cafes",
+    "districtCount": "{count} areas",
+    "viewOnMap": "View on map",
+    "viewCafe": "View cafe",
+    "allGuides": "All guides",
+    "before-6am": {
+      "title": "Before 6AM cafes",
+      "titleWithCount": "{count} cafes open before 6AM in Seoul & Gyeonggi",
+      "description": "Find cafes that open before 6 in the morning across Seoul & Gyeonggi.",
+      "intro": "Pre-work coffee, post-dawn run brunch, early meetings — there are more reasons to need a cafe before 6AM than you'd think. We've gathered earlybird cafes across {count} areas.",
+      "tip": "Early morning cafes may have different hours on different days. Always check before visiting."
+    },
+    "24h-cafes": {
+      "title": "24-hour cafes",
+      "titleWithCount": "{count} 24-hour cafes in Seoul & Gyeonggi",
+      "description": "Open around the clock — 24-hour cafes in Seoul & Gyeonggi for late nights and early mornings.",
+      "intro": "Late-night study sessions, after-work wind-downs, dawn coffee runs. Here are {count} cafes open 24/7 with no time restrictions.",
+      "tip": "Even 24-hour cafes may adjust hours on weekends or holidays."
+    },
+    "new-cafes": {
+      "title": "Newly added cafes",
+      "titleWithCount": "{count} new morning cafes this week",
+      "description": "Check out morning cafes added in the past 7 days.",
+      "intro": "Discover freshly added cafes on Morning Cafe. Why not try a new morning routine?",
+      "tip": "Newly listed cafes may not have reviews yet. Be the first to visit and leave one!"
+    },
+    "weekend-morning": {
+      "title": "Weekend morning cafes",
+      "titleWithCount": "{count} cafes open early on weekends",
+      "description": "Morning cafes open before 8AM on Saturdays and Sundays in Seoul & Gyeonggi.",
+      "intro": "A lazy weekend morning, a walk to a neighborhood cafe for a cup of coffee. We found {count} cafes that open before 8AM on Sat or Sun.",
+      "tip": "Weekend hours often differ from weekdays. Check Saturday and Sunday hours separately."
+    }
   },
   "cafeDetail": {
     "title": "{name} — Morning cafe",

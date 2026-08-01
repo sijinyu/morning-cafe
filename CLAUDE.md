@@ -68,6 +68,11 @@ src/
 │   │   └── [gu]/
 │   │       ├── page.tsx            # 구별 카페 목록 (SSG + 24h ISR, SEO 핵심)
 │   │       └── opengraph-image.tsx # 구별 OG 이미지 (Edge runtime)
+│   ├── guides/
+│   │   ├── page.tsx                # 가이드 인덱스 (테마별 아침 카페 가이드 목록)
+│   │   ├── layout.tsx              # pass-through 레이아웃
+│   │   └── [slug]/
+│   │       └── page.tsx            # 개별 가이드 (SSG + 24h ISR, DB 자동 생성)
 │   ├── favorites/
 │   │   ├── page.tsx                # 즐겨찾기 페이지 (카드 클릭 → 지도 이동)
 │   │   └── layout.tsx              # SEO metadata
@@ -118,6 +123,7 @@ src/
 │   │   └── cafe.ts                  # Cafe 인터페이스 + extractGu (서버/클라이언트 공유)
 │   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle, is24Hours, is24HoursForDay)
 │   ├── quiet-score.ts              # 조용한 아침 지수 계산 (0~5 스케일)
+│   ├── guides.ts                   # 가이드 정의 (before-6am, 24h, weekend, new — 필터+정렬+그룹)
 │   ├── analytics.ts                # GA4 이벤트 트래킹 유틸 (trackEvent)
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
@@ -368,7 +374,9 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
 46. **앱 아이콘**: 젠지 컨셉 — 통통한 머그컵 + 라떼아트 하트 + 스파클 3개 + 글래스모피즘 배경 원. `public/icons/icon.svg` → 모든 사이즈 PNG + `favicon.ico` + `apple-touch-icon.png` + `kakao-app-icon.png`. 코랄 그라데이션(`#F7908B`→`#E8554E`→`#C43D38`).
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
-48. **AdFit 광고 배너**: `AdFitBanner` (`src/components/adfit-banner.tsx`). `unit` 미설정이면 no-op, `isNativeApp()`이면 렌더 안 함 (WebView 웹광고 노출 = AdFit 정책 위반). 현재 지면: 구별 SEO 페이지(`/cafes/[gu]`)만, `NEXT_PUBLIC_ADFIT_UNIT_GU`. 지면 추가 시 AdFit에서 광고단위 별도 발급 + env 추가. 지도 화면에는 달지 않는다 (North Star 훼손).
+48. **콘텐츠 가이드 시스템**: `src/lib/guides.ts`에 가이드 정의. `GUIDE_SLUGS` 배열에 slug 추가 → `GUIDE_FILTERS`/`GUIDE_SORTS`에 필터·정렬 함수 정의 → 자동으로 페이지 생성. i18n은 `guides.{slug}.title/titleWithCount/description/intro/tip` 키 3개 언어 모두 추가 필수. `fetchAllEarlybirdCafes()` 한 번 호출 후 각 가이드가 필터링 (ISR 24h 캐시). sitemap에 자동 등록됨.
+49. **PWA 설치 토스트**: iOS에서는 App Store 링크(`APP_STORE_URL` 상수), Android에서는 기존 `beforeinstallprompt` PWA 설치, 기타 브라우저에서는 PWA 안내. `pwa-install-prompt.tsx`.
+50. **AdFit 광고 배너**: `AdFitBanner` (`src/components/adfit-banner.tsx`). `unit` 미설정이면 no-op, `isNativeApp()`이면 렌더 안 함 (WebView 웹광고 노출 = AdFit 정책 위반). 현재 지면: 구별 SEO 페이지(`/cafes/[gu]`)만, `NEXT_PUBLIC_ADFIT_UNIT_GU`. 지면 추가 시 AdFit에서 광고단위 별도 발급 + env 추가. 지도 화면에는 달지 않는다 (North Star 훼손).
 
 ### 커밋 메시지
 
@@ -437,6 +445,8 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [ ] 수집 기능 MVP (사진 원형 크롭 + matter.js 물리엔진, 모바일 전용)
 - [x] Supabase 서버 쿼리 anon key fallback (SUPABASE_SERVICE_ROLE_KEY 미설정 대비)
 - [x] 도메인 `morning-cafe-phi.vercel.app`으로 전체 통일
+- [x] PWA 설치 토스트 → iOS 앱스토어 링크 안내 (PwaInstallPrompt 리팩터)
+- [x] 콘텐츠형 가이드 페이지 자동 생성 (`/guides`, `/guides/[slug]`) — before-6am, 24h-cafes, weekend-morning, new-cafes, SSG+ISR, sitemap 연동
 
 ---
 

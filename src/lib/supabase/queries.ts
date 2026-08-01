@@ -174,6 +174,33 @@ export async function fetchGuStats(): Promise<{ gu: string; count: number; earli
     .sort((a, b) => a.gu.localeCompare(b.gu, 'ko'));
 }
 
+/** Fetch all earlybird cafes across all districts. For guide/content pages (ISR cached). */
+export async function fetchAllEarlybirdCafes(): Promise<Cafe[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = createServerClient();
+  const allRows: Record<string, unknown>[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('cafes_with_coords')
+      .select(CAFE_COLUMNS)
+      .eq('is_earlybird', true)
+      .order('opening_time', { ascending: true, nullsFirst: false })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch all earlybird cafes: ${error.message}`);
+    }
+
+    allRows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return allRows.map(mapRowToCafe);
+}
+
 function mapRowToCafe(row: Record<string, unknown>): Cafe {
   return {
     id: row.id as string,

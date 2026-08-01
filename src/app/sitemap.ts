@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { fetchAllGus, fetchAllCafeIds } from '@/lib/supabase/queries';
+import { GUIDE_SLUGS } from '@/lib/guides';
 
 const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
@@ -38,10 +39,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const guEntries = gus.map((gu) => entry(`/cafes/${encodeURIComponent(gu)}`, 'daily', 0.8));
   const cafeEntries = cafeIds.map((id) => entry(`/cafe/${id}`, 'weekly', 0.7));
+  const guideEntries = GUIDE_SLUGS.map((slug) => entry(`/guides/${slug}`, 'daily', 0.8));
 
   return [
     entry('/', 'daily', 1),
     entry('/cafes', 'daily', 0.9),
+    entry('/guides', 'daily', 0.85),
+    ...guideEntries,
     ...guEntries,
     ...cafeEntries,
     entry('/favorites', 'weekly', 0.5),
