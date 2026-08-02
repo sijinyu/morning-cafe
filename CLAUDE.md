@@ -92,8 +92,8 @@ src/
 │
 ├── components/
 │   ├── layout/
-│   │   ├── bottom-nav.tsx          # 모바일 하단 네비 (h-14, z-50)
-│   │   ├── desktop-sidebar.tsx     # 데스크탑 좌측 사이드바
+│   │   ├── bottom-nav.tsx          # 모바일 하단 네비 (h-14, z-50, 4탭: 지도/가이드/찜/제보)
+│   │   ├── desktop-sidebar.tsx     # 데스크탑 좌측 사이드바 (5항목: 지도/가이드/찜/최근/제보)
 │   │   └── theme-provider.tsx      # next-themes 다크모드
 │   │
 │   ├── splash-screen.tsx             # 스플래시 스크린 (커피잔 + 김 애니메이션)
