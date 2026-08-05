@@ -1,5 +1,6 @@
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
-import { type Cafe } from '@/lib/types/cafe';
+import { extractGu, type Cafe } from '@/lib/types/cafe';
+import { haversineKm } from '@/lib/cafe-utils';
 
 const PAGE_SIZE = 1000;
 
@@ -199,6 +200,44 @@ export async function fetchAllEarlybirdCafes(): Promise<Cafe[]> {
   }
 
   return allRows.map(mapRowToCafe);
+}
+
+export interface NearbyCafesResult {
+  /** 기준 카페가 속한 구. 추출 실패 시 null. */
+  gu: string | null;
+  /** 거리순 가까운 다른 얼리버드 카페 */
+  nearby: Cafe[];
+  /** 같은 구의 전체 얼리버드 카페 수 (기준 카페 포함) */
+  totalInGu: number;
+}
+
+/**
+ * 같은 구의 다른 얼리버드 카페를 거리순으로 반환.
+ *
+ * 카페 상세(`/cafe/[id]`)의 유일한 출구가 카카오맵뿐이라 세션이 1페이지에서
+ * 끝나던 문제를 해결하기 위한 내부 링크용. 체류·광고 노출·지도 도달률·SEO
+ * 크롤링을 함께 개선한다.
+ */
+export async function fetchNearbyCafes(
+  cafe: Cafe,
+  limit = 4,
+): Promise<NearbyCafesResult> {
+  const gu = extractGu(cafe.road_address ?? cafe.address);
+  if (!gu) return { gu: null, nearby: [], totalInGu: 0 };
+
+  const siblings = await fetchCafesByGu(gu);
+
+  const nearby = siblings
+    .filter((candidate) => candidate.id !== cafe.id)
+    .map((candidate) => ({
+      cafe: candidate,
+      km: haversineKm(cafe.latitude, cafe.longitude, candidate.latitude, candidate.longitude),
+    }))
+    .sort((a, b) => a.km - b.km)
+    .slice(0, limit)
+    .map((entry) => entry.cafe);
+
+  return { gu, nearby, totalInGu: siblings.length };
 }
 
 function mapRowToCafe(row: Record<string, unknown>): Cafe {
