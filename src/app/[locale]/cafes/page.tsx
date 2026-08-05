@@ -5,6 +5,10 @@ import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchGuStats } from '@/lib/supabase/queries';
 import { formatOpeningTime } from '@/lib/cafe-utils';
+import { AdFitBanner } from '@/components/adfit-banner';
+import { AD_UNITS } from '@/lib/ad-units';
+import { KakaoChannelCta } from '@/components/kakao-channel-cta';
+import { RegionWaitlist } from '@/components/region-waitlist';
 
 export const revalidate = 86400; // 24h ISR
 
@@ -85,6 +89,13 @@ export default async function CafesIndexPage({ params }: PageProps) {
             </Link>
           ))}
         </div>
+
+        <div className="space-y-3 pt-6">
+          <RegionWaitlist />
+          <KakaoChannelCta placement="cafes_index" />
+        </div>
+
+        <AdFitBanner unit={AD_UNITS.cafesIndex} className="flex justify-center pt-6" />
       </div>
     </div>
   );

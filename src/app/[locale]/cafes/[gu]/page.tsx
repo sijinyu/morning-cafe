@@ -5,6 +5,9 @@ import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { AdFitBanner } from '@/components/adfit-banner';
+import { AD_UNITS } from '@/lib/ad-units';
+import { KakaoChannelCta } from '@/components/kakao-channel-cta';
+import { RegionWaitlist } from '@/components/region-waitlist';
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import type { Cafe } from '@/lib/types/cafe';
@@ -151,10 +154,7 @@ export default async function GuPage({ params }: PageProps) {
             </div>
           </section>
         )}
-        <AdFitBanner
-          unit={process.env.NEXT_PUBLIC_ADFIT_UNIT_GU}
-          className="flex justify-center px-5 py-2"
-        />
+        <AdFitBanner unit={AD_UNITS.gu} className="flex justify-center px-5 py-2" />
         {cafes.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
             <MapPin className="h-10 w-10 stroke-1" />
@@ -176,6 +176,11 @@ export default async function GuPage({ params }: PageProps) {
             ))}
           </div>
         )}
+
+        <div className="space-y-3 px-5 py-5">
+          <KakaoChannelCta placement="gu_list" />
+          <RegionWaitlist />
+        </div>
 
         {/* Other districts */}
         {otherGus.length > 0 && (

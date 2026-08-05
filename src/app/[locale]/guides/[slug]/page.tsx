@@ -14,6 +14,9 @@ import {
 import { formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { cn } from '@/lib/utils';
 import type { Cafe } from '@/lib/types/cafe';
+import { AdFitBanner } from '@/components/adfit-banner';
+import { AD_UNITS } from '@/lib/ad-units';
+import { KakaoChannelCta } from '@/components/kakao-channel-cta';
 
 export const revalidate = 86400; // 24h ISR
 
@@ -159,6 +162,12 @@ export default async function GuidePage({ params }: PageProps) {
             ))}
           </div>
         )}
+
+        <div className="px-5 pt-5">
+          <KakaoChannelCta placement="guide" />
+        </div>
+
+        <AdFitBanner unit={AD_UNITS.guide} className="flex justify-center px-5 py-4" />
 
         {/* Other guides */}
         <section className="border-t border-border px-5 py-6">

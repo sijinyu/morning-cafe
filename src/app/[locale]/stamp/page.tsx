@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Award, CheckCircle2, MapPin } from 'lucide-react';
 import { useStamps, SEOUL_GUS } from '@/lib/hooks/use-stamps';
+import { KakaoChannelCta } from '@/components/kakao-channel-cta';
 import { cn } from '@/lib/utils';
 
 function relativeTime(isoStr: string, t: ReturnType<typeof useTranslations>): string {
@@ -45,11 +46,12 @@ export default function StampPage() {
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto">
         {totalStamps === 0 ? (
-          /* Empty state */
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+          /* Empty state — 스탬프가 0인 사용자가 오히려 리텐션 전환 1순위다. */
+          <div className="flex h-full flex-col items-center justify-center gap-2 px-5 text-muted-foreground">
             <Award className="h-10 w-10 stroke-1" />
             <p className="text-sm">{t('empty')}</p>
             <p className="text-xs">{t('emptyHint')}</p>
+            <KakaoChannelCta placement="stamp_empty" className="mt-6 w-full max-w-sm text-left" />
           </div>
         ) : (
           <div className="pb-6">
@@ -146,6 +148,10 @@ export default function StampPage() {
                 ))}
               </ul>
             </section>
+
+            <div className="px-5 pt-5">
+              <KakaoChannelCta placement="stamp" />
+            </div>
           </div>
         )}
       </div>

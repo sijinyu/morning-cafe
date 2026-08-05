@@ -7,7 +7,8 @@
     "guides": "가이드",
     "report": "제보",
     "reportFull": "제보하기",
-    "mainNav": "메인 네비게이션"
+    "mainNav": "메인 네비게이션",
+    "stamp": "스탬프"
   },
   "brand": {
     "name": "모닝카페",
@@ -287,7 +288,9 @@
     "notFound": "카페를 찾을 수 없습니다 — 모닝카페",
     "openAt": "{time} 오픈",
     "back": "뒤로가기",
-    "viewOnKakao": "카카오맵에서 보기"
+    "viewOnKakao": "카카오맵에서 보기",
+    "nearbyTitle": "근처 {gu} 아침 카페",
+    "nearbyMore": "{gu} 아침 카페 {count}곳 모두 보기"
   },
   "morningPick": {
     "title": "오늘의 아침 카페",
@@ -338,5 +341,21 @@
     "title": "모닝카페 — 서울·경기 아침 카페 지도",
     "description": "서울·경기에서 아침 일찍 여는 카페를 한눈에! 6시, 7시 오픈 카페를 지도에서 바로 찾아보세요.",
     "siteName": "모닝카페"
+  },
+  "channel": {
+    "title": "매주 월요일 아침, 새 카페 3곳",
+    "description": "새로 문 연 아침 카페를 카카오톡으로 보내드려요. 앱을 다시 찾아올 필요 없이요.",
+    "cta": "카카오톡으로 받기",
+    "requested": "신청했어요! 카카오톡을 확인해주세요",
+    "dismiss": "닫기"
+  },
+  "waitlist": {
+    "title": "{region}은 아직 준비 중이에요",
+    "description": "지금은 서울과 경기 15개 도시만 다루고 있어요. 오픈하면 가장 먼저 알려드릴게요.",
+    "cta": "{region} 오픈 알림 받기",
+    "submitting": "신청 중…",
+    "done": "신청 완료",
+    "doneDescription": "{region}이 열리면 카카오톡으로 알려드릴게요. 고마워요!",
+    "error": "잠시 후 다시 시도해주세요."
   }
 }

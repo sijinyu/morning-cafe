@@ -11,12 +11,17 @@ import {
   Map,
   ChevronLeft,
 } from 'lucide-react';
-import { fetchCafeById } from '@/lib/supabase/queries';
+import { fetchCafeById, fetchNearbyCafes } from '@/lib/supabase/queries';
 import { is24Hours, formatOpeningTime, getOpeningBadgeStyle } from '@/lib/cafe-utils';
 import { romanizeAddress } from '@/lib/romanize';
 import { cn } from '@/lib/utils';
 import { extractGu, type Cafe } from '@/lib/types/cafe';
+import { AdFitBanner } from '@/components/adfit-banner';
+import { AD_UNITS } from '@/lib/ad-units';
+import { KakaoChannelCta } from '@/components/kakao-channel-cta';
+import { RegionWaitlist } from '@/components/region-waitlist';
 import { CafeShareButton } from './share-button';
+import { NearbyCafes } from './nearby-cafes';
 
 // SSR — revalidate every 24h
 export const revalidate = 86400;
@@ -210,6 +215,9 @@ export default async function CafePage({ params }: PageProps) {
 
   const mapLink = `/?cafeId=${cafe.id}`;
 
+  // 내부 링크용 — 같은 구의 가까운 카페. ISR(24h)로 캐시된다.
+  const { gu: nearbyGu, nearby, totalInGu } = await fetchNearbyCafes(cafe);
+
   return (
     <>
       <JsonLd cafe={cafe} />
@@ -330,6 +338,27 @@ export default async function CafePage({ params }: PageProps) {
               )}
             </div>
           </div>
+
+          {/* 근처 카페 → 채널 구독 → 광고 순서.
+              가치를 먼저 주고(회유) 그 다음에 요청하고, 광고는 마지막에 둔다. */}
+          {nearbyGu && (
+            <NearbyCafes
+              cafes={nearby}
+              gu={nearbyGu}
+              totalInGu={totalInGu}
+              labels={{
+                title: t('nearbyTitle', { gu: nearbyGu }),
+                moreLink: t('nearbyMore', { gu: nearbyGu, count: totalInGu }),
+              }}
+            />
+          )}
+
+          <div className="space-y-3 px-5 py-5">
+            <KakaoChannelCta placement="cafe_detail" />
+            <RegionWaitlist />
+          </div>
+
+          <AdFitBanner unit={AD_UNITS.cafeDetail} className="flex justify-center px-5 pb-6" />
         </div>
       </div>
     </>

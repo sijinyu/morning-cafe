@@ -7,7 +7,8 @@
     "guides": "ガイド",
     "report": "報告",
     "reportFull": "カフェを報告",
-    "mainNav": "メインナビゲーション"
+    "mainNav": "メインナビゲーション",
+    "stamp": "スタンプ"
   },
   "brand": {
     "name": "モーニングカフェ",
@@ -287,7 +288,9 @@
     "notFound": "カフェが見つかりません — モーニングカフェ",
     "openAt": "{time}オープン",
     "back": "戻る",
-    "viewOnKakao": "カカオマップで見る"
+    "viewOnKakao": "カカオマップで見る",
+    "nearbyTitle": "{gu}の近くのモーニングカフェ",
+    "nearbyMore": "{gu}のモーニングカフェ{count}軒をすべて見る"
   },
   "morningPick": {
     "title": "今日の朝カフェ",
@@ -338,5 +341,21 @@
     "title": "モーニングカフェ — ソウル・京畿道 朝カフェマップ",
     "description": "ソウル・京畿道で朝早くオープンするカフェを一目で！6時・7時オープンのカフェを地図ですぐに見つけよう。",
     "siteName": "モーニングカフェ"
+  },
+  "channel": {
+    "title": "毎週月曜の朝、新着カフェ3軒",
+    "description": "新しくオープンした早朝カフェをKakaoTalkでお届けします。わざわざ見に来る必要はありません。",
+    "cta": "KakaoTalkで受け取る",
+    "requested": "登録しました！KakaoTalkをご確認ください",
+    "dismiss": "閉じる"
+  },
+  "waitlist": {
+    "title": "{region}はまだ準備中です",
+    "description": "現在はソウルと京畿道15都市のみ対応しています。オープンしたら一番にお知らせします。",
+    "cta": "{region}のオープン通知を受け取る",
+    "submitting": "送信中…",
+    "done": "申請完了",
+    "doneDescription": "{region}がオープンしたらKakaoTalkでお知らせします。ありがとうございます！",
+    "error": "しばらくしてからもう一度お試しください。"
   }
 }
