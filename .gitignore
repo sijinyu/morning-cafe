@@ -56,3 +56,6 @@ ios/App/build/
 ios/App/DerivedData/
 ios/capacitor-cordova-ios-plugins/
 *.xcuserdatad/
+
+# Serena MCP 캐시
+.serena/
