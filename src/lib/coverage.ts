@@ -63,6 +63,10 @@ const KOREAN_CITY_NAMES: Readonly<Record<string, string>> = {
 /**
  * `x-vercel-ip-city` 값을 비교 가능한 키로 정규화.
  * "Goyang-si" → "goyang", "Seoul" → "seoul", "Namyangju%20si" → "namyangju"
+ *
+ * 행정단위 접미사는 **구분자가 있을 때만** 제거한다. 구분자를 optional로 두면
+ * "Daegu" → "dae"처럼 접미사로 끝나는 도시명이 망가진다. Vercel 헤더는 실제로
+ * 항상 구분자를 포함한다("Goyang-si", "Namyangju si").
  */
 export function normalizeCity(rawCity: string): string {
   let decoded = rawCity;
@@ -75,7 +79,7 @@ export function normalizeCity(rawCity: string): string {
   return decoded
     .trim()
     .toLowerCase()
-    .replace(/[-\s_]?(si|gun|gu|city)$/, '')
+    .replace(/[-\s_](si|gun|gu|city)$/, '')
     .replace(/[-\s_]/g, '');
 }
 
@@ -101,4 +105,27 @@ export function displayCityName(rawCity: string, locale: string): string {
 /** 웨이팅리스트 DB에 저장할 정규화 키. */
 export function waitlistRegionKey(rawCity: string): string {
   return normalizeCity(rawCity);
+}
+
+/**
+ * 미들웨어가 심어주는 지역 쿠키 이름.
+ *
+ * 예전에는 `/api/geo`를 호출해 헤더를 읽었는데, 그러면 **페이지뷰마다 서버리스
+ * 함수가 한 번씩 깨어난다**. 미들웨어는 이미 모든 페이지 요청에서 실행되므로
+ * 거기서 쿠키로 심으면 추가 함수 호출이 0이 된다.
+ *
+ * 값은 이미 정규화된 키(`busan`)라 쿠키 인코딩 문제도 없다.
+ */
+export const GEO_COOKIE_NAME = 'mc_geo_city';
+
+/** 클라이언트에서 지역 쿠키를 읽는다. 없으면 null. */
+export function readGeoCookie(): string | null {
+  if (typeof document === 'undefined') return null;
+
+  const match = document.cookie.match(
+    new RegExp(`(?:^|;\\s*)${GEO_COOKIE_NAME}=([^;]*)`),
+  );
+  if (!match?.[1]) return null;
+
+  return decodeURIComponent(match[1]) || null;
 }

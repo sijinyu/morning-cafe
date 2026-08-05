@@ -28,6 +28,17 @@ export const revalidate = 86400;
 
 const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
+/**
+ * 링크 프리뷰 이미지 — 정적 에셋.
+ *
+ * 예전에는 `opengraph-image.tsx`로 카페마다 1200x630 PNG를 실시간 생성했는데,
+ * `ImageResponse`(satori + resvg)는 한 장에 수백 ms CPU를 쓴다. 카페 수천 개 ×
+ * 3개 언어를 크롤러가 훑으면서 Vercel Fluid Active CPU를 가장 많이 소모했다.
+ * 카카오톡 공유(`share-button.tsx`)는 이미 이 정적 아이콘을 쓰고 있어 실제
+ * 공유 경험에는 변화가 없다.
+ */
+const OG_IMAGE = `${BASE_URL}/icons/icon-512x512.png`;
+
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
 }
@@ -77,11 +88,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       locale: locale === 'ja' ? 'ja_JP' : locale === 'en' ? 'en_US' : 'ko_KR',
       siteName: tMeta('siteName'),
       url,
+      images: [{ url: OG_IMAGE, width: 512, height: 512, alt: cafe.name }],
     },
     twitter: {
       card: 'summary',
       title,
       description,
+      images: [OG_IMAGE],
     },
     alternates: localeAlternates(`/cafe/${id}`, locale),
   };

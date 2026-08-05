@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
 import { extractGu, type Cafe } from '@/lib/types/cafe';
 import { haversineKm } from '@/lib/cafe-utils';
@@ -212,6 +213,23 @@ export interface NearbyCafesResult {
 }
 
 /**
+ * 구별 카페 목록을 요청 간에 캐시한다.
+ *
+ * `/cafe/[id]`는 동적 SSR(프리렌더 없음)이라 카페 페이지마다 같은 구를 다시
+ * 조회하면 행 매핑 비용이 그대로 Vercel Fluid Active CPU로 잡힌다. 구 단위로
+ * 캐시하면 "카페 수 × 하루"가 "구 수 × 하루"로 줄어든다.
+ *
+ * `unstable_cache`는 Next.js 16에서 `use cache`로 대체 예정이지만, `use cache`는
+ * `cacheComponents` 옵트인이 필요해 앱 전체 렌더링 동작이 바뀐다. CPU 수정의
+ * 부수 효과로 그런 변경을 끌고 오지 않기 위해 현행 API를 쓴다.
+ */
+const fetchCafesByGuCached = unstable_cache(
+  async (gu: string) => fetchCafesByGu(gu),
+  ['cafes-by-gu'],
+  { revalidate: 86400 },
+);
+
+/**
  * 같은 구의 다른 얼리버드 카페를 거리순으로 반환.
  *
  * 카페 상세(`/cafe/[id]`)의 유일한 출구가 카카오맵뿐이라 세션이 1페이지에서
@@ -225,7 +243,7 @@ export async function fetchNearbyCafes(
   const gu = extractGu(cafe.road_address ?? cafe.address);
   if (!gu) return { gu: null, nearby: [], totalInGu: 0 };
 
-  const siblings = await fetchCafesByGu(gu);
+  const siblings = await fetchCafesByGuCached(gu);
 
   const nearby = siblings
     .filter((candidate) => candidate.id !== cafe.id)
