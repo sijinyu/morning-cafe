@@ -42,7 +42,11 @@ KAKAO_REST_API_KEY=              # 카카오 REST API 키 (place-detail API)
 RESEND_API_KEY=                  # Resend 이메일 API 키 (제보 알림)
 NEXT_PUBLIC_GA_MEASUREMENT_ID=   # Google Analytics 4 측정 ID (G-XXXXXXX)
 GOOGLE_GEMINI_API_KEY=           # Google Gemini API 키 (AI 카페 추천)
-NEXT_PUBLIC_ADFIT_UNIT_GU=       # 카카오 AdFit 광고단위 ID (구별 SEO 페이지 배너, 미설정 시 광고 숨김)
+NEXT_PUBLIC_ADFIT_UNIT_GU=       # 카카오 AdFit 광고단위 ID (구별 SEO 페이지, 미설정 시 광고 숨김)
+NEXT_PUBLIC_ADFIT_UNIT_CAFE=     # AdFit 광고단위 ID (개별 카페 페이지 — 네이버 유입 최다 지면)
+NEXT_PUBLIC_ADFIT_UNIT_GUIDE=    # AdFit 광고단위 ID (가이드 페이지)
+NEXT_PUBLIC_ADFIT_UNIT_CAFES_INDEX= # AdFit 광고단위 ID (구 목록 인덱스)
+NEXT_PUBLIC_KAKAO_CHANNEL_ID=    # 카카오톡 채널 공개 ID (예: _xkLxjTb, 미설정 시 구독 CTA 숨김)
 NEXT_PUBLIC_ADSENSE_CLIENT=      # 구글 애드센스 클라이언트 ID (ca-pub-XXXX, 미설정 시 로더 스크립트/ads.txt 비활성)
 NEXT_PUBLIC_ADSENSE_SLOT_GU=     # 구글 애드센스 광고단위 슬롯 ID (구별 SEO 페이지 배너)
 ```
@@ -70,6 +74,11 @@ src/
 │   │   └── [gu]/
 │   │       ├── page.tsx            # 구별 카페 목록 (SSG + 24h ISR, SEO 핵심)
 │   │       └── opengraph-image.tsx # 구별 OG 이미지 (Edge runtime)
+│   ├── guides/
+│   │   ├── page.tsx                # 가이드 인덱스 (테마별 아침 카페 가이드 목록)
+│   │   ├── layout.tsx              # pass-through 레이아웃
+│   │   └── [slug]/
+│   │       └── page.tsx            # 개별 가이드 (SSG + 24h ISR, DB 자동 생성)
 │   ├── favorites/
 │   │   ├── page.tsx                # 즐겨찾기 페이지 (카드 클릭 → 지도 이동)
 │   │   └── layout.tsx              # SEO metadata
@@ -89,8 +98,8 @@ src/
 │
 ├── components/
 │   ├── layout/
-│   │   ├── bottom-nav.tsx          # 모바일 하단 네비 (h-14, z-50)
-│   │   ├── desktop-sidebar.tsx     # 데스크탑 좌측 사이드바
+│   │   ├── bottom-nav.tsx          # 모바일 하단 네비 (h-14, z-50, 5탭: 지도/가이드/스탬프/찜/제보)
+│   │   ├── desktop-sidebar.tsx     # 데스크탑 좌측 사이드바 (6항목: 지도/가이드/스탬프/찜/최근/제보)
 │   │   └── theme-provider.tsx      # next-themes 다크모드
 │   │
 │   ├── splash-screen.tsx             # 스플래시 스크린 (커피잔 + 김 애니메이션)
@@ -120,6 +129,7 @@ src/
 │   │   └── cafe.ts                  # Cafe 인터페이스 + extractGu (서버/클라이언트 공유)
 │   ├── cafe-utils.ts               # 공통 유틸 (formatOpeningTime, getOpeningBadgeStyle, is24Hours, is24HoursForDay)
 │   ├── quiet-score.ts              # 조용한 아침 지수 계산 (0~5 스케일)
+│   ├── guides.ts                   # 가이드 정의 (before-6am, 24h, weekend, new — 필터+정렬+그룹)
 │   ├── analytics.ts                # GA4 이벤트 트래킹 유틸 (trackEvent)
 │   ├── utils.ts                    # cn() 유틸리티 (clsx + tailwind-merge)
 │   ├── store/
@@ -148,7 +158,8 @@ scripts/
 │   ├── 001-add-gu-column.sql       # cafes 테이블 gu 컬럼 추가
 │   ├── 002-gu-stats-function.sql   # 구별 통계 RPC 함수
 │   ├── 003-gu-trigger.sql          # gu 자동 추출 트리거
-│   └── 006-push-tokens.sql         # push_tokens 테이블 (디바이스 토큰)
+│   ├── 006-push-tokens.sql         # push_tokens 테이블 (디바이스 토큰)
+│   └── 008-region-waitlist.sql     # region_waitlist 테이블 + region_demand 뷰
 └── ...
 │
 .github/
@@ -370,8 +381,21 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 45. **iOS Xcode 프로젝트 설정**: Bundle ID `com.morningcafe.app`, Xcode 26.3, iOS 26 SDK, iPhone only (Portrait), Version 1.0.0 Build 1. Push Notifications entitlement 제거 상태 (서명 이슈). `PrivacyInfo.xcprivacy`에 IDFA 미사용 + UserDefaults API 선언.
 46. **앱 아이콘**: 젠지 컨셉 — 통통한 머그컵 + 라떼아트 하트 + 스파클 3개 + 글래스모피즘 배경 원. `public/icons/icon.svg` → 모든 사이즈 PNG + `favicon.ico` + `apple-touch-icon.png` + `kakao-app-icon.png`. 코랄 그라데이션(`#F7908B`→`#E8554E`→`#C43D38`).
 47. **LaunchScreen**: `#FFF8F0` (따뜻한 크림) 배경 + 중앙 128x128 앱 아이콘. 웹 스플래시 스크린과 연결.
-48. **AdFit 광고 배너**: `AdFitBanner` (`src/components/adfit-banner.tsx`). `unit` 미설정이면 no-op, `isNativeApp()`이면 렌더 안 함 (WebView 웹광고 노출 = AdFit 정책 위반). 현재 지면: 구별 SEO 페이지(`/cafes/[gu]`)만, `NEXT_PUBLIC_ADFIT_UNIT_GU`. 지면 추가 시 AdFit에서 광고단위 별도 발급 + env 추가. 지도 화면에는 달지 않는다 (North Star 훼손).
-49. **애드센스 광고 배너**: `AdsenseBanner` (`src/components/adsense-banner.tsx`). AdFit과 동일 원칙 — env 미설정 no-op, 네이티브 렌더 금지, 지면은 구별 SEO 페이지만, 지도 화면 금지. 로더 스크립트는 `layout.tsx`에서 `NEXT_PUBLIC_ADSENSE_CLIENT` 설정 시에만 사이트 전역 로드(애드센스 사이트 심사에 필요). `/ads.txt`는 `src/app/ads.txt/route.ts`가 env로 동적 생성. 애드센스 대시보드에서 **자동 광고(Auto ads)는 끈다** — 켜면 지도 화면에도 광고가 박힌다.
+48. **콘텐츠 가이드 시스템**: `src/lib/guides.ts`에 가이드 정의. `GUIDE_SLUGS` 배열에 slug 추가 → `GUIDE_FILTERS`/`GUIDE_SORTS`에 필터·정렬 함수 정의 → 자동으로 페이지 생성. i18n은 `guides.{slug}.title/titleWithCount/description/intro/tip` 키 3개 언어 모두 추가 필수. `fetchAllEarlybirdCafes()` 한 번 호출 후 각 가이드가 필터링 (ISR 24h 캐시). sitemap에 자동 등록됨.
+49. **PWA 설치 토스트**: iOS에서는 App Store 링크(`APP_STORE_URL` 상수), Android에서는 기존 `beforeinstallprompt` PWA 설치, 기타 브라우저에서는 PWA 안내. `pwa-install-prompt.tsx`.
+50. **AdFit 광고 배너**: `AdFitBanner` (`src/components/adfit-banner.tsx`). `unit` 미설정이면 no-op, `isNativeApp()`이면 렌더 안 함 (WebView 웹광고 노출 = AdFit 정책 위반). 광고단위는 `src/lib/ad-units.ts`의 `AD_UNITS`에서 중앙 관리. 지면 4곳: `/cafe/[id]`(★네이버 유입 최다), `/cafes/[gu]`, `/guides/[slug]`, `/cafes`. 지면 추가 시 AdFit에서 광고단위 **별도 발급** + env 추가. **지도 화면(`/`)에는 절대 달지 않는다** (North Star 훼손). iOS 앱에는 광고를 넣지 않는다 — GA 기준 플랫폼 100% WEB이라 수익 0인데 지도를 가리고 심사 리스크만 늘어난다.
+51. **카카오톡 채널 (리텐션 핵심)**: `KakaoChannelCta` (`src/components/kakao-channel-cta.tsx`) + `src/lib/kakao-channel.ts`. `NEXT_PUBLIC_KAKAO_CHANNEL_ID` 미설정 시 no-op. `Kakao.Channel.addChannel()` → 실패 시 `pf.kakao.com/{id}` 폴백. 지면: 카페 상세, 스탬프(빈 상태 포함), 가이드, 구별 목록, 구 인덱스. **배경**: 찜·스탬프·브리핑은 전부 localStorage 기반이라 "돌아올 이유"는 있어도 "돌아오라 말할 수단"이 없었다. 채널은 우리가 먼저 말을 걸 수 있는 유일한 채널이며 캐시 삭제로 사라지지 않는다. GA 이벤트: `subscribe_channel` (placement 파라미터로 지면 구분).
+52. **지역 웨이팅리스트**: `RegionWaitlist` + `/api/region-waitlist` + `src/lib/coverage.ts`. **지역 판정은 미들웨어(`src/middleware.ts`)가 `x-vercel-ip-city`를 정규화해 `mc_geo_city` 쿠키로 심고, 클라이언트는 `useGeoCity()`로 읽는다.** 페이지에서 `headers()`를 읽으면 24h ISR이 무력화되고, 전용 API 라우트를 두면 페이지뷰마다 함수가 깨어나 Fluid Active CPU를 낭비한다 — 미들웨어는 이미 모든 페이지 요청에서 돌기 때문에 추가 비용이 0이다. 로컬/비Vercel 환경은 쿠키가 없어 카드가 숨겨진다(정상). 수요 집계는 `region_demand` 뷰 → 다음 확장 지역을 데이터로 결정.
+    - `normalizeCity()`의 행정단위 접미사 제거는 **구분자가 있을 때만** 동작해야 한다(`/[-\s_](si|gun|gu|city)$/`). 구분자를 optional로 두면 "Daegu" → "dae"로 망가진다.
+53. **클라이언트 전용 값 읽기 (`useSyncExternalStore` 패턴)**: `useLocalFlag`(localStorage 플래그) / `useGeoCity`(지역 쿠키). `useState` + `useEffect(() => setX(...))` 대신 사용 — 연쇄 렌더와 첫 페인트 깜빡임이 없고 `react-hooks/set-state-in-effect` 린트도 통과한다. 서버 스냅샷은 "숨김" 쪽으로 둔다(`useLocalFlag`는 `true`, `useGeoCity`는 `null`). 스냅샷 함수는 원시값을 반환해야 한다 — 새 객체를 반환하면 무한 렌더가 된다.
+54. **`fetchNearbyCafes`**: `queries.ts`. 같은 구의 다른 얼리버드 카페를 `haversineKm` 거리순으로 반환 + `totalInGu`. 카페 상세의 출구가 카카오맵뿐이라 세션이 1페이지에서 끝나던 문제를 해결하는 내부 링크용 (`NearbyCafes` 서버 컴포넌트). 체류·광고 노출·지도 도달률·SEO 크롤링을 동시에 개선. **구별 조회는 `unstable_cache`(24h)로 감싼다** — `/cafe/[id]`는 동적 SSR이라 캐시가 없으면 "카페 수 × 하루"만큼 행 매핑 비용이 Active CPU로 잡힌다.
+56. **Vercel Fluid Active CPU 절약 원칙**: Fluid는 **실제 CPU를 돈 시간**만 과금한다(DB 응답 대기는 거의 무료). 따라서 비용은 쿼리 수가 아니라 **렌더링 양**에서 나온다.
+    - **`ImageResponse`(OG 이미지 동적 생성)를 페이지 수만큼 만들지 말 것.** satori+resvg가 한 장에 수백 ms CPU를 쓴다. 카페별 `opengraph-image.tsx`를 제거하고 정적 `icons/icon-512x512.png`로 대체했다 (카카오톡 공유는 원래 이 파일을 쓰므로 실제 공유 경험 변화 없음). 구별 OG는 경로가 ~120개라 유지.
+    - **페이지뷰마다 호출되는 API 라우트를 만들지 말 것.** 요청 헤더만 필요하면 미들웨어에서 쿠키로 심어라.
+    - **동적 SSR(`ƒ`) 페이지에 무거운 연산을 얹지 말 것.** 현재 `ƒ`: `/cafe/[id]`, OG 이미지 3종, `/api/*`. 나머지는 SSG(`●`)라 런타임 CPU 0.
+    - 미해결: `/cafe/[id]`는 `generateStaticParams`가 없어 요청 시 SSR. 인기 카페 상위 N개만 프리렌더하는 절충안 검토 필요.
+55. **`window.Kakao` 타입**: `src/types/kakao.d.ts`에서 전역 선언 1곳으로 관리. 파일별 `declare global`은 프로퍼티 타입 충돌을 일으키므로 금지.
+57. **애드센스 광고 배너**: `AdsenseBanner` (`src/components/adsense-banner.tsx`). AdFit과 동일 원칙 — env(`NEXT_PUBLIC_ADSENSE_CLIENT`+slot) 미설정 no-op, 네이티브 앱에서 push 안 함, `<ins>`는 SSR HTML 포함(심사 크롤러용), **지도 화면(`/`) 금지**. 로더 스크립트·`google-adsense-account` 메타는 `layout.tsx`에서 client 설정 시에만 전역 로드(사이트 소유권 확인에 필요). `/ads.txt`는 `src/app/ads.txt/route.ts`가 env로 동적 생성. 현재 지면: 구별 SEO 페이지(`NEXT_PUBLIC_ADSENSE_SLOT_GU`). 애드센스 대시보드에서 **자동 광고(Auto ads)는 끈다** — 켜면 지도 화면에도 광고가 박힌다.
 
 ### 커밋 메시지
 
@@ -440,6 +464,17 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
 - [ ] 수집 기능 MVP (사진 원형 크롭 + matter.js 물리엔진, 모바일 전용)
 - [x] Supabase 서버 쿼리 anon key fallback (SUPABASE_SERVICE_ROLE_KEY 미설정 대비)
 - [x] 도메인 `morning-cafe-phi.vercel.app`으로 전체 통일
+- [x] PWA 설치 토스트 → iOS 앱스토어 링크 안내 (PwaInstallPrompt 리팩터)
+- [x] AdFit 광고 지면 4곳 확장 + `AD_UNITS` 중앙 관리 (`/cafe/[id]` 최우선 — 네이버 유입 최다)
+- [x] 카페 상세 내부 링크 "근처 아침 카페" (`fetchNearbyCafes` + `NearbyCafes`) — 세션 1페이지 이탈 해결
+- [x] 카카오톡 채널 구독 CTA 5개 지면 — 리텐션 "말 걸 수단" 확보
+- [x] 지역 확장 웨이팅리스트 (Vercel 지오 헤더 + `region_demand` 뷰) — 버려지던 커버리지 밖 트래픽 전환
+- [x] 하단 네비 5탭 + 사이드바 6항목에 스탬프 노출 (기존 리텐션 기능 발견 가능성 개선)
+- [ ] AdFit 광고단위 4개 발급 + Vercel env 설정 (코드는 완료, env만 채우면 가동)
+- [ ] 카카오톡 채널 개설 (center-pf.kakao.com) + `NEXT_PUBLIC_KAKAO_CHANNEL_ID` 설정
+- [ ] 마이그레이션 008 실행 (Supabase SQL 에디터)
+- [ ] 주간 카톡 발송 운영 (매주 월요일 아침 7시, 신규 카페 3곳)
+- [x] 콘텐츠형 가이드 페이지 자동 생성 (`/guides`, `/guides/[slug]`) — before-6am, 24h-cafes, weekend-morning, new-cafes, SSG+ISR, sitemap 연동
 
 ---
 

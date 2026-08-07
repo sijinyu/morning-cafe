@@ -4,9 +4,11 @@
     "favorites": "保存",
     "recent": "最近",
     "recentFull": "最近見たカフェ",
+    "guides": "ガイド",
     "report": "報告",
     "reportFull": "カフェを報告",
-    "mainNav": "メインナビゲーション"
+    "mainNav": "メインナビゲーション",
+    "stamp": "スタンプ"
   },
   "brand": {
     "name": "モーニングカフェ",
@@ -144,11 +146,9 @@
   },
   "pwa": {
     "close": "閉じる",
-    "useAsApp": "アプリのように使う",
-    "iosStep1": "下部の「共有」ボタンをタップ",
-    "iosShare": "共有",
-    "iosStep2": "ホーム画面に追加",
-    "iosStep2Action": "<b>ホーム画面に追加</b>を選択",
+    "installApp": "アプリをインストール",
+    "installDescription": "朝カフェをもっと快適に探しましょう",
+    "goToAppStore": "App Storeからインストール",
     "androidTitle": "アプリとしてインストールできます",
     "androidInstall": "ホーム画面に追加",
     "genericTitle": "アプリのように使う",
@@ -241,6 +241,45 @@
     "earlybirdSection": "アーリーバードカフェ",
     "guEmpty": "{gu}に登録された朝カフェはまだありません"
   },
+  "guides": {
+    "indexTitle": "朝カフェガイド",
+    "indexDescription": "ソウル・京畿道の朝カフェをテーマ別に。早朝オープン、24時間、週末カフェガイド。",
+    "indexSubtitle": "テーマ別で探す朝カフェ",
+    "guideCount": "{count}件のガイド",
+    "cafeCount": "{count}件",
+    "districtCount": "{count}エリア",
+    "viewOnMap": "地図で見る",
+    "viewCafe": "カフェの詳細",
+    "allGuides": "すべてのガイド",
+    "before-6am": {
+      "title": "朝6時前オープンのカフェ",
+      "titleWithCount": "ソウル・京畿道 朝6時前オープンのカフェ{count}件",
+      "description": "早朝から営業するカフェをお探しですか？6時前にオープンするアーリーバードカフェをまとめました。",
+      "intro": "出勤前のコーヒー、早朝ランニング後のブランチ、朝のミーティング。6時前に開くカフェが必要な場面は意外と多いものです。{count}エリアの早朝カフェをまとめました。",
+      "tip": "早朝カフェは曜日によってオープン時間が異なる場合があります。訪問前に営業時間をご確認ください。"
+    },
+    "24h-cafes": {
+      "title": "24時間カフェまとめ",
+      "titleWithCount": "ソウル・京畿道 24時間カフェ{count}件",
+      "description": "夜通し作業や早朝のコーヒーに！24時間営業のカフェをまとめました。",
+      "intro": "試験期間の徹夜勉強、残業後の遅いコーヒー。時間制限なくいつでも行ける24時間カフェ{count}件をまとめました。",
+      "tip": "24時間カフェでも週末や祝日は営業時間が変わることがあります。"
+    },
+    "new-cafes": {
+      "title": "新着カフェ",
+      "titleWithCount": "今週新しく登録された朝カフェ{count}件",
+      "description": "直近7日以内に新しく登録された朝カフェをチェック。",
+      "intro": "モーニングカフェに新しく登録されたカフェをご紹介。新しい朝のルーティンを作ってみませんか？",
+      "tip": "新しく登録されたカフェはまだレビューがないかもしれません。最初のレビュアーになってみてください！"
+    },
+    "weekend-morning": {
+      "title": "週末朝カフェ",
+      "titleWithCount": "週末も朝早く開くカフェ{count}件",
+      "description": "土曜・日曜も朝8時前にオープンするカフェをまとめました。",
+      "intro": "週末の朝、ゆっくり起きて近所のカフェでコーヒー一杯。土日も朝8時前に開くカフェ{count}件を見つけました。",
+      "tip": "週末の営業時間は平日と異なることが多いです。土・日それぞれの時間をご確認ください。"
+    }
+  },
   "cafeDetail": {
     "title": "{name} — 朝カフェ",
     "description": "{name}（{gu}）— {time}オープン。住所・営業時間・メニューをチェック。",
@@ -249,7 +288,9 @@
     "notFound": "カフェが見つかりません — モーニングカフェ",
     "openAt": "{time}オープン",
     "back": "戻る",
-    "viewOnKakao": "カカオマップで見る"
+    "viewOnKakao": "カカオマップで見る",
+    "nearbyTitle": "{gu}の近くのモーニングカフェ",
+    "nearbyMore": "{gu}のモーニングカフェ{count}軒をすべて見る"
   },
   "morningPick": {
     "title": "今日の朝カフェ",
@@ -300,5 +341,21 @@
     "title": "モーニングカフェ — ソウル・京畿道 朝カフェマップ",
     "description": "ソウル・京畿道で朝早くオープンするカフェを一目で！6時・7時オープンのカフェを地図ですぐに見つけよう。",
     "siteName": "モーニングカフェ"
+  },
+  "channel": {
+    "title": "毎週月曜の朝、新着カフェ3軒",
+    "description": "新しくオープンした早朝カフェをKakaoTalkでお届けします。わざわざ見に来る必要はありません。",
+    "cta": "KakaoTalkで受け取る",
+    "requested": "登録しました！KakaoTalkをご確認ください",
+    "dismiss": "閉じる"
+  },
+  "waitlist": {
+    "title": "{region}はまだ準備中です",
+    "description": "現在はソウルと京畿道15都市のみ対応しています。オープンしたら一番にお知らせします。",
+    "cta": "{region}のオープン通知を受け取る",
+    "submitting": "送信中…",
+    "done": "申請完了",
+    "doneDescription": "{region}がオープンしたらKakaoTalkでお知らせします。ありがとうございます！",
+    "error": "しばらくしてからもう一度お試しください。"
   }
 }

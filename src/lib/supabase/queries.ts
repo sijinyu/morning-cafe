@@ -1,5 +1,7 @@
+import { unstable_cache } from 'next/cache';
 import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
-import { type Cafe } from '@/lib/types/cafe';
+import { extractGu, type Cafe } from '@/lib/types/cafe';
+import { haversineKm } from '@/lib/cafe-utils';
 
 const PAGE_SIZE = 1000;
 
@@ -172,6 +174,88 @@ export async function fetchGuStats(): Promise<{ gu: string; count: number; earli
   return [...guMap.entries()]
     .map(([gu, stats]) => ({ gu, ...stats }))
     .sort((a, b) => a.gu.localeCompare(b.gu, 'ko'));
+}
+
+/** Fetch all earlybird cafes across all districts. For guide/content pages (ISR cached). */
+export async function fetchAllEarlybirdCafes(): Promise<Cafe[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = createServerClient();
+  const allRows: Record<string, unknown>[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('cafes_with_coords')
+      .select(CAFE_COLUMNS)
+      .eq('is_earlybird', true)
+      .order('opening_time', { ascending: true, nullsFirst: false })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch all earlybird cafes: ${error.message}`);
+    }
+
+    allRows.push(...(data ?? []));
+    if (!data || data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return allRows.map(mapRowToCafe);
+}
+
+export interface NearbyCafesResult {
+  /** 기준 카페가 속한 구. 추출 실패 시 null. */
+  gu: string | null;
+  /** 거리순 가까운 다른 얼리버드 카페 */
+  nearby: Cafe[];
+  /** 같은 구의 전체 얼리버드 카페 수 (기준 카페 포함) */
+  totalInGu: number;
+}
+
+/**
+ * 구별 카페 목록을 요청 간에 캐시한다.
+ *
+ * `/cafe/[id]`는 동적 SSR(프리렌더 없음)이라 카페 페이지마다 같은 구를 다시
+ * 조회하면 행 매핑 비용이 그대로 Vercel Fluid Active CPU로 잡힌다. 구 단위로
+ * 캐시하면 "카페 수 × 하루"가 "구 수 × 하루"로 줄어든다.
+ *
+ * `unstable_cache`는 Next.js 16에서 `use cache`로 대체 예정이지만, `use cache`는
+ * `cacheComponents` 옵트인이 필요해 앱 전체 렌더링 동작이 바뀐다. CPU 수정의
+ * 부수 효과로 그런 변경을 끌고 오지 않기 위해 현행 API를 쓴다.
+ */
+const fetchCafesByGuCached = unstable_cache(
+  async (gu: string) => fetchCafesByGu(gu),
+  ['cafes-by-gu'],
+  { revalidate: 86400 },
+);
+
+/**
+ * 같은 구의 다른 얼리버드 카페를 거리순으로 반환.
+ *
+ * 카페 상세(`/cafe/[id]`)의 유일한 출구가 카카오맵뿐이라 세션이 1페이지에서
+ * 끝나던 문제를 해결하기 위한 내부 링크용. 체류·광고 노출·지도 도달률·SEO
+ * 크롤링을 함께 개선한다.
+ */
+export async function fetchNearbyCafes(
+  cafe: Cafe,
+  limit = 4,
+): Promise<NearbyCafesResult> {
+  const gu = extractGu(cafe.road_address ?? cafe.address);
+  if (!gu) return { gu: null, nearby: [], totalInGu: 0 };
+
+  const siblings = await fetchCafesByGuCached(gu);
+
+  const nearby = siblings
+    .filter((candidate) => candidate.id !== cafe.id)
+    .map((candidate) => ({
+      cafe: candidate,
+      km: haversineKm(cafe.latitude, cafe.longitude, candidate.latitude, candidate.longitude),
+    }))
+    .sort((a, b) => a.km - b.km)
+    .slice(0, limit)
+    .map((entry) => entry.cafe);
+
+  return { gu, nearby, totalInGu: siblings.length };
 }
 
 function mapRowToCafe(row: Record<string, unknown>): Cafe {

@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { X, Share, Plus, Download } from 'lucide-react';
+import { X, Download, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { isNativeApp } from '@/lib/capacitor';
 
 const DISMISSED_KEY = 'pwa-install-dismissed';
 const DISMISS_DAYS = 14;
+const APP_STORE_URL = 'https://apps.apple.com/app/id6776460349';
 
 /** 이미 standalone(홈화면 추가)으로 실행 중인지 */
 function isStandalone(): boolean {
@@ -108,27 +109,25 @@ export function PwaInstallPrompt() {
             </button>
 
             {ios ? (
-              /* iOS Safari 안내 */
-              <div className="space-y-2.5 pr-6">
-                <p className="text-sm font-semibold">{t('useAsApp')}</p>
-                <div className="flex items-start gap-3 text-xs text-muted-foreground leading-relaxed">
-                  <div className="space-y-1.5">
-                    <p className="flex items-center gap-1.5">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-muted">
-                        <Share className="h-3 w-3" />
-                      </span>
-                      {t('iosStep1')}
-                    </p>
-                    <p className="flex items-center gap-1.5">
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-muted">
-                        <Plus className="h-3 w-3" />
-                      </span>
-                      {t.rich('iosStep2Action', {
-                        b: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
-                      })}
-                    </p>
-                  </div>
+              /* iOS — 앱스토어 링크 */
+              <div className="space-y-3 pr-6">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5 text-red-500" />
+                  <p className="text-sm font-semibold">{t('installApp')}</p>
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t('installDescription')}
+                </p>
+                <a
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={dismiss}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-medium text-white hover:bg-red-600 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  {t('goToAppStore')}
+                </a>
               </div>
             ) : android ? (
               /* Android Chrome — 바로 설치 */
@@ -146,7 +145,7 @@ export function PwaInstallPrompt() {
             ) : (
               /* 기타 브라우저 */
               <div className="space-y-2 pr-6">
-                <p className="text-sm font-semibold">{t('useAsApp')}</p>
+                <p className="text-sm font-semibold">{t('genericTitle')}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {t('genericStep')}
                 </p>

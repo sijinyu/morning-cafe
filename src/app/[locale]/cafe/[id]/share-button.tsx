@@ -8,16 +8,7 @@ import { formatOpeningTime } from '@/lib/cafe-utils';
 import { isNativeApp } from '@/lib/capacitor';
 import type { Cafe } from '@/lib/types/cafe';
 
-declare global {
-  interface Window {
-    Kakao?: {
-      isInitialized: () => boolean;
-      Share: {
-        sendDefault: (options: Record<string, unknown>) => void;
-      };
-    };
-  }
-}
+// window.Kakao 타입은 `src/types/kakao.d.ts`에서 전역 선언한다.
 
 const BASE_URL = 'https://morning-cafe-phi.vercel.app';
 
