@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Clock, Moon, Sunrise, Sparkles } from 'lucide-react';
+import { BookOpen, Clock, Coffee, Moon, Sun, Sunrise, Sparkles } from 'lucide-react';
 import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchAllEarlybirdCafes } from '@/lib/supabase/queries';
@@ -14,16 +14,20 @@ interface PageProps {
 
 const GUIDE_ICONS: Record<GuideSlug, React.ReactNode> = {
   'before-6am': <Sunrise className="h-5 w-5" />,
+  'open-by-7am': <Coffee className="h-5 w-5" />,
   '24h-cafes': <Moon className="h-5 w-5" />,
   'new-cafes': <Sparkles className="h-5 w-5" />,
   'weekend-morning': <Clock className="h-5 w-5" />,
+  'sunday-morning': <Sun className="h-5 w-5" />,
 };
 
 const GUIDE_COLORS: Record<GuideSlug, string> = {
   'before-6am': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+  'open-by-7am': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   '24h-cafes': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   'new-cafes': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   'weekend-morning': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  'sunday-morning': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
