@@ -47,6 +47,8 @@ NEXT_PUBLIC_ADFIT_UNIT_CAFE=     # AdFit 광고단위 ID (개별 카페 페이�
 NEXT_PUBLIC_ADFIT_UNIT_GUIDE=    # AdFit 광고단위 ID (가이드 페이지)
 NEXT_PUBLIC_ADFIT_UNIT_CAFES_INDEX= # AdFit 광고단위 ID (구 목록 인덱스)
 NEXT_PUBLIC_KAKAO_CHANNEL_ID=    # 카카오톡 채널 공개 ID (예: _xkLxjTb, 미설정 시 구독 CTA 숨김)
+NEXT_PUBLIC_ADSENSE_CLIENT=      # 구글 애드센스 클라이언트 ID (ca-pub-XXXX, 미설정 시 로더 스크립트/ads.txt 비활성)
+NEXT_PUBLIC_ADSENSE_SLOT_GU=     # 구글 애드센스 광고단위 슬롯 ID (구별 SEO 페이지 배너)
 ```
 
 카카오 Maps JS SDK 키는 `src/lib/hooks/use-kakao-loader.ts`에서 로드.
@@ -393,6 +395,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
     - **동적 SSR(`ƒ`) 페이지에 무거운 연산을 얹지 말 것.** 현재 `ƒ`: `/cafe/[id]`, OG 이미지 3종, `/api/*`. 나머지는 SSG(`●`)라 런타임 CPU 0.
     - 미해결: `/cafe/[id]`는 `generateStaticParams`가 없어 요청 시 SSR. 인기 카페 상위 N개만 프리렌더하는 절충안 검토 필요.
 55. **`window.Kakao` 타입**: `src/types/kakao.d.ts`에서 전역 선언 1곳으로 관리. 파일별 `declare global`은 프로퍼티 타입 충돌을 일으키므로 금지.
+57. **애드센스 광고 배너**: `AdsenseBanner` (`src/components/adsense-banner.tsx`). AdFit과 동일 원칙 — env(`NEXT_PUBLIC_ADSENSE_CLIENT`+slot) 미설정 no-op, 네이티브 앱에서 push 안 함, `<ins>`는 SSR HTML 포함(심사 크롤러용), **지도 화면(`/`) 금지**. 로더 스크립트·`google-adsense-account` 메타는 `layout.tsx`에서 client 설정 시에만 전역 로드(사이트 소유권 확인에 필요). `/ads.txt`는 `src/app/ads.txt/route.ts`가 env로 동적 생성. 현재 지면: 구별 SEO 페이지(`NEXT_PUBLIC_ADSENSE_SLOT_GU`). 애드센스 대시보드에서 **자동 광고(Auto ads)는 끈다** — 켜면 지도 화면에도 광고가 박힌다.
 
 ### 커밋 메시지
 

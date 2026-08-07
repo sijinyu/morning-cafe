@@ -30,6 +30,8 @@ declare global {
   interface Window {
     Kakao?: KakaoSdk;
     adfit?: AdFitApi;
+    /** 구글 애드센스 로더(`adsbygoogle.js`) 명령 큐. */
+    adsbygoogle?: unknown[];
   }
 }
 

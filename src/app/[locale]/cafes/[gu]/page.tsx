@@ -5,6 +5,7 @@ import { localeAlternates } from '@/lib/i18n-meta';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchCafesByGu, fetchAllGus } from '@/lib/supabase/queries';
 import { AdFitBanner } from '@/components/adfit-banner';
+import { AdsenseBanner } from '@/components/adsense-banner';
 import { AD_UNITS } from '@/lib/ad-units';
 import { KakaoChannelCta } from '@/components/kakao-channel-cta';
 import { RegionWaitlist } from '@/components/region-waitlist';
@@ -155,6 +156,10 @@ export default async function GuPage({ params }: PageProps) {
           </section>
         )}
         <AdFitBanner unit={AD_UNITS.gu} className="flex justify-center px-5 py-2" />
+        <AdsenseBanner
+          slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GU}
+          className="px-5 py-2"
+        />
         {cafes.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-2 text-muted-foreground">
             <MapPin className="h-10 w-10 stroke-1" />
