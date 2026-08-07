@@ -210,11 +210,26 @@ function GuideCafeCard({
         href={`/cafe/${cafe.id}`}
         className="flex items-start gap-3 px-5 py-3 hover:bg-muted/50 transition-colors"
       >
-        {/* Rank number */}
-        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-          {rank}
-        </span>
-        <div className="min-w-0 flex-1 space-y-1">
+        {/* Thumbnail + rank badge */}
+        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-muted">
+          {cafe.thumbnail_url ? (
+            <img
+              src={cafe.thumbnail_url}
+              alt=""
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <MapPin className="h-4 w-4 text-muted-foreground/40" />
+            </div>
+          )}
+          <span className="absolute left-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-br-lg bg-black/55 px-1 text-[10px] font-bold text-white">
+            {rank}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1 space-y-1 self-center">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-sm truncate">{cafe.name}</span>
             {cafe.opening_time && slug !== '24h-cafes' && (

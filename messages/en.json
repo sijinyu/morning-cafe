@@ -258,6 +258,13 @@
       "intro": "Pre-work coffee, post-dawn run brunch, early meetings — there are more reasons to need a cafe before 6AM than you'd think. We've gathered earlybird cafes across {count} areas.",
       "tip": "Early morning cafes may have different hours on different days. Always check before visiting."
     },
+    "open-by-7am": {
+      "title": "Open by 7 AM",
+      "titleWithCount": "{count} cafes open before 7 AM",
+      "description": "Cafes in Seoul & Gyeonggi that open before 7 AM — perfect for a coffee on your commute.",
+      "intro": "Need a coffee before work? We found cafes opening before 7 AM across {count} areas in Seoul & Gyeonggi.",
+      "tip": "Chain locations can differ in opening hours — check the specific branch before visiting."
+    },
     "24h-cafes": {
       "title": "24-hour cafes",
       "titleWithCount": "{count} 24-hour cafes in Seoul & Gyeonggi",
@@ -276,8 +283,15 @@
       "title": "Weekend morning cafes",
       "titleWithCount": "{count} cafes open early on weekends",
       "description": "Morning cafes open before 8AM on Saturdays and Sundays in Seoul & Gyeonggi.",
-      "intro": "A lazy weekend morning, a walk to a neighborhood cafe for a cup of coffee. We found {count} cafes that open before 8AM on Sat or Sun.",
+      "intro": "A lazy weekend morning, a walk to a neighborhood cafe for a cup of coffee. We found cafes that open before 8AM on Sat or Sun across {count} areas.",
       "tip": "Weekend hours often differ from weekdays. Check Saturday and Sunday hours separately."
+    },
+    "sunday-morning": {
+      "title": "Sunday Morning Cafes",
+      "titleWithCount": "{count} cafes open Sunday morning",
+      "description": "Many cafes close on Sundays — these Seoul & Gyeonggi cafes open before 8 AM on Sunday.",
+      "intro": "Sunday mornings are the hardest time to find an open cafe. We found cafes open before 8 AM on Sundays across {count} areas.",
+      "tip": "Some cafes open later or take alternate Sundays off — calling ahead is safest."
     }
   },
   "cafeDetail": {
