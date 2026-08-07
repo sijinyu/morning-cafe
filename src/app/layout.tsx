@@ -28,6 +28,9 @@ export default function RootLayout({
   return (
     <html className={`${geistSans.variable} h-full`} suppressHydrationWarning>
       <head>
+        {ADSENSE_CLIENT && (
+          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+        )}
         {/* CDN preconnect */}
         <link rel="preconnect" href="https://t1.daumcdn.net" />
         <link rel="preconnect" href="https://dapi.kakao.com" />
