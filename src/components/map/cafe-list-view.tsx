@@ -10,6 +10,8 @@ import { getCachedFirstPhoto } from '@/lib/hooks/use-place-detail';
 import { formatOpeningTime, getOpeningBadgeStyle, is24HoursForDay, isNewCafe, haversineKm } from '@/lib/cafe-utils';
 import { romanizeAddress } from '@/lib/romanize';
 import { cn } from '@/lib/utils';
+import { AdFitBanner } from '@/components/adfit-banner';
+import { AD_UNITS } from '@/lib/ad-units';
 
 /** 웹에서 마우스 드래그 가로 스크롤 지원 — moved flag로 드래그 후 클릭 차단 */
 function useDragScroll() {
@@ -202,6 +204,10 @@ export function CafeListView({ userLocation, onSelectCafe, searchQuery = '' }: C
           )}
         </div>
       )}
+
+      {/* AdFit 매체 심사는 대표 URL(메인)에서 광고 설치를 확인하므로 리스트뷰에 지면 필요.
+          지도 뷰에는 넣지 않는다 (North Star). */}
+      <AdFitBanner unit={AD_UNITS.list} className="flex justify-center px-5 py-2" />
 
       <div
         className="relative w-full"
