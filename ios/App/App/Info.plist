@@ -49,5 +49,8 @@
 	</dict>
 	<key>UISupportsFullScreen</key>
 	<true/>
+	<!-- AdMob 앱 ID — 현재 구글 공식 테스트 ID. 실계정 앱 등록 후 교체 (src/lib/admob.ts의 광고단위 ID도 함께) -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 </dict>
 </plist>

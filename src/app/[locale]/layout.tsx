@@ -11,6 +11,7 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt';
 import { StatusBarConfig } from '@/components/native/status-bar-config';
 import { OfflineScreen } from '@/components/native/offline-screen';
 import { PushInit } from '@/components/native/push-init';
+import { AdmobBanner } from '@/components/native/admob-banner';
 import { SplashScreen } from '@/components/splash-screen';
 import { locales } from '@/i18n/config';
 
@@ -94,6 +95,7 @@ export default async function LocaleLayout({
           <SwUpdatePrompt />
           <PwaInstallPrompt />
           <PushInit />
+          <AdmobBanner />
         </ThemeProvider>
     </NextIntlClientProvider>
   );
