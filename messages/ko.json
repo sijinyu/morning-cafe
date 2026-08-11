@@ -213,7 +213,12 @@
     "yesterday": "어제",
     "daysAgo": "{count}일 전",
     "weeksAgo": "{count}주 전",
-    "monthsAgo": "{count}개월 전"
+    "monthsAgo": "{count}개월 전",
+    "recapTitle": "{month}, 나의 아침",
+    "recapMornings": "{count}번의 아침",
+    "recapStats": "카페 {cafes}곳 · 동네 {gus}곳",
+    "recapEarliest": "가장 이른 아침 {time}",
+    "recapShare": "리캡 카드 공유"
   },
   "privacy": {
     "title": "개인정보처리방침"

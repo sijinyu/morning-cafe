@@ -213,7 +213,12 @@
     "yesterday": "Yesterday",
     "daysAgo": "{count} days ago",
     "weeksAgo": "{count} weeks ago",
-    "monthsAgo": "{count} months ago"
+    "monthsAgo": "{count} months ago",
+    "recapTitle": "My mornings in {month}",
+    "recapMornings": "{count} mornings",
+    "recapStats": "{cafes} cafes · {gus} areas",
+    "recapEarliest": "earliest {time}",
+    "recapShare": "Share recap card"
   },
   "privacy": {
     "title": "Privacy policy"

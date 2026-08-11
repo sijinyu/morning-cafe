@@ -213,7 +213,12 @@
     "yesterday": "昨日",
     "daysAgo": "{count}日前",
     "weeksAgo": "{count}週間前",
-    "monthsAgo": "{count}ヶ月前"
+    "monthsAgo": "{count}ヶ月前",
+    "recapTitle": "{month}の私の朝",
+    "recapMornings": "{count}回の朝",
+    "recapStats": "カフェ{cafes}店 · {gus}エリア",
+    "recapEarliest": "最も早い朝 {time}",
+    "recapShare": "リキャップカードを共有"
   },
   "privacy": {
     "title": "プライバシーポリシー"
