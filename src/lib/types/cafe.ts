@@ -25,6 +25,10 @@ export function extractGu(address: string): string | null {
   const seoulMatch = address.match(/서울\S*\s+(\S+구)/);
   if (seoulMatch?.[1]) return seoulMatch[1];
 
+  // 부산: "부산 해운대구" → "부산 해운대구" — 서울과 구명이 겹치므로(강서구·중구) 접두사 유지
+  const busanMatch = address.match(/부산\S*\s+(\S+구|\S+군)/);
+  if (busanMatch?.[1]) return `부산 ${busanMatch[1]}`;
+
   // 경기도: "경기 성남시 분당구" → "성남시 분당구", "경기 고양시 일산동구" → "고양시 일산동구"
   const gyeonggiMatch = address.match(/경기\S*\s+(\S+시)\s+(\S+구)/);
   if (gyeonggiMatch?.[1] && gyeonggiMatch?.[2]) return `${gyeonggiMatch[1]} ${gyeonggiMatch[2]}`;

@@ -12,6 +12,7 @@
 /** 크롤링 대상 지역 (정규화된 로마자 키). */
 const COVERED_CITIES: ReadonlySet<string> = new Set([
   'seoul',
+  'busan',
   // 경기 15개 도시
   'seongnam',
   'suwon',

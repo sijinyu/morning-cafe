@@ -34,23 +34,40 @@ if (!KAKAO_REST_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
-// 서울 + 경기도 전역을 포함하는 확장 경계
-// 남쪽: 평택/안성(36.95) ~ 북쪽: 동두천/포천/연천(37.95)
-// 서쪽: 김포/안산(126.35) ~ 동쪽: 양평/가평/이천(127.65)
-const SEARCH_BOUNDS = { minLat: 36.95, maxLat: 37.95, minLng: 126.35, maxLng: 127.65 };
+// 크롤링 지역 정의 — `npx tsx scripts/seed-cafes.ts [region]` (기본: seoul-gyeonggi)
+const CRAWL_REGIONS = {
+  'seoul-gyeonggi': {
+    // 남쪽: 평택/안성(36.95) ~ 북쪽: 동두천/포천/연천(37.95)
+    // 서쪽: 김포/안산(126.35) ~ 동쪽: 양평/가평/이천(127.65)
+    bounds: { minLat: 36.95, maxLat: 37.95, minLng: 126.35, maxLng: 127.65 },
+    allowed: [
+      '서울',
+      // 경기도 시
+      '성남', '수원', '용인', '고양', '부천', '안양', '하남', '광명', '과천', '의왕',
+      '구리', '남양주', '파주', '김포', '화성', '광주', '의정부', '안산', '시흥', '군포',
+      '오산', '양주', '동두천', '포천', '이천', '평택', '안성', '여주',
+      // 경기도 군
+      '양평', '가평', '연천',
+      // 별칭
+      '판교', '분당', '일산', '동탄', '위례',
+    ],
+  },
+  busan: {
+    // 남쪽: 가덕도(34.85) ~ 북쪽: 기장군(35.40), 서쪽: 강서구(128.75) ~ 동쪽: 기장 해안(129.35)
+    bounds: { minLat: 34.85, maxLat: 35.40, minLng: 128.75, maxLng: 129.35 },
+    allowed: ['부산'],
+  },
+} as const;
 
-// 서울+경기 주소 필터용 허용 키워드 — 경기도 31개 시/군 전체
-const ALLOWED_REGIONS = [
-  '서울',
-  // 경기도 시
-  '성남', '수원', '용인', '고양', '부천', '안양', '하남', '광명', '과천', '의왕',
-  '구리', '남양주', '파주', '김포', '화성', '광주', '의정부', '안산', '시흥', '군포',
-  '오산', '양주', '동두천', '포천', '이천', '평택', '안성', '여주',
-  // 경기도 군
-  '양평', '가평', '연천',
-  // 별칭
-  '판교', '분당', '일산', '동탄', '위례',
-];
+type CrawlRegion = keyof typeof CRAWL_REGIONS;
+const REGION_ARG = (process.argv[2] ?? 'seoul-gyeonggi') as CrawlRegion;
+if (!(REGION_ARG in CRAWL_REGIONS)) {
+  console.error(`Unknown region "${REGION_ARG}". Available: ${Object.keys(CRAWL_REGIONS).join(', ')}`);
+  process.exit(1);
+}
+console.log(`크롤링 지역: ${REGION_ARG}`);
+const SEARCH_BOUNDS = CRAWL_REGIONS[REGION_ARG].bounds;
+const ALLOWED_REGIONS: readonly string[] = CRAWL_REGIONS[REGION_ARG].allowed;
 const GRID_RADIUS = 600;
 const OVERLAP_FACTOR = 0.6;
 const EARTH_RADIUS_M = 6_371_000;

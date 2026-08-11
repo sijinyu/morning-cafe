@@ -55,19 +55,24 @@ export function isNewCafe(cafe: Pick<Cafe, 'created_at'>): boolean {
   return Date.now() - new Date(cafe.created_at).getTime() < SEVEN_DAYS_MS;
 }
 
-/** 서비스 지역 (서울 + 경기 전역) 경계 — cafe-map.tsx SEOUL_BOUNDS와 동일 */
+/** 서비스 지역 박스 목록 — 크롤링 커버리지와 짝 (seed-cafes.ts CRAWL_REGIONS) */
+const SERVICE_AREAS = [
+  { swLat: 36.95, swLng: 126.35, neLat: 37.95, neLng: 127.65 }, // 서울+경기
+  { swLat: 34.85, swLng: 128.75, neLat: 35.40, neLng: 129.35 }, // 부산
+] as const;
+
+/** 전체 서비스 지역을 감싸는 외곽 박스 — 지도 팬 제한용 (cafe-map.tsx) */
 export const SERVICE_BOUNDS = {
-  swLat: 36.95,
+  swLat: 34.85,
   swLng: 126.35,
   neLat: 37.95,
-  neLng: 127.65,
+  neLng: 129.35,
 };
 
-/** 좌표가 서비스 지역(서울+경기) 내인지 판별 */
+/** 좌표가 서비스 지역(서울+경기 또는 부산) 내인지 판별 */
 export function isInServiceArea(lat: number, lng: number): boolean {
-  return (
-    lat >= SERVICE_BOUNDS.swLat && lat <= SERVICE_BOUNDS.neLat &&
-    lng >= SERVICE_BOUNDS.swLng && lng <= SERVICE_BOUNDS.neLng
+  return SERVICE_AREAS.some(
+    (a) => lat >= a.swLat && lat <= a.neLat && lng >= a.swLng && lng <= a.neLng,
   );
 }
 

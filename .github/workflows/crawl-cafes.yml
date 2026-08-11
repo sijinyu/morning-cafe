@@ -34,8 +34,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Seed cafes
-        run: npx tsx scripts/seed-cafes.ts
+      - name: Seed cafes (서울·경기)
+        run: npx tsx scripts/seed-cafes.ts seoul-gyeonggi
+
+      - name: Seed cafes (부산)
+        run: npx tsx scripts/seed-cafes.ts busan
 
       - name: Mark stale cafes
         run: npx tsx scripts/mark-stale-cafes.ts

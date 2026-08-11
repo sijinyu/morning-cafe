@@ -191,9 +191,11 @@ ios/                                   # Capacitor iOS 프로젝트
 
 - **서울**: 25개 구 전체
 - **경기도**: 성남(분당/판교), 수원, 용인, 고양(일산), 부천, 안양, 하남, 광명, 과천, 의왕, 구리, 남양주, 파주, 김포, 화성(동탄)
-- `seed-cafes.ts`: `SEARCH_BOUNDS` (37.22~37.82 / 126.58~127.25), 600m 그리드, `ALLOWED_REGIONS` 주소 필터
-- `extractGu()`: 서울 "강남구" + 경기 "성남시 분당구" / "하남시" 패턴 지원
-- DB 트리거: `007-gu-trigger-gyeonggi.sql`로 경기도 gu 자동 추출
+- **부산**: 16개 구·군 (2026-08 확장 — GA 활성 사용자 2위 도시)
+- `seed-cafes.ts`: `CRAWL_REGIONS`에 지역별 bounds/주소필터 정의, `npx tsx scripts/seed-cafes.ts [seoul-gyeonggi|busan]`으로 실행 (기본 seoul-gyeonggi). 600m 그리드
+- `extractGu()`: 서울 "강남구" + 부산 "부산 해운대구"(구명 충돌 방지 접두사) + 경기 "성남시 분당구" / "하남시" 패턴
+- DB 트리거: `007`(경기) → `009-gu-trigger-busan.sql`(부산 포함 최신)로 gu 자동 추출
+- 서비스 지역 판정: `cafe-utils.ts` `SERVICE_AREAS`(박스 목록) — 지역 추가 시 `CRAWL_REGIONS`·`SERVICE_AREAS`·`coverage.ts COVERED_CITIES` 세 곳을 함께 갱신
 
 ### Zustand Store (`cafe-store.ts`)
 
