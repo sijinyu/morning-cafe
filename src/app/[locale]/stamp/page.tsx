@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Award, CheckCircle2, MapPin } from 'lucide-react';
 import { useStamps, SEOUL_GUS } from '@/lib/hooks/use-stamps';
 import { KakaoChannelCta } from '@/components/kakao-channel-cta';
+import { MonthlyRecap } from '@/components/monthly-recap';
 import { cn } from '@/lib/utils';
 
 function relativeTime(isoStr: string, t: ReturnType<typeof useTranslations>): string {
@@ -55,6 +56,9 @@ export default function StampPage() {
           </div>
         ) : (
           <div className="pb-6">
+            {/* 이번 달 아침 리캡 */}
+            <MonthlyRecap />
+
             {/* 25구 conquest grid */}
             <section className="px-4 pt-5 pb-4">
               <h2 className="mb-3 text-sm font-semibold text-foreground">{t('conquestMap')}</h2>
