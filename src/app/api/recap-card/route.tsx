@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
               lineHeight: 1,
             }}
           >
-            {year}년 {month}월
+            {`${year}년 ${month}월`}
           </div>
         </div>
 
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
           </svg>
 
           {/* Big number */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
             <div
               style={{
                 fontSize: 180,
@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '-0.04em',
               }}
             >
-              {checkins}
+              {String(checkins)}
             </div>
             <div style={{ fontSize: 56, fontWeight: 800, color: '#3C2415' }}>번의 아침</div>
           </div>
@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
                 fontWeight: 700,
               }}
             >
-              카페 {cafes}곳
+              {`카페 ${cafes}곳`}
             </div>
             <div
               style={{
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
                 fontWeight: 700,
               }}
             >
-              동네 {gus}곳
+              {`동네 ${gus}곳`}
             </div>
           </div>
 
@@ -195,8 +195,8 @@ export async function GET(request: NextRequest) {
                 fontWeight: 600,
               }}
             >
-              {earliest && <div>가장 이른 아침 {earliest}</div>}
-              {topGu && <div>가장 자주 간 동네 · {topGu}</div>}
+              {earliest && <div>{`가장 이른 아침 ${earliest}`}</div>}
+              {topGu && <div>{`가장 자주 간 동네 · ${topGu}`}</div>}
             </div>
           )}
         </div>
