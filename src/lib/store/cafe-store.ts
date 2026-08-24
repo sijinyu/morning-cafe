@@ -1,6 +1,5 @@
 'use client';
 import { create } from 'zustand';
-import { createClient } from '@/lib/supabase/client';
 
 export type { Cafe } from '@/lib/types/cafe';
 export { extractGu } from '@/lib/types/cafe';
@@ -593,24 +592,25 @@ function writeCache(rows: Record<string, unknown>[]): void {
   }
 }
 
+/**
+ * 카페 데이터 로드 — Supabase 직접 조회 대신 CDN 캐시 라우트(/api/cafes) 경유.
+ * 직접 조회는 방문자마다 전체 데이터셋 egress가 나가 무료 쿼터 초과 장애를
+ * 일으켰다(2026-08). PAGE_SIZE는 라우트와 동일해야 마지막 페이지를 판정한다.
+ */
 async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
-  const supabase = createClient();
   const allRows: Record<string, unknown>[] = [];
-  const PAGE_SIZE = 1000;
-  let from = 0;
+  const PAGE_SIZE = 2500;
 
-  while (true) {
-    const { data, error } = await supabase
-      .from('cafes_with_coords')
-      .select('id, kakao_place_id, name, address, road_address, phone, latitude, longitude, place_url, instagram_url, category, opening_time, closing_time, hours_by_day, is_earlybird, last_crawled_at, created_at, thumbnail_url')
-      .eq('is_earlybird', true)
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error) return null;
-
-    allRows.push(...(data ?? []));
-    if (!data || data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
+  for (let page = 0; page <= 50; page++) {
+    try {
+      const res = await fetch(`/api/cafes?page=${page}`);
+      if (!res.ok) return null;
+      const rows = (await res.json()) as Record<string, unknown>[];
+      allRows.push(...rows);
+      if (rows.length < PAGE_SIZE) break;
+    } catch {
+      return null;
+    }
   }
 
   return allRows;
