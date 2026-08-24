@@ -56,7 +56,8 @@ export async function fetchCafesByGu(gu: string): Promise<Cafe[]> {
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
-      throw new Error(`Failed to fetch cafes for ${gu}: ${error.message}`);
+      console.error(`Failed to fetch cafes for ${gu}: ${error.message}`);
+      return [];
     }
 
     allRows.push(...(data ?? []));
@@ -80,7 +81,8 @@ export async function fetchAllGus(): Promise<string[]> {
     .not('gu', 'is', null);
 
   if (error) {
-    throw new Error(`Failed to fetch gus: ${error.message}`);
+    console.error(`Failed to fetch gus: ${error.message}`);
+    return [];
   }
 
   const gus = new Set<string>();
@@ -144,7 +146,8 @@ export async function fetchGuStats(): Promise<{ gu: string; count: number; earli
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
-      throw new Error(`Failed to fetch gu stats: ${error.message}`);
+      console.error(`Failed to fetch gu stats: ${error.message}`);
+      return [];
     }
 
     for (const row of data ?? []) {
@@ -176,6 +179,27 @@ export async function fetchGuStats(): Promise<{ gu: string; count: number; earli
     .sort((a, b) => a.gu.localeCompare(b.gu, 'ko'));
 }
 
+/**
+ * Earlybird 카페 한 페이지 조회 — `/api/cafes` 캐시 라우트용.
+ * 클라이언트가 Supabase를 직접 읽으면 방문자 수만큼 egress가 나가 무료 쿼터가
+ * 초과되므로(2026-08 장애), Vercel CDN 캐시 뒤에서만 호출한다.
+ */
+export async function fetchEarlybirdPage(page: number, size: number): Promise<Record<string, unknown>[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = createServerClient();
+  const from = page * size;
+  const { data, error } = await supabase
+    .from('cafes_with_coords')
+    .select(CAFE_COLUMNS)
+    .eq('is_earlybird', true)
+    .order('id', { ascending: true })
+    .range(from, from + size - 1);
+  if (error) {
+    throw new Error(`Failed to fetch earlybird page ${page}: ${error.message}`);
+  }
+  return data ?? [];
+}
+
 /** Fetch all earlybird cafes across all districts. For guide/content pages (ISR cached). */
 export async function fetchAllEarlybirdCafes(): Promise<Cafe[]> {
   if (!isSupabaseConfigured()) return [];
@@ -192,7 +216,8 @@ export async function fetchAllEarlybirdCafes(): Promise<Cafe[]> {
       .range(from, from + PAGE_SIZE - 1);
 
     if (error) {
-      throw new Error(`Failed to fetch all earlybird cafes: ${error.message}`);
+      console.error(`Failed to fetch all earlybird cafes: ${error.message}`);
+      break;
     }
 
     allRows.push(...(data ?? []));

@@ -397,6 +397,7 @@ node scripts/generate-stats.js   # → docs/seoul-morning-cafe-stats.md
     - **페이지뷰마다 호출되는 API 라우트를 만들지 말 것.** 요청 헤더만 필요하면 미들웨어에서 쿠키로 심어라.
     - **동적 SSR(`ƒ`) 페이지에 무거운 연산을 얹지 말 것.** 현재 `ƒ`: `/cafe/[id]`, OG 이미지 3종, `/api/*`. 나머지는 SSG(`●`)라 런타임 CPU 0.
     - 미해결: `/cafe/[id]`는 `generateStaticParams`가 없어 요청 시 SSR. 인기 카페 상위 N개만 프리렌더하는 절충안 검토 필요.
+59. **Supabase egress 원칙 (2026-08 장애 재발 방지)**: 클라이언트에서 Supabase를 **직접 대량 조회하지 않는다** — 방문자 수 × 데이터셋 크기만큼 egress가 나가 무료 쿼터(5GB/월)가 초과되고 프로젝트 전체가 402로 차단된다(지도 빈 화면 장애 전례). 전체 카페 데이터는 `/api/cafes?page=N`(unstable_cache 6h + CDN s-maxage, 페이지당 2,500건≈1.2MB — Data Cache 2MB/함수응답 4.5MB 제한 회피) 경유. 서버 집계 쿼리(fetchAllGus 등)는 빌드 시 DB 장애에도 배포가 막히지 않게 fail-soft(빈 배열 + console.error, ISR이 자동 치유). 단 `fetchEarlybirdPage`는 throw 유지 — 빈 배열을 6시간 캐시하면 복구 후에도 빈 지도가 되기 때문.
 55. **`window.Kakao` 타입**: `src/types/kakao.d.ts`에서 전역 선언 1곳으로 관리. 파일별 `declare global`은 프로퍼티 타입 충돌을 일으키므로 금지.
 57. **애드센스 광고 배너**: `AdsenseBanner` (`src/components/adsense-banner.tsx`). AdFit과 동일 원칙 — env(`NEXT_PUBLIC_ADSENSE_CLIENT`+slot) 미설정 no-op, 네이티브 앱에서 push 안 함, `<ins>`는 SSR HTML 포함(심사 크롤러용), **지도 화면(`/`) 금지**. 로더 스크립트·`google-adsense-account` 메타는 `layout.tsx`에서 client 설정 시에만 전역 로드(사이트 소유권 확인에 필요). `/ads.txt`는 `src/app/ads.txt/route.ts`가 env로 동적 생성. 현재 지면: 구별 SEO 페이지(`NEXT_PUBLIC_ADSENSE_SLOT_GU`). 애드센스 대시보드에서 **자동 광고(Auto ads)는 끈다** — 켜면 지도 화면에도 광고가 박힌다.
 
