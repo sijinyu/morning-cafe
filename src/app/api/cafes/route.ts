@@ -12,8 +12,13 @@ import { fetchEarlybirdPage } from '@/lib/supabase/queries';
  *
  * 페이지당 2,500건 ≈ 1.2MB — Vercel Data Cache 아이템 2MB 제한과
  * 함수 응답 4.5MB 제한을 모두 피하는 크기.
+ *
+ * **1000 초과 금지**: Supabase(PostgREST)가 요청당 최대 1,000행으로 잘라
+ * 반환한다. 더 크게 잡으면 조용히 1,000행만 와서 클라이언트가 마지막
+ * 페이지로 오판 → 지도에 카페 1,000개만 뜨는 버그(2026-08 전례).
+ * cafe-store.ts의 PAGE_SIZE와 반드시 일치해야 한다.
  */
-const PAGE_SIZE = 2500;
+const PAGE_SIZE = 1000;
 const REVALIDATE_S = 21600; // 6h — 크롤 주기(5일)보다 훨씬 짧아 신선도 충분
 
 export async function GET(request: NextRequest) {
@@ -33,7 +38,8 @@ export async function GET(request: NextRequest) {
     const rows = await getPage();
     return Response.json(rows, {
       headers: {
-        'Cache-Control': `public, s-maxage=${REVALIDATE_S}, stale-while-revalidate=86400`,
+        // max-age: 브라우저 캐시 (재방문 시 네트워크 0), s-maxage: Vercel CDN
+        'Cache-Control': `public, max-age=${REVALIDATE_S}, s-maxage=${REVALIDATE_S}, stale-while-revalidate=86400`,
       },
     });
   } catch {
