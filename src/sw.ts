@@ -84,6 +84,20 @@ const serwist = new Serwist({
         ],
       }),
     },
+    // 전체 카페 데이터(/api/cafes 페이지) — SWR: 캐시로 즉시 렌더 + 백그라운드 갱신.
+    // sessionStorage(탭 한정)와 달리 재방문에도 유지되어 "매번 다시 로드"를 없앤다.
+    {
+      matcher: /\/api\/cafes\?.*/i,
+      handler: new StaleWhileRevalidate({
+        cacheName: "cafes-data",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 30, // 페이지(1000건 단위) 수보다 넉넉히
+            maxAgeSeconds: 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
     // Default cache rules from @serwist/next
     ...defaultCache,
   ],

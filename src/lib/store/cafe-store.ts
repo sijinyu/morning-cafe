@@ -599,7 +599,8 @@ function writeCache(rows: Record<string, unknown>[]): void {
  */
 async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
   const allRows: Record<string, unknown>[] = [];
-  const PAGE_SIZE = 2500;
+  // /api/cafes route와 동일해야 한다 (Supabase 요청당 1,000행 상한 — 초과 금지)
+  const PAGE_SIZE = 1000;
 
   for (let page = 0; page <= 50; page++) {
     try {
