@@ -607,28 +607,44 @@ function writeCache(rows: Record<string, unknown>[]): void {
 }
 
 /**
- * 카페 데이터 로드 — Supabase 직접 조회 대신 CDN 캐시 라우트(/api/cafes) 경유.
- * 직접 조회는 방문자마다 전체 데이터셋 egress가 나가 무료 쿼터 초과 장애를
- * 일으켰다(2026-08). PAGE_SIZE는 라우트와 동일해야 마지막 페이지를 판정한다.
+ * 카페 데이터 로드 — CDN 캐시 라우트(/api/cafes)를 **병렬 배치**로 다운로드.
+ * 순차 다운로드(왕복 20회)는 첫 표시까지 수 초가 걸려서, 8페이지씩 병렬로 받고
+ * 배치가 도착할 때마다 onProgress로 즉시 반영한다 — 첫 1,000곳이 바로 뜬다.
+ * PAGE_SIZE는 라우트와 동일해야 마지막 페이지를 판정한다 (Supabase 요청당 상한).
+ * 에러 시: 이미 받은 부분까지는 화면에 남기고 null 반환 (캐시에는 저장 안 함).
  */
-async function fetchFromSupabase(): Promise<Record<string, unknown>[] | null> {
-  const allRows: Record<string, unknown>[] = [];
-  // /api/cafes route와 동일해야 한다 (Supabase 요청당 1,000행 상한 — 초과 금지)
+async function fetchFromSupabase(
+  onProgress?: (rows: Record<string, unknown>[]) => void,
+): Promise<Record<string, unknown>[] | null> {
   const PAGE_SIZE = 1000;
+  const BATCH = 8;
+  const allRows: Record<string, unknown>[] = [];
 
-  for (let page = 0; page <= 50; page++) {
-    try {
-      const res = await fetch(`/api/cafes?page=${page}`);
-      if (!res.ok) return null;
-      const rows = (await res.json()) as Record<string, unknown>[];
-      allRows.push(...rows);
-      if (rows.length < PAGE_SIZE) break;
-    } catch {
-      return null;
+  try {
+    for (let start = 0; start <= 50; start += BATCH) {
+      const pages = Array.from({ length: BATCH }, (_, i) => start + i);
+      const chunks = await Promise.all(
+        pages.map(async (page) => {
+          const res = await fetch(`/api/cafes?page=${page}`);
+          if (!res.ok) throw new Error(`page ${page}: ${res.status}`);
+          return (await res.json()) as Record<string, unknown>[];
+        }),
+      );
+      let done = false;
+      for (const rows of chunks) {
+        allRows.push(...rows);
+        if (rows.length < PAGE_SIZE) {
+          done = true;
+          break;
+        }
+      }
+      if (!done) onProgress?.(allRows);
+      if (done) break;
     }
+    return allRows;
+  } catch {
+    return null;
   }
-
-  return allRows;
 }
 
 function mapRowsToCafes(rows: Record<string, unknown>[]): Cafe[] {
@@ -713,11 +729,16 @@ export const useCafeStore = create<CafeState>((set, get) => ({
       return;
     }
 
-    // No cache — fetch from Supabase directly
+    // No cache — 병렬 로드하되 배치 도착 즉시 지도에 반영 (점진 표시)
     try {
-      const rows = await fetchFromSupabase();
+      const rows = await fetchFromSupabase((partial) => applyData(partial, get, set));
       if (!rows) {
-        set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
+        // 중간 실패 — 이미 표시된 부분 데이터는 유지, 캐시는 완전 로드만 저장
+        if (get().cafes.length === 0) {
+          set({ cafes: [], filteredCafes: [], availableGus: [], loading: false });
+        } else {
+          set({ loading: false });
+        }
         return;
       }
       writeCache(rows);
