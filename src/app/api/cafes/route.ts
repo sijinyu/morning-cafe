@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
       headers: {
         // max-age: 브라우저 캐시 (재방문 시 네트워크 0), s-maxage: Vercel CDN
         'Cache-Control': `public, max-age=${REVALIDATE_S}, s-maxage=${REVALIDATE_S}, stale-while-revalidate=86400`,
+        // 공개 데이터 — 앱인토스 미니앱(miniapp/) 등 외부 클라이언트 허용
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch {
