@@ -120,8 +120,13 @@ export default async function GuidePage({ params }: PageProps) {
         ) : (
           /* Cafes grouped by district */
           <div className="divide-y divide-border">
-            {data.grouped.map(({ gu, cafes }) => (
-              <section key={gu} className="py-4">
+            {data.grouped.map(({ gu, cafes }, groupIndex) => (
+              <section
+                key={gu}
+                // content-visibility: 화면 밖 그룹은 렌더 스킵 — 큰 가이드(800+행) 스크롤 버벅 해결.
+                // contain-intrinsic-size는 그룹 예상 높이(헤더+행 10개)로 스크롤바 점프 방지.
+                className="py-4 [content-visibility:auto] [contain-intrinsic-size:auto_880px]"
+              >
                 <div className="mb-3 flex items-center justify-between px-5">
                   <h2 className="text-sm font-semibold">
                     {gu}{' '}
@@ -158,6 +163,10 @@ export default async function GuidePage({ params }: PageProps) {
                     </li>
                   )}
                 </ul>
+                {/* 목록 중간 지면 — 상위 2개 지역을 본 뒤 노출 (env 미설정 시 no-op) */}
+                {groupIndex === 1 && (
+                  <AdFitBanner unit={AD_UNITS.guide} className="flex justify-center px-5 pt-4" />
+                )}
               </section>
             ))}
           </div>
