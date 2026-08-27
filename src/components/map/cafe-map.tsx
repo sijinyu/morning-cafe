@@ -21,9 +21,10 @@ const OVERLAP_THRESHOLD = 0.0001;
 // 서울 + 경기도 경계 (팬 제한용) — SERVICE_BOUNDS와 동일
 const SEOUL_BOUNDS = SERVICE_BOUNDS;
 
-// 줌아웃 최대 레벨 — 모바일은 화면이 작아 더 넓게 허용
+// 줌아웃 최대 레벨 — 부산 확장으로 서울↔부산 이동이 가능해야 해서 완화 (기존 8/6).
+// 저줌에서는 MarkerClusterer(minLevel 4)가 마커를 묶어 렌더 부담을 막는다.
 const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-const MAX_ZOOM_LEVEL = IS_MOBILE ? 8 : 6;
+const MAX_ZOOM_LEVEL = IS_MOBILE ? 13 : 12;
 
 // Color palette — warm cafe tones per opening hour bracket
 interface MarkerColors {
